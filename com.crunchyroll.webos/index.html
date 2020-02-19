@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>Crunchyroll WebOS TV</title>
+
+    <script src="./assets/js/webostv.js"></script>
+    <script src="./assets/js/webostv-dev.js"></script>
+    <script src="./assets/js/vanilla.ui.js"></script>
+    <script src="./assets/js/app.js"></script>
+
+    <link href="./assets/css/styles.css" rel="stylesheet">
+
+    <!-- https://docs.videojs.com/docs/api/player.html -->
+    <link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/@videojs/themes@1/dist/sea/index.css" rel="stylesheet">
+    <script src="https://unpkg.com/video.js/dist/video.min.js"></script>
+
+</head>
+<body>
+<div id="main" data-app-events data-app-history>
+
+    <div id="loading" data-loading>
+        <span>Loading...</span>
+    </div>
+
+    <div id="login" data-login>
+        <form action="#" method="POST">
+
+            <label for="email">E-mail:</label>
+            <input
+                id="email"
+                type="email"
+                value=""
+                required>
+
+            <label for="password">Password:</label>
+            <input
+                id="password"
+                type="password"
+                value=""
+                required>
+
+            <label for="locale">Locale:</label>
+            <select id="locale">
+                <option value="enUS">English (US)</option>
+                <option value="enGB">English (UK)</option>
+                <option value="esLA">Español</option>
+                <option value="esES">Español (España)</option>
+                <option value="ptBR">Português (Brasil)</option>
+                <option value="ptPT">Português (Portugal)</option>
+                <option value="frFR">Français (France)</option>
+                <option value="deDE">Deutsch</option>
+                <option value="itIT">Italiano</option>
+                <option value="ruRU">Русский</option>
+                <option value="arME">العربية</option>
+                <option value="jaJP">Japonês</option>
+            </select>
+
+            <button type="submit">Login</button>
+            <div id="message"></div>
+
+        </form>
+    </div>
+
+    <div id="video" data-video>
+        <video class="video-js vjs-theme-sea"
+            controls preload="auto"
+            style="width: 100vw; height: 100vh;"></video>
+    </div>
+
+    <div id="menu" data-menu>
+
+        <div class="links">
+            <div
+                class="menu-link menu-series active"
+                data-content="series">Series</div>
+            <div
+                class="menu-link menu-queue"
+                data-content="queue">Queue</div>
+            <div
+                class="menu-link menu-history"
+                data-content="history">History</div>
+        </div>
+
+        <div class="account">
+            <div class="account-name">&nbsp;</div>
+            <div class="account-logout">Logout</div>
+        </div>
+
+    </div>
+
+    <div id="content">
+        <div class="inside" data-series></div>
+    </div>
+
+</div>
+</body>

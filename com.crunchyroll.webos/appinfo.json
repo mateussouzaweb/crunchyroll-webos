@@ -1,0 +1,15 @@
+{
+    "id": "com.crunchyroll.webos",
+    "version": "1.0.0",
+    "vendor": "Mateus Souza",
+    "type": "web",
+    "main": "index.html",
+    "title": "Crunchyroll",
+    "icon": "assets/img/80px.png",
+    "largeIcon": "assets/img/130px.png",
+    "splashBackground": "assets/img/background.png",
+    "bgImage": "assets/img/background.png",
+    "bgColor": "#F37521",
+    "iconColor": "#F37521",
+    "disableBackHistoryAPI": false
+}

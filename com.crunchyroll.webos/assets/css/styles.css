@@ -1,0 +1,271 @@
+/* GENERAL */
+html, body{
+    background-color: black;
+    border: 0;
+    color: #FFF;
+    margin: 0;
+    padding: 0;
+}
+html, body, input, select, button{
+    font-size: 24px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+*, *::after, *::before{
+    box-sizing: border-box;
+}
+
+label{
+    display: block;
+    margin-bottom: 3px;
+    font-weight: bold;
+}
+input,
+select {
+    display: block;
+    height: 75px;
+    margin-bottom: 20px;
+    padding: 5px 25px;
+    width: 100%;
+}
+input{
+    border-width: 0;
+}
+button{
+    background: #000;
+    border: 0;
+    color: #FFF;
+    display: block;
+    height: 75px;
+    text-transform: uppercase;
+    width: 100%;
+}
+button:focus,
+button:active {
+    background: #F37521;
+}
+
+.hidden{
+    display: none !important;
+}
+
+/* LOADING */
+#loading{
+    background-color: rgba(0, 0, 0, 0.65);
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    transition: background 0.25s ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    z-index: 999;
+    text-align: center;
+}
+#loading.active{
+    display: flex;
+}
+#loading span{
+    background: #F37521;
+    color: #000;
+    padding: 20px 40px;
+    flex: 1;
+    margin: auto;
+}
+
+/* VIDEO */
+#video{
+    display: none;
+    z-index: 10;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background: #000;
+    color: #fff;
+    padding: 0;
+}
+#video video{
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    color: #fff;
+}
+#video video:-webkit-full-screen {
+    width: 100% !important;
+    height: 100% !important;
+}
+#video.active{
+    display: block;
+}
+#video .video-js .vjs-fullscreen-control{
+    display: none !important;
+}
+
+body.video-active #menu,
+body.video-active #content{
+    display: none;
+}
+
+/* LOGIN */
+#login{
+    background-color: #F37521;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    transition: background 0.25s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: hidden;
+    z-index: 99;
+}
+#login.active{
+    display: flex;
+}
+
+#login form{
+    background: url(../img/512px.png) no-repeat center center;
+    background-size: 200px auto;
+    background-position: top center;
+    padding-top: 240px;
+    flex: 1;
+    margin: auto;
+    text-align: center;
+    max-width: 500px;
+}
+#login #message{
+    margin-top: 20px;
+}
+
+/* MENU */
+#menu{
+    background: #000;
+    border-right: 2px solid #FFF;
+    display: flex;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding-right: 20px;
+    width: 210px;
+    z-index: 2;
+    flex-flow: column;
+    justify-content: space-between;
+}
+#menu .links{
+    flex: 1 1 auto;
+}
+#menu .menu-link{
+    display: block;
+    cursor: pointer;
+    margin-top: 60px;
+    font-size: 30px;
+    padding: 10px 20px;
+}
+#menu .menu-link.hover,
+#menu .menu-link:hover{
+    color: #e89f6d;
+}
+#menu .menu-link.active{
+    color: #F37521;
+}
+
+#menu .account{
+    flex: 0 1 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+#menu .account-name{
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    text-overflow: ellipsis;
+    word-wrap: normal;
+    word-break: keep-all;
+    overflow: hidden;
+}
+#menu .account-logout{
+    display: block;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 30px;
+    padding: 10px 20px;
+}
+#menu .account-logout.hover,
+#menu .account-logout:hover{
+    color: #e89f6d;
+}
+
+/* CONTENT */
+#content{
+    padding: 20px 40px;
+    padding-left: 250px;
+}
+#content .inside{
+    align-items: stretch;
+    display: flex;
+    flex-wrap: wrap;
+}
+#content h1{
+    flex: 1 1 100%;
+    margin: 40px 0 20px;
+}
+#content .list-filters{
+    flex: 1 1 100%;
+    margin: 0 0 20px;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+#content .list-filters select{
+    flex: 0 1 300px;
+}
+#content .list-filters input{
+    flex: 0 1 500px;
+}
+
+#content .list-items{
+    align-items: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -20px;
+}
+#content .list-item{
+    margin: 20px;
+    border: 2px solid #FFF;
+    flex: 0 1 280px;
+    cursor: pointer;
+}
+#content .list-item.hover,
+#content .list-item:hover{
+    background: #F37521;
+}
+#content .list-item h3{
+    font-weight: normal;
+}
+#content .list-item-image {
+    position: relative;
+}
+#content .list-item-image img{
+    width: 100%;
+    height: auto;
+}
+#content .list-item-progress{
+    position: absolute;
+    bottom: 0px;
+    width: 0%;
+    height: 5px;
+    left: 0;
+    background-color: #F37521;
+}
+#content .list-item-info{
+    padding: 20px;
+}
