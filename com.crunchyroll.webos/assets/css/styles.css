@@ -101,8 +101,66 @@ button:active {
 #video.active{
     display: block;
 }
-#video .video-js .vjs-fullscreen-control{
-    display: none !important;
+#video .video-js{
+    font-size: 20px;
+}
+#video .video-js .vjs-control-bar{
+    background-color: #F37521;
+}
+#video .video-js .vjs-slider{
+    background-color: #000;
+}
+#video .video-js .vjs-exit-bar{
+    background: #F37521;
+    font-size: 60px;
+    border-radius: 0;
+    left: 50%;
+    margin-left: -1.5em;
+    margin-top: -1em;
+    top: 50%;
+}
+#video .video-js .vjs-title-bar {
+    background: rgba(0, 0, 0, 0.5);
+    color: #FFF;
+    display: block;
+    font-size: 20px;
+    padding: .5em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 1;
+    transition: all 0.2s ease-in-out;
+}
+#video .video-js.vjs-playing.vjs-has-started .vjs-title-bar{
+    display: none;
+    opacity: 0;
+}
+#video .video-js .vjs-extra-action-bar{
+    display: none;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 100px;
+    margin-top: -50px;
+    margin-left: -150px;
+}
+#video .video-js.vjs-paused.vjs-has-started .vjs-extra-action-bar{
+    display: flex;
+}
+#video .video-js .vjs-extra-action-bar button{
+    background: #F37521;
+    border: 5px solid #FFF;
+    border-radius: 0;
+    cursor: pointer;
+    color: #FFF;
+    flex: 1;
+    font-size: 50px;
+    height: 100px;
+    padding: 10px 15px;
+    margin: 10px;
 }
 
 body.video-active #menu,

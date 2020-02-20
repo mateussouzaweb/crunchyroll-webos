@@ -178,7 +178,7 @@ V.component('[data-app-events]', {
         }else if( key == keys.BACK ){
 
             if( videoActive ){
-                window.stopVideo();
+                window.pauseVideo();
                 window.hideVideo();
             }else{
 
@@ -1518,8 +1518,12 @@ V.component('[data-video]', {
         var self = this;
         var element = this.element;
 
+        var options = {
+            suppressNotSupportedError: true
+        };
+
         var video = V.$('video', element);
-        var player = videojs(video);
+        var player = videojs(video, options);
             player.hide();
 
         self.player = player;
@@ -1571,7 +1575,81 @@ V.component('[data-video]', {
             self.backwardVideo();
         });
 
+        this.appendComponents();
+
         resolve(this);
+    },
+
+    /**
+     * Append components to video player
+     * @return {void}
+     */
+    appendComponents: function(){
+
+        var self = this;
+        var player = self.player;
+        var Component = videojs.getComponent('Component');
+        var Button = videojs.getComponent('Button');
+
+        var TitleBar = videojs.extend(Component, {
+            createEl: function(){
+                return videojs.dom.createEl('div', {
+                    className: 'vjs-title-bar'
+                });
+            },
+            updateText: function(text){
+                videojs.dom.emptyEl( this.el() );
+                videojs.dom.appendContent( this.el(), text );
+            }
+        });
+
+        var ActionBar = videojs.extend(Component, {
+            createEl: function(){
+                return videojs.dom.createEl('div', {
+                    className: 'vjs-extra-action-bar'
+                });
+            }
+        });
+        var PlayButton = videojs.extend(Button, {
+            createEl: function(){
+                return videojs.dom.createEl('button', {
+                    className: 'vjs-extra-button-play',
+                    innerHTML: 'Play',
+                });
+            },
+            handleClick: function(e){
+                e.preventDefault();
+                self.playVideo();
+            }
+        });
+        var CloseButton = videojs.extend(Button, {
+            createEl: function(){
+                return videojs.dom.createEl('button', {
+                    className: 'vjs-extra-button-close',
+                    innerHTML: 'Close',
+                });
+            },
+            handleClick: function(e){
+                e.preventDefault();
+                self.pauseVideo();
+                self.hideVideo();
+            }
+        });
+
+        videojs.registerComponent('TitleBar', TitleBar);
+        videojs.registerComponent('ActionBar', ActionBar);
+        videojs.registerComponent('PlayButton', PlayButton);
+        videojs.registerComponent('CloseButton', CloseButton);
+
+        player.addChild('TitleBar');
+        player.addChild('ActionBar');
+        player.getChild('ActionBar').addChild('PlayButton');
+        player.getChild('ActionBar').addChild('CloseButton');
+
+        player.removeChild('BigPlayButton');
+        player.getChild('ControlBar').removeChild('PictureInPictureToggle');
+        player.getChild('ControlBar').removeChild('FullscreenToggle');
+
     },
 
     /**
@@ -1617,8 +1695,15 @@ V.component('[data-video]', {
         var self = this;
         var player = self.player;
 
-        var data = window.getSessionData();
         var episodeId = window.episodeId;
+        var episodeNumber = window.episodeNumber;
+        var episodeName = window.episodeName;
+
+        if( self.lastEpisodeId == episodeId ){
+            return Promise.resolve();
+        }
+
+        var data = window.getSessionData();
         var fields = 'media.stream_data,media.media_id,media.playhead,media.duration';
 
         return apiRequest('POST', '/info', {
@@ -1636,6 +1721,11 @@ V.component('[data-video]', {
                 type: 'application/x-mpegURL',
                 withCredentials: true
             });
+
+            var title = player.getChild('TitleBar');
+                title.updateText(episodeNumber + ' - ' + episodeName);
+
+            self.lastEpisodeId = episodeId;
 
             return response;
         });
