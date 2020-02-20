@@ -348,6 +348,9 @@ V.component('[data-login]', {
         window.getSessionData = function(){
             return self.getSessionData();
         }
+        window.isLoggedIn = function(){
+            return self.isLoggedIn();
+        }
 
         resolve(this);
 
@@ -362,6 +365,7 @@ V.component('[data-login]', {
     onRender: function(resolve, reject){
 
         var self = this;
+            self.firstLogin = false;
 
         // Private
         self.on('show', function(e){
@@ -393,6 +397,7 @@ V.component('[data-login]', {
         self.loadSessionData();
 
         if( !self.isLoggedIn() ){
+            self.firstLogin = true;
             self.showLogin();
         }
 
@@ -547,6 +552,11 @@ V.component('[data-login]', {
             self.hideLogin();
             window.hideLoading();
 
+            if( self.firstLogin ){
+                self.firstLogin = false;
+                V.trigger('.menu-link.active', 'click');
+            }
+
             return response;
         })
         .catch(function(error){
@@ -567,7 +577,8 @@ V.component('[data-login]', {
     makeLogout: function(){
 
         if( !this.isLoggedIn() ){
-            return this.showLogin();
+            this.showLogin();
+            return Promise.resolve();
         }
 
         var self = this;
@@ -591,6 +602,8 @@ V.component('[data-login]', {
 
             // Clear all session data
             self.setSessionData({});
+            self.firstLogin = true;
+
             window.hideLoading();
 
             return response;
@@ -656,12 +669,16 @@ V.component('[data-menu]', {
 
         self.updateMenu();
 
+        if( window.isLoggedIn() ){
+            V.trigger('.menu-link.active', 'click');
+        }
+
         resolve(this);
     },
 
     /**
      * Update menu
-     * @return {Promise}
+     * @return {void}
      */
     updateMenu: function(){
 
@@ -877,7 +894,7 @@ V.component('[data-history]', {
 
     /**
      * List history
-     * @return {void}
+     * @return {Promise}
      */
     listHistory: function(){
 
@@ -1024,7 +1041,7 @@ V.component('[data-series]', {
 
     /**
      * List series
-     * @return {void}
+     * @return {Promise}
      */
     listSeries: function(){
 
@@ -1272,7 +1289,7 @@ V.component('[data-episodes]', {
 
     /**
      * List episodes
-     * @return {void}
+     * @return {Promise}
      */
     listEpisodes: function(){
 
