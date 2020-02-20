@@ -766,12 +766,79 @@ V.component('[data-queue]', {
         var element = self.element;
         var html = '';
 
+        var fields = [
+            'image.full_url',
+            'image.fwide_url',
+            'image.fwidestar_url',
+            'image.height',
+            'image.large_url',
+            'image.medium_url',
+            'image.small_url',
+            'image.thumb_url',
+            'image.wide_url',
+            'image.widestar_url',
+            'image.width',
+            'media.availability_notes',
+            'media.available',
+            'media.available_time',
+            'media.bif_url',
+            'media.class',
+            'media.clip',
+            'media.collection_id',
+            'media.collection_name',
+            'media.created',
+            'media.description',
+            'media.duration',
+            'media.episode_number',
+            'media.free_available',
+            'media.free_available_time',
+            'media.free_unavailable_time',
+            'media.media_id',
+            'media.media_type',
+            'media.name',
+            'media.playhead',
+            'media.premium_available',
+            'media.premium_available_time',
+            'media.premium_only',
+            'media.premium_unavailable_time',
+            'media.screenshot_image',
+            'media.series_id',
+            'media.series_name',
+            'media.stream_data',
+            'media.unavailable_time',
+            'media.url',
+            'last_watched_media',
+            'last_watched_media_playhead',
+            'most_likely_media',
+            'most_likely_media_playhead',
+            'ordering',
+            'playhead',
+            'queue_entry_id',
+            'series',
+            'series.class',
+            'series.collection_count',
+            'series.description',
+            'series.genres',
+            'series.in_queue',
+            'series.landscape_image',
+            'series.media_count',
+            'series.media_type',
+            'series.name',
+            'series.portrait_image',
+            'series.publisher_name',
+            'series.rating',
+            'series.series_id',
+            'series.url',
+            'series.year'
+        ];
+
         window.showLoading();
 
         return apiRequest('POST', '/queue', {
             session_id: data.sessionId,
             locale: data.locale,
-            media_types: 'anime'
+            media_types: 'anime',
+            fields: fields.join(',')
         }).then(function(response){
 
             if( response.error
@@ -809,15 +876,20 @@ V.component('[data-queue]', {
         var html = '';
         var serie = data.series;
         var episode = data.last_watched_media;
-        var playhead = data.last_watched_media_playhead;
+        var playhead = episode.playhead;
+        var duration = episode.duration;
 
         html += '<div class="list-item queue-item" ';
-        html += 'data-episode="{EPISODE_ID}" ';
-        html += 'data-number="{EPISODE_NUMBER}" ';
-        html += 'data-name="{EPISODE_NAME}">';
+        html += 'data-episode ';
+        html += 'data-episode-id="{EPISODE_ID}" ';
+        html += 'data-episode-number="{EPISODE_NUMBER}" ';
+        html += 'data-episode-name="{EPISODE_NAME}" ';
+        html += 'data-episode-duration="{EPISODE_DURATION}" ';
+        html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-serie-id="{SERIE_ID}" ';
+        html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
                 html += '<img src="{EPISODE_IMAGE}" />';
-                html += '<div class="list-item-progress" data-progress="{EPISODE_PROGRESS}">&nbsp;</div>';
             html += '</div>';
             html += '<div class="list-item-info">';
                 html += '<h2>{SERIE_NAME}</h2>';
@@ -828,12 +900,15 @@ V.component('[data-queue]', {
         html = html
         .replace('{EPISODE_ID}', episode.media_id)
         .replace('{SERIE_NAME}', serie.name)
+        .replace('{SERIE_NAME}', serie.name)
+        .replace('{SERIE_ID}', serie.series_id)
         .replace('{EPISODE_NAME}', episode.name)
         .replace('{EPISODE_NAME}', episode.name)
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
-        .replace('{EPISODE_PROGRESS}', playhead);
+        .replace('{EPISODE_DURATION}', duration)
+        .replace('{EPISODE_PLAYHEAD}', playhead);
 
         return html;
     }
@@ -903,11 +978,63 @@ V.component('[data-history]', {
         var element = self.element;
         var html = '';
 
+        var fields = [
+            'media',
+            'media.availability_notes',
+            'media.available',
+            'media.available_time',
+            'media.bif_url',
+            'media.class',
+            'media.clip',
+            'media.collection_id',
+            'media.collection_name',
+            'media.created',
+            'media.description',
+            'media.duration',
+            'media.episode_number',
+            'media.free_available',
+            'media.free_available_time',
+            'media.free_unavailable_time',
+            'media.media_id',
+            'media.media_type',
+            'media.name',
+            'media.playhead',
+            'media.premium_available',
+            'media.premium_available_time',
+            'media.premium_only',
+            'media.premium_unavailable_time',
+            'media.screenshot_image',
+            'media.series_id',
+            'media.series_name',
+            'media.stream_data',
+            'media.unavailable_time',
+            'media.url',
+            'playhead',
+            'timestamp',
+            'series',
+            'series.class',
+            'series.collection_count',
+            'series.description',
+            'series.genres',
+            'series.in_queue',
+            'series.landscape_image',
+            'series.media_count',
+            'series.media_type',
+            'series.name',
+            'series.portrait_image',
+            'series.publisher_name',
+            'series.rating',
+            'series.series_id',
+            'series.url',
+            'series.year'
+        ];
+
         window.showLoading();
 
         return apiRequest('POST', '/recently_watched', {
             session_id: data.sessionId,
             locale: data.locale,
+            fields: fields.join(','),
             limit: 8,
             offset: 0
         }).then(function(response){
@@ -932,7 +1059,7 @@ V.component('[data-history]', {
             window.hideLoading();
 
         })
-        .catch(function(error){
+        .catch(function(){
             window.hideLoading();
         });
     },
@@ -946,17 +1073,21 @@ V.component('[data-history]', {
 
         var html = '';
         var serie = data.series;
-        var collection = data.collection;
         var episode = data.media;
-        var playhead = data.playhead;
+        var playhead = episode.playhead;
+        var duration = episode.duration;
 
         html += '<div class="list-item history-item" ';
-        html += 'data-episode="{EPISODE_ID}" ';
-        html += 'data-number="{EPISODE_NUMBER}" ';
-        html += 'data-name="{EPISODE_NAME}">';
+        html += 'data-episode ';
+        html += 'data-episode-id="{EPISODE_ID}" ';
+        html += 'data-episode-number="{EPISODE_NUMBER}" ';
+        html += 'data-episode-name="{EPISODE_NAME}" ';
+        html += 'data-episode-duration="{EPISODE_DURATION}" ';
+        html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-serie-id="{SERIE_ID}" ';
+        html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
                 html += '<img src="{EPISODE_IMAGE}" />';
-                html += '<div class="list-item-progress" data-progress="{EPISODE_PROGRESS}">&nbsp;</div>';
             html += '</div>';
             html += '<div class="list-item-info">';
                 html += '<h2>{SERIE_NAME}</h2>';
@@ -966,13 +1097,16 @@ V.component('[data-history]', {
 
         html = html
         .replace('{EPISODE_ID}', episode.media_id)
+        .replace('{SERIE_ID}', serie.series_id)
+        .replace('{SERIE_NAME}', serie.name)
         .replace('{SERIE_NAME}', serie.name)
         .replace('{EPISODE_NAME}', episode.name)
         .replace('{EPISODE_NAME}', episode.name)
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
-        .replace('{EPISODE_PROGRESS}', playhead);
+        .replace('{EPISODE_DURATION}', duration)
+        .replace('{EPISODE_PLAYHEAD}', playhead);
 
         return html;
     }
@@ -1096,7 +1230,7 @@ V.component('[data-series]', {
             locale: data.locale,
             media_type: 'anime',
             filter: filter,
-            fields: fields,
+            fields: fields.join(','),
             limit: 20,
             offset: 0
         }).then(async function(response){
@@ -1212,8 +1346,9 @@ V.component('[data-series]', {
         var html = '';
 
         html += '<div class="list-item serie-item" ';
-        html += 'data-serie="{SERIE_ID}" ';
-        html += 'data-name="{SERIE_NAME}">';
+        html += 'data-serie ';
+        html += 'data-serie-id="{SERIE_ID}" ';
+        html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
                 html += '<img src="{SERIE_IMAGE}" />';
             html += '</div>';
@@ -1272,6 +1407,10 @@ V.component('[data-episodes]', {
             self.listEpisodes();
         });
 
+        self.on('change', 'select' , function(e){
+            self.listEpisodes();
+        });
+
         resolve(this);
 
     },
@@ -1298,9 +1437,28 @@ V.component('[data-episodes]', {
         var element = self.element;
         var html = '';
 
-        var serieId = element.dataset.id;
-        var serieName = element.dataset.name;
-        var sort = 'asc'; // asc | desc
+        var serieId = element.dataset.serieId;
+        var serieName = element.dataset.serieName;
+        var sort = 'desc';
+        var fields = [
+            'most_likely_media',
+            'media',
+            'media.name',
+            'media.description',
+            'media.episode_number',
+            'media.duration',
+            'media.playhead',
+            'media.screenshot_image',
+            'media.media_id',
+            'media.series_id',
+            'media.series_name',
+            'media.collection_id',
+            'media.url'
+        ];
+
+        if( V.$('select#sort', element) ){
+            sort = V.$('select#sort', element).value;
+        }
 
         window.showLoading();
 
@@ -1309,9 +1467,10 @@ V.component('[data-episodes]', {
             locale: data.locale,
             series_id: serieId,
             sort: sort,
+            fields: fields.join(','),
             limit: 30,
             offset: 0
-        }).then(function(response){
+        }).then(async function(response){
 
             if( response.error
                 && response.code == 'bad_session' ){
@@ -1324,6 +1483,9 @@ V.component('[data-episodes]', {
                 html += '<small>Serie</small><br/>';
                 html += serieName + ' - Episodes';
             html += '</h1>';
+            html += '<div class="list-filters">';
+                html += await self.getFilters(sort);
+            html += '</div>';
             html += '<div class="list-items">';
                 response.data.map(function(item){
                     html += self.toEpisode(item);
@@ -1342,6 +1504,32 @@ V.component('[data-episodes]', {
     },
 
     /**
+     * Retrieve episodes filter
+     * @param {String} sort
+     * @return {String}
+     */
+    getFilters: async function(sort){
+
+        var options = [];
+        var html = '';
+
+        // Retrieve options
+        options.push({id: 'asc', name: 'Ascending'});
+        options.push({id: 'desc', name: 'Descending'});
+
+        html += '<select id="sort">';
+        html += options.map(function(option){
+            return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
+                .replace('{SELECTED}', (option.id == sort) ? 'selected="selected"' : '')
+                .replace('{VALUE}', option.id)
+                .replace('{LABEL}', option.name);
+        });
+        html += '</select>';
+
+        return html;
+    },
+
+    /**
      * Transform data to episode item
      * @param {Object} data
      * @return {String}
@@ -1352,19 +1540,22 @@ V.component('[data-episodes]', {
         var element = self.element;
         var html = '';
 
-        var serieId = element.dataset.id;
-        var serieName = element.dataset.name;
+        var serieId = element.dataset.serieId;
+        var serieName = element.dataset.serieName;
 
         html += '<div class="list-item episode-item" ';
-        html += 'data-episode="{EPISODE_ID}" ';
-        html += 'data-number="{EPISODE_NUMBER}" ';
-        html += 'data-name="{EPISODE_NAME}">';
+        html += 'data-episode ';
+        html += 'data-episode-id="{EPISODE_ID}" ';
+        html += 'data-episode-number="{EPISODE_NUMBER}" ';
+        html += 'data-episode-name="{EPISODE_NAME}" ';
+        html += 'data-episode-duration="{EPISODE_DURATION}" ';
+        html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-serie-id="{SERIE_ID}" ';
+        html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
                 html += '<img src="{EPISODE_IMAGE}" />';
-                html += '<div class="list-item-progress" data-progress="{EPISODE_PROGRESS}">&nbsp;</div>';
             html += '</div>';
             html += '<div class="list-item-info">';
-                html += '<h2>{SERIE_NAME}</h2>';
                 html += '<h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>';
             html += '</div>';
         html += '</div>';
@@ -1372,13 +1563,15 @@ V.component('[data-episodes]', {
         html = html
         .replace('{SERIE_ID}', serieId)
         .replace('{SERIE_NAME}', serieName)
+        .replace('{SERIE_NAME}', serieName)
         .replace('{EPISODE_ID}', data.media_id)
         .replace('{EPISODE_NAME}', data.name)
         .replace('{EPISODE_NAME}', data.name)
         .replace('{EPISODE_NUMBER}', data.episode_number)
         .replace('{EPISODE_NUMBER}', data.episode_number)
         .replace('{EPISODE_IMAGE}', data.screenshot_image.full_url)
-        .replace('{EPISODE_PROGRESS}', data.playhead);
+        .replace('{EPISODE_DURATION}', data.duration)
+        .replace('{EPISODE_PLAYHEAD}', data.playhead);
 
         return html;
     }
@@ -1404,10 +1597,18 @@ V.component('[data-serie]', {
             e.preventDefault();
             window.pushHistory(keys.OK);
 
-            content.innerHTML = '<div class="inside" data-episodes data-id="{SERIE_ID}" data-name="{SERIE_NAME}"></div>'
-                .replace('{SERIE_ID}', element.dataset.serie)
-                .replace('{SERIE_NAME}', element.dataset.name);
+            var html = '';
+                html += '<div class="inside" ';
+                html += 'data-episodes ';
+                html += 'data-serie-id="{SERIE_ID}" ';
+                html += 'data-serie-name="{SERIE_NAME}">';
+                html += '</div>';
 
+            html = html
+                .replace('{SERIE_ID}', element.dataset.serieId)
+                .replace('{SERIE_NAME}', element.dataset.serieName);
+
+            content.innerHTML = html;
             V.mount(content);
 
         });
@@ -1435,9 +1636,11 @@ V.component('[data-episode]', {
             e.preventDefault();
             window.pushHistory(keys.OK);
 
-            window.episodeId = element.dataset.episode;
-            window.episodeNumber = element.dataset.number;
-            window.episodeName = element.dataset.name;
+            window.episodeId = element.dataset.episodeId;
+            window.episodeNumber = element.dataset.episodeNumber;
+            window.episodeName = element.dataset.episodeName;
+            window.serieId = element.dataset.serieId;
+            window.serieName = element.dataset.serieName;
 
             window.loadVideo().then(function(){
                 window.showVideo();
@@ -1455,24 +1658,18 @@ V.component('[data-episode]', {
      * @param {Function} reject
      * @return {void}
      */
-    afterRender: async function(resolve, reject){
+    afterRender: function(resolve, reject){
 
-        var data = window.getSessionData();
         var self = this;
         var element = self.element;
 
-        var episodeId = element.dataset.episode;
-        var fields = 'media.stream_data,media.media_id,media.playhead,media.duration';
+        var duration = element.dataset.episodeDuration;
+        var playhead = element.dataset.episodePlayhead;
+        var progress = (100 / Number(duration)) * Number(playhead);
 
-        await apiRequest('POST', '/info', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            media_id: episodeId,
-            fields: fields
-        }).then(function(response){
-            var stream = response.data.stream_data.streams[0].url;
-                element.dataset.stream = stream;
-        });
+        if( progress ){
+            V.$('.list-item-image', element).innerHTML += '<div class="list-item-progress" style="width: ' + progress + '%">&nbsp;</div>';
+        }
 
         resolve(this);
     }
@@ -1631,7 +1828,7 @@ V.component('[data-video]', {
             createEl: function(){
                 return videojs.dom.createEl('button', {
                     className: 'vjs-extra-button-play',
-                    innerHTML: 'Play',
+                    innerHTML: '<span class="vjs-icon-play"></span>',
                 });
             },
             handleClick: function(e){
@@ -1643,7 +1840,7 @@ V.component('[data-video]', {
             createEl: function(){
                 return videojs.dom.createEl('button', {
                     className: 'vjs-extra-button-close',
-                    innerHTML: 'Close',
+                    innerHTML: '<span class="vjs-icon-fullscreen-exit"></span>',
                 });
             },
             handleClick: function(e){
@@ -1711,27 +1908,42 @@ V.component('[data-video]', {
 
         var self = this;
         var player = self.player;
+        var title = player.getChild('TitleBar');
 
         var episodeId = window.episodeId;
         var episodeNumber = window.episodeNumber;
         var episodeName = window.episodeName;
+        var serieId = window.serieId;
+        var serieName = window.serieName;
 
         if( self.lastEpisodeId == episodeId ){
             return Promise.resolve();
         }
 
         var data = window.getSessionData();
-        var fields = 'media.stream_data,media.media_id,media.playhead,media.duration';
+        var fields = [
+            'media.stream_data',
+            'media.media_id',
+            'media.playhead',
+            'media.duration'
+        ];
 
         return apiRequest('POST', '/info', {
             session_id: data.sessionId,
             locale: data.locale,
             media_id: episodeId,
-            fields: fields
+            fields: fields.join(',')
         }).then(function(response){
 
             var streams = response.data.stream_data.streams;
             var stream = streams[ streams.length - 1 ].url;
+
+            var startTime = response.data.playhead || 0;
+            var duration = response.data.duration || 0;
+
+            if( startTime / duration > 0.85 || startTime < 30 ){
+                startTime = 0;
+            }
 
             player.src({
                 src: stream,
@@ -1739,10 +1951,12 @@ V.component('[data-video]', {
                 withCredentials: true
             });
 
-            var title = player.getChild('TitleBar');
-                title.updateText(episodeNumber + ' - ' + episodeName);
+            title.updateText(
+                serieName + ' / EP ' + episodeNumber + ' - ' + episodeName
+            );
 
             self.lastEpisodeId = episodeId;
+            player.currentTime(startTime);
 
             return response;
         });

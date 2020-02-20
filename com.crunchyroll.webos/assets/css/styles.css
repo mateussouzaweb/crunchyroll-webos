@@ -131,8 +131,10 @@ button:active {
     width: 100%;
     opacity: 1;
     transition: all 0.2s ease-in-out;
+    z-index: 1;
 }
-#video .video-js.vjs-playing.vjs-has-started .vjs-title-bar{
+#video .video-js.vjs-playing.vjs-has-started .vjs-title-bar,
+#video .video-js.vjs-waiting.vjs-has-started .vjs-title-bar{
     display: none;
     opacity: 0;
 }
@@ -146,6 +148,7 @@ button:active {
     height: 100px;
     margin-top: -50px;
     margin-left: -150px;
+    z-index: 2;
 }
 #video .video-js.vjs-paused.vjs-has-started .vjs-extra-action-bar{
     display: flex;
@@ -298,7 +301,7 @@ body.video-active #content{
 }
 #content .list-item{
     margin: 20px;
-    border: 2px solid #FFF;
+    border: 1px solid #FFF;
     flex: 0 1 280px;
     cursor: pointer;
 }
@@ -320,7 +323,7 @@ body.video-active #content{
     position: absolute;
     bottom: 0px;
     width: 0%;
-    height: 5px;
+    height: 10px;
     left: 0;
     background-color: #F37521;
 }
