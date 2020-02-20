@@ -1970,9 +1970,10 @@ V.component('[data-video]', {
 
         var self = this;
         var player = self.player;
+            player.play();
 
-        player.play();
         self.playing = true;
+        self.trackProgress();
 
     },
 
@@ -1984,9 +1985,10 @@ V.component('[data-video]', {
 
         var self = this;
         var player = self.player;
+            player.pause();
 
-        player.pause();
         self.playing = false;
+        self.stopTrackProgress();
 
     },
 
@@ -2001,7 +2003,9 @@ V.component('[data-video]', {
 
         player.pause();
         player.currentTime(0);
+
         self.playing = false;
+        self.stopTrackProgress();
 
     },
 
@@ -2012,12 +2016,11 @@ V.component('[data-video]', {
     toggleVideo: function(){
 
         var self = this;
-        var player = self.player;
 
         if( self.playing ){
-            player.pause();
+            self.pauseVideo();
         } else {
-            player.play();
+            self.playVideo();
         }
 
     },
@@ -2047,18 +2050,50 @@ V.component('[data-video]', {
     },
 
     /**
+     * Start progress tracking
+     * @return {void}
+     */
+    trackProgress: function(){
+
+        var self = this;
+
+        if( self.trackTimeout ){
+            self.stopTrackProgress();
+        }
+
+        self.trackTimeout = window.setTimeout(function(){
+            self.updatePlaybackStatus();
+        }, 30000); // 30s
+
+    },
+
+    /**
+     * Stop progress tracking
+     * @return {void}
+     */
+    stopTrackProgress: function(){
+
+        var self = this;
+
+        if( self.trackTimeout ){
+            window.clearTimeout(self.trackTimeout);
+        }
+
+    },
+
+    /**
      * Update playback status at Crunchyroll
      * @return {Promise}
      */
-    updatePlayback: function(){
+    updatePlaybackStatus: function(){
 
         var self = this;
         var player = self.player;
 
         var data = window.getSessionData();
 
-        var elapsed = 60;
-        var elapsedDelta = 60;
+        var elapsed = 30;
+        var elapsedDelta = 30;
         var playhead = player.currentTime();
 
         return apiRequest('POST', '/log', {
@@ -2069,6 +2104,8 @@ V.component('[data-video]', {
             playhead: playhead,
             elapsed: elapsed,
             elapsedDelta: elapsedDelta
+        }).then(function(response){
+            self.trackProgress();
         });
     }
 
