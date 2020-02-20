@@ -7,23 +7,23 @@
 
     <title>Crunchyroll WebOS TV</title>
 
-    <script src="./assets/js/webostv.js"></script>
-    <script src="./assets/js/webostv-dev.js"></script>
+    <script src="./assets/js/webos.tv.js"></script>
+    <script src="./assets/js/webos.tv.dev.js"></script>
+    <script src="./assets/js/video.js.min.js"></script>
     <script src="./assets/js/vanilla.ui.js"></script>
     <script src="./assets/js/app.js"></script>
 
+    <link href="./assets/css/video.js.min.css" rel="stylesheet">
     <link href="./assets/css/styles.css" rel="stylesheet">
 
-    <!-- https://docs.videojs.com/docs/api/player.html -->
-    <link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/video.js/dist/video.min.js"></script>
+    <link rel="shortcut icon" href="./assets/img/130px.png" type="image/png">
 
 </head>
 <body>
 <div id="main" data-app-events data-app-history>
 
     <div id="loading" data-loading>
-        <span>Loading...</span>
+        <span>&nbsp;</span>
     </div>
 
     <div id="login" data-login>
@@ -44,20 +44,22 @@
                 required>
 
             <label for="locale">Locale:</label>
-            <select id="locale">
-                <option value="enUS">English (US)</option>
-                <option value="enGB">English (UK)</option>
-                <option value="esLA">Español</option>
-                <option value="esES">Español (España)</option>
-                <option value="ptBR">Português (Brasil)</option>
-                <option value="ptPT">Português (Portugal)</option>
-                <option value="frFR">Français (France)</option>
-                <option value="deDE">Deutsch</option>
-                <option value="itIT">Italiano</option>
-                <option value="ruRU">Русский</option>
-                <option value="arME">العربية</option>
-                <option value="jaJP">Japonês</option>
-            </select>
+            <div class="select">
+                <select id="locale">
+                    <option value="enUS">English (US)</option>
+                    <option value="enGB">English (UK)</option>
+                    <option value="esLA">Español</option>
+                    <option value="esES">Español (España)</option>
+                    <option value="ptBR">Português (Brasil)</option>
+                    <option value="ptPT">Português (Portugal)</option>
+                    <option value="frFR">Français (France)</option>
+                    <option value="deDE">Deutsch</option>
+                    <option value="itIT">Italiano</option>
+                    <option value="ruRU">Русский</option>
+                    <option value="arME">العربية</option>
+                    <option value="jaJP">Japonês</option>
+                </select>
+            </div>
 
             <button type="submit">Login</button>
             <div id="message"></div>

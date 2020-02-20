@@ -852,7 +852,7 @@ V.component('[data-queue]', {
             html += '<div class="list-items">';
                 response.data.map(function(item){
                     html += self.toQueue(item);
-                });
+                }).join('');
             html += '</div>';
 
             element.innerHTML = html;
@@ -886,6 +886,7 @@ V.component('[data-queue]', {
         html += 'data-episode-name="{EPISODE_NAME}" ';
         html += 'data-episode-duration="{EPISODE_DURATION}" ';
         html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-episode-premium="{EPISODE_PREMIUM}" ';
         html += 'data-serie-id="{SERIE_ID}" ';
         html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
@@ -908,7 +909,8 @@ V.component('[data-queue]', {
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
         .replace('{EPISODE_DURATION}', duration)
-        .replace('{EPISODE_PLAYHEAD}', playhead);
+        .replace('{EPISODE_PLAYHEAD}', playhead)
+        .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0);
 
         return html;
     }
@@ -1050,7 +1052,7 @@ V.component('[data-history]', {
             html += '<div class="list-items">';
                 response.data.map(function(item){
                     html += self.toHistory(item);
-                });
+                }).join('');
             html += '</div>';
 
             element.innerHTML = html;
@@ -1084,6 +1086,7 @@ V.component('[data-history]', {
         html += 'data-episode-name="{EPISODE_NAME}" ';
         html += 'data-episode-duration="{EPISODE_DURATION}" ';
         html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-episode-premium="{EPISODE_PREMIUM}" ';
         html += 'data-serie-id="{SERIE_ID}" ';
         html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
@@ -1106,7 +1109,8 @@ V.component('[data-history]', {
         .replace('{EPISODE_NUMBER}', episode.episode_number)
         .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
         .replace('{EPISODE_DURATION}', duration)
-        .replace('{EPISODE_PLAYHEAD}', playhead);
+        .replace('{EPISODE_PLAYHEAD}', playhead)
+        .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0);
 
         return html;
     }
@@ -1249,7 +1253,7 @@ V.component('[data-series]', {
             html += '<div class="list-items">';
                 response.data.map(function(item){
                     html += self.toSerie(item);
-                });
+                }).join('');
             html += '</div>';
 
             element.innerHTML = html;
@@ -1277,7 +1281,7 @@ V.component('[data-series]', {
         var html = '';
 
         // Retrieve options
-        options.push({id: '', name: '== FILTERS =='});
+        options.push({id: '', name: '--- FILTERS'});
         options.push({id: 'alpha', name: 'Alphabetical'});
         options.push({id: 'featured', name: 'Featured'});
         options.push({id: 'newest', name: 'Newest'});
@@ -1299,12 +1303,12 @@ V.component('[data-series]', {
                 media_type: 'anime'
             }).then(function(response){
 
-                categories.push({id: '-', name: '== GENRES =='});
+                categories.push({id: '-', name: '--- GENRES'});
                 response.data.genre.map(function(item){
                     categories.push({id: item.tag, name: item.label});
                 });
 
-                // categories.push({id: '-', name: '== SEASONS =='});
+                // categories.push({id: '-', name: '--- SEASONS'});
                 // response.data.season.map(function(item){
                 //     categories.push({id: item.tag, name: item.label});
                 // });
@@ -1320,14 +1324,16 @@ V.component('[data-series]', {
         });
 
         // Create select
+        html += '<div class="select">';
         html += '<select id="filter">';
         html += options.map(function(option){
             return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
                 .replace('{SELECTED}', (option.id == selected) ? 'selected="selected"' : '')
                 .replace('{VALUE}', option.id)
                 .replace('{LABEL}', option.name);
-        });
+        }).join('');
         html += '</select>';
+        html += '</div>';
 
         html += '<input type="text" id="search" value="{VALUE}" placeholder="{LABEL}">'
             .replace('{VALUE}', search)
@@ -1453,7 +1459,8 @@ V.component('[data-episodes]', {
             'media.series_id',
             'media.series_name',
             'media.collection_id',
-            'media.url'
+            'media.url',
+            'media.free_available'
         ];
 
         if( V.$('select#sort', element) ){
@@ -1480,7 +1487,7 @@ V.component('[data-episodes]', {
             }
 
             html += '<h1>';
-                html += '<small>Serie</small><br/>';
+                html += '<small>Serie /</small><br/>';
                 html += serieName + ' - Episodes';
             html += '</h1>';
             html += '<div class="list-filters">';
@@ -1489,7 +1496,7 @@ V.component('[data-episodes]', {
             html += '<div class="list-items">';
                 response.data.map(function(item){
                     html += self.toEpisode(item);
-                });
+                }).join('');
             html += '</div>';
 
             element.innerHTML = html;
@@ -1517,14 +1524,16 @@ V.component('[data-episodes]', {
         options.push({id: 'asc', name: 'Ascending'});
         options.push({id: 'desc', name: 'Descending'});
 
+        html += '<div class="select">';
         html += '<select id="sort">';
         html += options.map(function(option){
             return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
                 .replace('{SELECTED}', (option.id == sort) ? 'selected="selected"' : '')
                 .replace('{VALUE}', option.id)
                 .replace('{LABEL}', option.name);
-        });
+        }).join('');
         html += '</select>';
+        html += '</div>';
 
         return html;
     },
@@ -1550,6 +1559,7 @@ V.component('[data-episodes]', {
         html += 'data-episode-name="{EPISODE_NAME}" ';
         html += 'data-episode-duration="{EPISODE_DURATION}" ';
         html += 'data-episode-playhead="{EPISODE_PLAYHEAD}" ';
+        html += 'data-episode-premium="{EPISODE_PREMIUM}" ';
         html += 'data-serie-id="{SERIE_ID}" ';
         html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
@@ -1571,7 +1581,8 @@ V.component('[data-episodes]', {
         .replace('{EPISODE_NUMBER}', data.episode_number)
         .replace('{EPISODE_IMAGE}', data.screenshot_image.full_url)
         .replace('{EPISODE_DURATION}', data.duration)
-        .replace('{EPISODE_PLAYHEAD}', data.playhead);
+        .replace('{EPISODE_PLAYHEAD}', data.playhead)
+        .replace('{EPISODE_PREMIUM}', (!data.free_available) ? 1 : 0);
 
         return html;
     }
@@ -1665,10 +1676,15 @@ V.component('[data-episode]', {
 
         var duration = element.dataset.episodeDuration;
         var playhead = element.dataset.episodePlayhead;
+        var premium = element.dataset.episodePremium;
         var progress = (100 / Number(duration)) * Number(playhead);
 
         if( progress ){
             V.$('.list-item-image', element).innerHTML += '<div class="list-item-progress" style="width: ' + progress + '%">&nbsp;</div>';
+        }
+
+        if( premium == 1 ){
+            V.$('.list-item-image', element).innerHTML += '<div class="list-item-premium">&nbsp;</div>';
         }
 
         resolve(this);

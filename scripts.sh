@@ -47,6 +47,10 @@ function inspect(){
     $ARES_SDK/ares-inspect --device $DEVICE --app $ID
 }
 
+function deploy(){
+    build && install
+}
+
 function test(){
     build && install && launch && inspect
 }
