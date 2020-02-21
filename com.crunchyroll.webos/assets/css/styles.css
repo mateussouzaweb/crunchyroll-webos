@@ -39,6 +39,7 @@ input{
     border-radius: 5px;
     transition: border 0.2s ease-in-out;
 }
+input.hover,
 input:hover,
 input:focus,
 input:active {
@@ -57,6 +58,7 @@ button{
     transition: background 0.2s ease-in-out;
     width: 100%;
 }
+button.hover,
 button:hover,
 button:focus,
 button:active {
@@ -116,13 +118,17 @@ button:active {
 .select select::-ms-expand {
     display: none;
 }
+.select.hover,
 .select:hover,
 .select:focus,
 .select:active{
     border-color: #F37521;
     outline: none;
 }
-
+.select:focus-within{
+    border-color: #F37521;
+    outline: none;
+}
 .hidden{
     display: none !important;
 }
@@ -150,7 +156,6 @@ button:active {
 #loading span{
     background: transparent url(../icons/loading.svg) no-repeat;
     background-size: 100% auto;
-    box-shadow: 0px 0 20px 5px #000000;
     flex: 0 0 auto;
     width: 100px;
     height: 100px;
@@ -252,6 +257,12 @@ button:active {
     padding: 10px 15px;
     margin: 10px;
 }
+#video .video-js .vjs-extra-action-bar button.hover,
+#video .video-js .vjs-extra-action-bar button:hover,
+#video .video-js .vjs-extra-action-bar button:focus,
+#video .video-js .vjs-extra-action-bar button:active{
+    border-color: #ffc095;
+}
 #video .vjs-error .vjs-error-display .vjs-modal-dialog-content{
     top: 20%;
     height: auto;
@@ -302,14 +313,20 @@ body.video-active #content{
 #login button{
     margin-bottom: 40px;
 }
+#login input.hover,
 #login input:hover,
 #login input:focus,
 #login input:active,
+#login .select.hover,
 #login .select:hover,
 #login .select:focus,
 #login .select:active{
     border-color: #000000;
 }
+#login .select:focus-within{
+    border-color: #000000;
+}
+#login button.hover,
 #login button:hover,
 #login button:focus,
 #login button:active{
@@ -413,6 +430,19 @@ body.video-active #content{
     border-color: #FFF;
     color: #FFF;
 }
+#content .list-filters input.hover,
+#content .list-filters input:hover,
+#content .list-filters input:focus,
+#content .list-filters input:active,
+#content .list-filters .select.hover,
+#content .list-filters .select:hover,
+#content .list-filters .select:focus,
+#content .list-filters .select:active{
+    border-color: #F37521;
+}
+#content .list-filters .select:focus-within{
+    border-color: #F37521;
+}
 #content .list-filters input{
     flex: 0 1 500px;
 }
@@ -422,6 +452,9 @@ body.video-active #content{
 }
 #content .list-filters .select:after{
     filter: invert(100%);
+}
+#content .list-filters .select option{
+    color: #000;
 }
 
 #content .list-items{

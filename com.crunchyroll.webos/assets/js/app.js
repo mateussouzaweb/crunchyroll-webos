@@ -1,18 +1,3 @@
-var keys = {
-    STOP: 413,
-    PAUSE: 19,
-    PLAY: 415,
-    OK: 13,
-    FORWARD: 417,
-    BACKWARD: 412,
-    BACK: 461,
-    RIGHT: 39,
-    LEFT: 37,
-    UP: 38,
-    DOWN: 40,
-    INFO: 457
-};
-
 /**
  * Make request on Crunchyroll API
  * @param {String} method
@@ -53,7 +38,89 @@ function createUuid(){
     });
 }
 
-V.component('[data-app-events]', {
+/**
+ * Find next/closest available navigable element
+ * @param {String} direction
+ * @param {Element} element
+ * @param {Array} items
+ */
+function findClosest(direction, element, items){
+
+    var matches = [];
+    var current = element.getBoundingClientRect();
+
+    // Find matches
+    items.forEach(function(itemElement){
+
+        if( itemElement === element ){
+            return;
+        }
+
+        var item = itemElement.getBoundingClientRect();
+
+        // Item not visible in document
+        if( item.width == 0 || item.height == 0 ){
+            return;
+        }
+
+        var diff = false;
+
+        if( direction == 'up' ){
+            if( item.top < current.top ){
+                diff = current.top - item.top;
+            }
+        }else if( direction == 'down' ){
+            if( item.top > current.bottom ){
+                diff = item.top - current.bottom;
+            }
+        }else if( direction == 'left' ){
+            if( item.left < current.left ){
+                diff = current.left - item.left;
+            }
+        }else if( direction == 'right' ){
+            if( item.left > current.right ){
+                diff = item.left - current.right;
+            }
+        }
+
+        if( diff !== false ){
+            matches.push({
+                element: itemElement,
+                diff: diff,
+                xDiff: Math.abs(current.top - item.top),
+                yDiff: Math.abs(current.left - item.left)
+            });
+        }
+    });
+
+    // Sort elements
+    matches = matches.sort(function(a, b){
+        return (a.diff + a.xDiff + a.yDiff) - (b.diff + b.xDiff + b.yDiff);
+    });
+
+    return (matches.length) ? matches[0].element : null;
+}
+
+V.component('[data-keyboard-navigation]', {
+
+    /**
+     * Keys mapping
+     * @var {Object}
+     */
+    keys: {
+        STOP: 413,
+        PAUSE: 19,
+        PLAY: 415,
+        OK: 13,
+        FORWARD: 417,
+        BACKWARD: 412,
+        BACK: 461,
+        RIGHT: 39,
+        LEFT: 37,
+        UP: 38,
+        DOWN: 40,
+        INFO: 457
+    },
 
     /**
      * Constructor
@@ -64,10 +131,32 @@ V.component('[data-app-events]', {
     constructor: function(resolve, reject){
 
         var self = this;
+        var keys = self.keys;
+        var _keys = Object.values(keys);
+
+        // Events
+        V.on(window, 'keydown', function(e){
+            if( _keys.indexOf(e.keyCode) !== -1
+                && self.handleKeyPress(e.keyCode) ){
+                e.preventDefault();
+            }
+        });
+
+        V.on(window, 'blur', function(e){
+            self.handleKeyPress(keys.PAUSE);
+        });
+
+        V.on(window, 'focus', function(e){
+            self.handleKeyPress(keys.PLAY);
+        });
 
         // Public
         window.handleKeyPress = function(key){
             return self.handleKeyPress(key);
+        };
+
+        window.setActiveElement = function(element){
+            return self.setActiveElement(element);
         };
 
         resolve(this);
@@ -85,10 +174,23 @@ V.component('[data-app-events]', {
         var self = this;
             self.lastKey = null;
             self.lastKeyTime = null;
+            self.activeElement = null;
+            self.cursorVisible = false;
 
-        // Private
-        self.on('keydown', function(e){
-            self.handleKeyPress(e.keyCode);
+        V.on(document, 'cursorStateChange', function(e){
+
+            self.cursorVisible = e.detail.visibility;
+
+            if( !self.activeElement ){
+                return;
+            }
+
+            if( self.cursorVisible ){
+                self.activeElement.classList.remove('hover');
+            }else{
+                self.activeElement.classList.add('hover');
+            }
+
         });
 
         resolve(this);
@@ -96,107 +198,187 @@ V.component('[data-app-events]', {
     },
 
     /**
+     * Set the current active element for navigation
+     * @param {Element} element
+     * @return {void}
+     */
+    setActiveElement: function(element){
+
+        if( this.activeElement ){
+            this.activeElement.classList.remove('hover');
+            this.activeElement.blur();
+        }
+
+        element.scrollIntoViewIfNeeded();
+        element.classList.add('hover');
+        element.focus();
+
+        this.activeElement = element;
+
+    },
+
+    /**
      * Handle key press
      * @param {Number} key
-     * @return {void}
+     * @return {Boolean}
      */
     handleKeyPress: function(key){
 
         var self = this;
         var body = document.body;
         var videoActive = body.classList.contains('video-active');
+        var result;
 
-        // STOP
-        if( key == keys.STOP ){
-            videoActive && window.stopVideo();
-
-        // PAUSE
-        }else if( key == keys.PAUSE ){
-            videoActive && window.pauseVideo();
-
-        // PLAY
-        }else if( key == keys.PLAY ){
-            videoActive && window.playVideo();
-
-        // OK
-        }else if( key == keys.OK ){
-
-            if( videoActive ) {
-                window.toggleVideo();
-            }else{
-                // TODO: menu or element click
-                // return this.menu(keys.OK);
-            }
-
-        // FORWARD
-        }else if( key == keys.FORWARD ){
-            videoActive && window.forwardVideo();
-
-        // BACKWARD
-        }else if( key == keys.BACKWARD ){
-            videoActive && window.backwardVideo();
-
-        // RIGHT
-        }else if( key == keys.RIGHT ){
-
-            if( videoActive ) {
-                window.forwardVideo();
-            }else{
-                // TODO: right menu or element
-                // return this.menu(keys.RIGHT);
-            }
-
-        // LEFT
-        }else if( key == keys.LEFT ){
-
-            if( videoActive ) {
-                window.backwardVideo();
-            }else{
-                // TODO: left menu or element
-                // return this.menu(keys.LEFT);
-            }
-
-        // UP
-        }else if( key == keys.UP ){
-
-            // TODO: up menu or element
-            // return this.menu(keys.UP);
-
-        // DOWN
-        }else if( key == keys.DOWN ){
-
-            // TODO: down menu or element
-            // return this.menu(keys.DOWN);
-
-        // INFO
-        }else if( key == keys.INFO ){
-
-            // TODO: menu or element click
-            // return this.menu(keys.OK);
-
-        // BACK
-        }else if( key == keys.BACK ){
-
-            if( videoActive ){
-                window.pauseVideo();
-                window.hideVideo();
-            }else{
-
-                // TODO: menu or element back
-                // return this.menu(keys.OK);
-
-            }
-
+        if( videoActive ){
+            result = self.handleKeyOnVideo(key);
+        }else{
+            result = self.handleKeyNavigation(key);
         }
 
         self.lastKey = key;
         self.lastKeyTime = new Date();
 
+        return result;
+    },
+
+    /**
+     * Handle key press for navigation
+     * @param {Number} key
+     * @return {Boolean}
+     */
+    handleKeyNavigation: function(key){
+
+        var self = this;
+        var keys = self.keys;
+        var current = self.activeElement;
+
+        if( !current ){
+            return;
+        }
+
+        var directions = {};
+            directions[ keys.RIGHT ] = 'right';
+            directions[ keys.LEFT ] = 'left';
+            directions[ keys.UP ] = 'up';
+            directions[ keys.DOWN ] = 'down';
+
+        // OK / INFO
+        if( key == keys.OK || key == keys.INFO ){
+
+            if( current && current.classList.contains('select') ){
+                current.firstChild.click();
+            }else if( current ){
+                current.click();
+            }
+
+            return true;
+
+        // RIGHT / LEFT / UP / DOWN
+        }else if( directions[key] ){
+
+            var parent = current.parentElement;
+            var items = [];
+            var closest = null;
+
+            while( parent && closest == null ){
+                items = Array.from( V.$$('[tabindex]', parent) );
+                closest = findClosest(directions[key], current, items);
+                parent = parent.parentElement;
+            }
+
+            if( closest != null ){
+                self.setActiveElement(closest);
+            }
+
+            return true;
+        }
+
+        return false;
+    },
+
+    /**
+     * Handle key press specific to video
+     * @param {Number} key
+     * @return {Boolean}
+     */
+    handleKeyOnVideo: function(key){
+
+        var self = this;
+        var keys = self.keys;
+
+        // STOP
+        if( key == keys.STOP ){
+            window.stopVideo();
+            return true;
+
+        // PAUSE
+        }else if( key == keys.PAUSE ){
+            window.pauseVideo();
+            return true;
+
+        // PLAY
+        }else if( key == keys.PLAY ){
+            window.playVideo();
+            return true;
+
+        // OK
+        }else if( key == keys.OK ){
+            window.toggleVideo();
+            return true;
+
+        // FORWARD
+        }else if( key == keys.FORWARD ){
+            window.forwardVideo();
+            return true;
+
+        // BACKWARD
+        }else if( key == keys.BACKWARD ){
+            window.backwardVideo();
+            return true;
+
+        // RIGHT
+        }else if( key == keys.RIGHT ){
+            window.forwardVideo();
+            return true;
+
+        // LEFT
+        }else if( key == keys.LEFT ){
+            window.backwardVideo();
+            return true;
+
+        // BACK
+        }else if( key == keys.BACK ){
+            window.pauseVideo();
+            window.hideVideo();
+            return true;
+
+        // UP (behavior as left navigation)
+        // DOWN (behavior as right navigation)
+        }else if( key == keys.UP || key == keys.DOWN ){
+
+            var current = self.activeElement;
+            var parent = V.$('.vjs-extra-action-bar');
+            var items = Array.from( V.$$('[tabindex]', parent) );
+
+            var closest = findClosest(
+                (key == keys.UP) ? 'left' : 'right',
+                current,
+                items
+            );
+
+            if( closest != null ){
+                self.setActiveElement(closest);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
 });
 
-V.component('[data-app-history]', {
+V.component('[data-history-navigation]', {
 
     /**
      * Constructor
@@ -209,8 +391,8 @@ V.component('[data-app-history]', {
         var self = this;
 
         // Public
-        window.pushHistory = function(key){
-            return self.pushHistory(key);
+        window.pushHistory = function(route){
+            return self.pushHistory(route);
         };
         window.resetHistory = function(){
             return self.resetHistory();
@@ -221,23 +403,16 @@ V.component('[data-app-history]', {
     },
 
     /**
-     * Push history based on key
-     * @param {Number} key
+     * Push history on navigation
+     * @param {String} route
      * @return {void}
      */
-    pushHistory: function(key){
+    pushHistory: function(route){
 
         // PUSH
-        if( key == keys.OK || key == keys.INFO ){
-
-            history.pushState({
-                uuid: createUuid()
-            }, document.title);
-
-        // BACK
-        }else if( key == keys.BACK ){
-            history.back();
-        }
+        history.pushState({
+            route: route
+        }, document.title);
 
     },
 
@@ -474,6 +649,8 @@ V.component('[data-login]', {
     showLogin: function(){
         var element = this.element;
             element.classList.add('active');
+
+        window.setActiveElement( V.$('#login label') );
     },
 
     /**
@@ -652,13 +829,19 @@ V.component('[data-menu]', {
         self.on('click', '.menu-link', function(e){
 
             e.preventDefault();
-            window.pushHistory(keys.OK);
 
             V.$('.menu-link.active', element).classList.remove('active');
             this.classList.add('active');
 
-            content.innerHTML = '<div class="inside" data-' + this.dataset.content + '></div>';
+            var html = '';
+                html += '<div class="inside" ';
+                html += 'data-' + this.dataset.content + '>';
+                html += '</div>';
+
+            content.innerHTML = html;
             V.mount(content);
+
+            window.setActiveElement(this);
 
         });
 
@@ -832,6 +1015,7 @@ V.component('[data-queue]', {
             'series.year'
         ];
 
+        window.pushHistory('queue');
         window.showLoading();
 
         return apiRequest('POST', '/queue', {
@@ -856,9 +1040,10 @@ V.component('[data-queue]', {
             html += '</div>';
 
             element.innerHTML = html;
-
             V.mount(element);
+
             window.hideLoading();
+            window.setActiveElement( V.$('#content .list-item') );
 
         })
         .catch(function(error){
@@ -879,7 +1064,7 @@ V.component('[data-queue]', {
         var playhead = episode.playhead;
         var duration = episode.duration;
 
-        html += '<div class="list-item queue-item" ';
+        html += '<div class="list-item queue-item" tabindex="-1"';
         html += 'data-episode ';
         html += 'data-episode-id="{EPISODE_ID}" ';
         html += 'data-episode-number="{EPISODE_NUMBER}" ';
@@ -1031,6 +1216,7 @@ V.component('[data-history]', {
             'series.year'
         ];
 
+        window.pushHistory('history');
         window.showLoading();
 
         return apiRequest('POST', '/recently_watched', {
@@ -1056,9 +1242,10 @@ V.component('[data-history]', {
             html += '</div>';
 
             element.innerHTML = html;
-
             V.mount(element);
+
             window.hideLoading();
+            window.setActiveElement( V.$('#content .list-item') );
 
         })
         .catch(function(){
@@ -1079,7 +1266,7 @@ V.component('[data-history]', {
         var playhead = episode.playhead;
         var duration = episode.duration;
 
-        html += '<div class="list-item history-item" ';
+        html += '<div class="list-item history-item" tabindex="-1"';
         html += 'data-episode ';
         html += 'data-episode-id="{EPISODE_ID}" ';
         html += 'data-episode-number="{EPISODE_NUMBER}" ';
@@ -1227,6 +1414,7 @@ V.component('[data-series]', {
             'image.full_url'
         ];
 
+        window.pushHistory('series/' + filter);
         window.showLoading();
 
         return apiRequest('POST', '/list_series', {
@@ -1257,9 +1445,10 @@ V.component('[data-series]', {
             html += '</div>';
 
             element.innerHTML = html;
-
             V.mount(element);
+
             window.hideLoading();
+            window.setActiveElement( V.$('#content .list-item') );
 
         })
         .catch(function(error){
@@ -1324,7 +1513,7 @@ V.component('[data-series]', {
         });
 
         // Create select
-        html += '<div class="select">';
+        html += '<div class="select" tabindex="-1">';
         html += '<select id="filter">';
         html += options.map(function(option){
             return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
@@ -1335,7 +1524,7 @@ V.component('[data-series]', {
         html += '</select>';
         html += '</div>';
 
-        html += '<input type="text" id="search" value="{VALUE}" placeholder="{LABEL}">'
+        html += '<input type="text" id="search" value="{VALUE}" placeholder="{LABEL}" tabindex="-1">'
             .replace('{VALUE}', search)
             .replace('{LABEL}', 'Search');
 
@@ -1351,7 +1540,7 @@ V.component('[data-series]', {
 
         var html = '';
 
-        html += '<div class="list-item serie-item" ';
+        html += '<div class="list-item serie-item" tabindex="-1"';
         html += 'data-serie ';
         html += 'data-serie-id="{SERIE_ID}" ';
         html += 'data-serie-name="{SERIE_NAME}">';
@@ -1467,6 +1656,7 @@ V.component('[data-episodes]', {
             sort = V.$('select#sort', element).value;
         }
 
+        window.pushHistory('episodes/' + serieId + '/' + sort);
         window.showLoading();
 
         return apiRequest('POST', '/list_media', {
@@ -1500,9 +1690,10 @@ V.component('[data-episodes]', {
             html += '</div>';
 
             element.innerHTML = html;
-
             V.mount(element);
+
             window.hideLoading();
+            window.setActiveElement( V.$('#content .list-item') );
 
         })
         .catch(function(error){
@@ -1524,7 +1715,7 @@ V.component('[data-episodes]', {
         options.push({id: 'asc', name: 'Ascending'});
         options.push({id: 'desc', name: 'Descending'});
 
-        html += '<div class="select">';
+        html += '<div class="select" tabindex="-1">';
         html += '<select id="sort">';
         html += options.map(function(option){
             return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
@@ -1552,7 +1743,7 @@ V.component('[data-episodes]', {
         var serieId = element.dataset.serieId;
         var serieName = element.dataset.serieName;
 
-        html += '<div class="list-item episode-item" ';
+        html += '<div class="list-item episode-item" tabindex="-1"';
         html += 'data-episode ';
         html += 'data-episode-id="{EPISODE_ID}" ';
         html += 'data-episode-number="{EPISODE_NUMBER}" ';
@@ -1606,7 +1797,6 @@ V.component('[data-serie]', {
         self.on('click', function(e){
 
             e.preventDefault();
-            window.pushHistory(keys.OK);
 
             var html = '';
                 html += '<div class="inside" ';
@@ -1645,7 +1835,6 @@ V.component('[data-episode]', {
         self.on('click', function(e){
 
             e.preventDefault();
-            window.pushHistory(keys.OK);
 
             window.episodeId = element.dataset.episodeId;
             window.episodeNumber = element.dataset.episodeNumber;
@@ -1844,7 +2033,9 @@ V.component('[data-video]', {
             createEl: function(){
                 return videojs.dom.createEl('button', {
                     className: 'vjs-extra-button-play',
-                    innerHTML: '<span class="vjs-icon-play"></span>',
+                    innerHTML: '<span class="vjs-icon-play"></span>'
+                },{
+                    tabIndex: -1
                 });
             },
             handleClick: function(e){
@@ -1852,11 +2043,29 @@ V.component('[data-video]', {
                 self.playVideo();
             }
         });
+        var EpisodesButton = videojs.extend(Button, {
+            createEl: function(){
+                return videojs.dom.createEl('button', {
+                    className: 'vjs-extra-button-episodes',
+                    innerHTML: '<span class="vjs-icon-chapters"></span>',
+                },{
+                    tabIndex: -1
+                });
+            },
+            handleClick: function(e){
+                e.preventDefault();
+                self.pauseVideo();
+                self.hideVideo();
+                self.listRelatedEpisodes();
+            }
+        });
         var CloseButton = videojs.extend(Button, {
             createEl: function(){
                 return videojs.dom.createEl('button', {
                     className: 'vjs-extra-button-close',
                     innerHTML: '<span class="vjs-icon-fullscreen-exit"></span>',
+                },{
+                    tabIndex: -1
                 });
             },
             handleClick: function(e){
@@ -1869,16 +2078,44 @@ V.component('[data-video]', {
         videojs.registerComponent('TitleBar', TitleBar);
         videojs.registerComponent('ActionBar', ActionBar);
         videojs.registerComponent('PlayButton', PlayButton);
+        videojs.registerComponent('EpisodesButton', EpisodesButton);
         videojs.registerComponent('CloseButton', CloseButton);
 
         player.addChild('TitleBar');
         player.addChild('ActionBar');
         player.getChild('ActionBar').addChild('PlayButton');
+        player.getChild('ActionBar').addChild('EpisodesButton');
         player.getChild('ActionBar').addChild('CloseButton');
 
         player.removeChild('BigPlayButton');
         player.getChild('ControlBar').removeChild('PictureInPictureToggle');
         player.getChild('ControlBar').removeChild('FullscreenToggle');
+
+    },
+
+    /**
+     * List related episodes
+     * @return {void}
+     */
+    listRelatedEpisodes: function(){
+
+        var serieId = window.serieId;
+        var serieName = window.serieName;
+        var content = V.$('#content');
+
+        var html = '';
+            html += '<div class="inside" ';
+            html += 'data-episodes ';
+            html += 'data-serie-id="{SERIE_ID}" ';
+            html += 'data-serie-name="{SERIE_NAME}">';
+            html += '</div>';
+
+        html = html
+            .replace('{SERIE_ID}', serieId)
+            .replace('{SERIE_NAME}', serieName);
+
+        content.innerHTML = html;
+        V.mount(content);
 
     },
 
@@ -1896,6 +2133,7 @@ V.component('[data-video]', {
         document.body.classList.add('video-active');
 
         player.show();
+        window.setActiveElement( V.$('.vjs-extra-button-play') );
 
     },
 
@@ -1943,6 +2181,8 @@ V.component('[data-video]', {
             'media.playhead',
             'media.duration'
         ];
+
+        window.pushHistory('video/' + episodeId);
 
         return apiRequest('POST', '/info', {
             session_id: data.sessionId,
@@ -2129,29 +2369,4 @@ V.component('[data-video]', {
 
 window.addEventListener('load', function(){
     V.mount(document.body);
-}, false);
-
-window.addEventListener('keydown', function(e){
-    window.handleKeyPress(e.keyCode);
-    window.pushHistory(e.keyCode);
-}, false);
-
-window.addEventListener('blur', function(){
-    window.handleKeyPress(keys.PAUSE);
-}, false);
-
-window.addEventListener('focus', function(){
-    window.handleKeyPress(keys.PLAY);
-}, false);
-
-window.addEventListener('popstate', function(event){
-
-    var data = event.state;
-
-    if( data ){
-        window.handleKeyPress(keys.BACK);
-    } else {
-        webOS.platformBack();
-    }
-
 }, false);

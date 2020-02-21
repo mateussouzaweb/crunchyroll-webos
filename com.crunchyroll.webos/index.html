@@ -20,7 +20,7 @@
 
 </head>
 <body>
-<div id="main" data-app-events data-app-history>
+<div id="main" data-keyboard-navigation data-history-navigation>
 
     <div id="loading" data-loading>
         <span>&nbsp;</span>
@@ -34,6 +34,7 @@
                 id="email"
                 type="email"
                 value=""
+                tabindex="-1"
                 required>
 
             <label for="password">Password:</label>
@@ -41,10 +42,11 @@
                 id="password"
                 type="password"
                 value=""
+                tabindex="-1"
                 required>
 
             <label for="locale">Locale:</label>
-            <div class="select">
+            <div class="select" tabindex="-1">
                 <select id="locale">
                     <option value="enUS">English (US)</option>
                     <option value="enGB">English (UK)</option>
@@ -61,7 +63,7 @@
                 </select>
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit" tabindex="-1">Login</button>
             <div id="message"></div>
 
         </form>
@@ -78,18 +80,22 @@
         <div class="links">
             <div
                 class="menu-link menu-series active"
-                data-content="series">Series</div>
+                data-content="series"
+                tabindex="-1">Series</div>
             <div
                 class="menu-link menu-queue"
-                data-content="queue">Queue</div>
+                data-content="queue"
+                tabindex="-1">Queue</div>
             <div
                 class="menu-link menu-history"
-                data-content="history">History</div>
+                data-content="history"
+                tabindex="-1">History</div>
         </div>
 
         <div class="account">
             <div class="account-name">&nbsp;</div>
-            <div class="account-logout">Logout</div>
+            <div class="account-logout"
+                tabindex="-1">Logout</div>
         </div>
 
     </div>
