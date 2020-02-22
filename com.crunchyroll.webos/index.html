@@ -9,13 +9,11 @@
 
     <script src="./assets/js/webos.tv.js"></script>
     <script src="./assets/js/webos.tv.dev.js"></script>
-    <script src="./assets/js/video.js.min.js"></script>
+    <script src="./assets/js/hls.js"></script>
     <script src="./assets/js/vanilla.ui.js"></script>
     <script src="./assets/js/app.js"></script>
 
-    <link href="./assets/css/video.js.min.css" rel="stylesheet">
     <link href="./assets/css/styles.css" rel="stylesheet">
-
     <link rel="shortcut icon" href="./assets/img/130px.png" type="image/png">
 
 </head>
@@ -70,9 +68,45 @@
     </div>
 
     <div id="video" data-video>
-        <video class="video-js"
-            controls preload="auto"
-            style="width: 100vw; height: 100vh;"></video>
+
+        <div class="video-title-bar"></div>
+        <div class="video-extra-bar">
+            <button tabindex="-1"
+                class="video-extra-play">
+                <span>Play</span>
+            </button>
+            <button tabindex="-1"
+                class="video-extra-watched">
+                <span>Watched</span>
+            </button>
+            <button tabindex="-1"
+                class="video-extra-episodes">
+                <span>Episodes</span>
+            </button>
+            <button tabindex="-1"
+                class="video-extra-close">
+                <span>Close</span>
+            </button>
+        </div>
+        <div class="video-control-bar">
+
+            <div class="video-progress">
+                <progress value="0" min="0"></progress>
+                <input type="range" value="0" min="0" step="1">
+                <div class="tooltip">00:00</div>
+            </div>
+
+            <div class="video-time">
+                <time class="elapsed">00:00</time>
+                <span> / </span>
+                <time class="duration">00:00</time>
+            </div>
+
+        </div>
+
+        <video class="video-element"
+            controls preload="metadata"></video>
+
     </div>
 
     <div id="menu" data-menu>

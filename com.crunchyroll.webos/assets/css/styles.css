@@ -93,6 +93,9 @@ button:active {
     z-index: 12;
 }
 .select select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
     background: transparent;
     border: 0 !important;
     border-radius: 0;
@@ -108,9 +111,6 @@ button:active {
     vertical-align: middle;
     width: 100%;
     z-index: 5;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 .select select:focus {
     outline: none;
@@ -129,6 +129,82 @@ button:active {
     border-color: #F37521;
     outline: none;
 }
+
+input[type=range]{
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    height: 8.4px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 1.3px;
+    cursor: pointer;
+    width: 100%;
+}
+input[type=range]::-moz-range-track {
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 1.3px;
+    cursor: pointer;
+    height: 8.4px;
+    width: 100%;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: transparent;
+}
+input[type=range]:focus::-moz-range-track {
+    outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #FFF;
+    border-radius: 16px;
+    cursor: pointer;
+    height: 16px;
+    margin-left: -1px;
+    width: 16px;
+}
+input[type=range]::-moz-range-thumb {
+    background: #FFF;
+    border: 1px solid #FFF;
+    border-radius: 50px;
+    cursor: pointer;
+    height: 14px;
+    margin-top: 5px;
+    width: 14px;
+}
+
+progress {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 5px;
+    width: 100%;
+    height: 8.4px;
+    pointer-events: none;
+}
+progress::-webkit-progress-bar {
+    background: #c25d1b;
+    border-radius: 5px;
+}
+progress::-webkit-progress-value {
+    background: #FFF;
+    border-radius: 5px 0 0 5px;
+}
+progress::-moz-progress-bar {
+    background: #FFF;
+    border: 1px solid #FFF;
+}
+
 .hidden{
     display: none !important;
 }
@@ -191,60 +267,99 @@ button:active {
 #video.active{
     display: block;
 }
-#video .video-js{
-    font-size: 1rem;
-}
-#video .video-js .vjs-control-bar{
+#video .video-control-bar{
+    align-items: center;
     background-color: #F37521;
+    bottom: 0;
+    display: flex;
+    left: 0;
+    opacity: 1;
+    padding: 15px;
+    position: absolute;
+    right: 0;
+    transition: all 0.4s ease-in-out;
+    width: 100%;
+    z-index: 2;
 }
-#video .video-js .vjs-slider{
-    background-color: #000;
+#video.video-playing .video-control-bar{
+    opacity: 0;
 }
-#video .video-js .vjs-exit-bar{
-    background: #F37521;
-    font-size: 2rem;
-    border-radius: 0;
-    left: 50%;
-    margin-left: -1.5em;
-    margin-top: -1em;
-    top: 50%;
+#video.show-controls .video-control-bar{
+    opacity: 1 !important;
 }
-#video .video-js .vjs-title-bar {
-    background: rgba(0, 0, 0, 0.5);
+
+#video .video-progress {
+    position: relative;
+    height: 8.4px;
+    flex: 1;
+}
+#video .video-progress progress,
+#video .video-progress input[type=range] {
+    position: absolute;
+    top: 0;
+}
+#video .video-progress .tooltip {
+    background-color: #F37521;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    content: attr(data-title);
+    display: none;
+    font-size: 0.8rem;
+    margin-left: -50px;
+    text-align: center;
+    width: 100px;
+    padding: 5px;
+    position: absolute;
+    top: -55px;
+}
+#video .video-progress:hover .tooltip {
+    display: block;
+}
+#video .video-time{
+    font-size: 0.8rem;
+    margin-left: 20px;
+}
+
+#video .video-title-bar {
+    background: rgba(0, 0, 0, 0.65);
     color: #FFF;
     display: block;
-    font-size: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
     padding: 15px 25px;
     position: absolute;
     text-align: center;
     top: 0;
     left: 0;
+    right: 0;
     width: 100%;
     opacity: 1;
-    transition: all 0.2s ease-in-out;
-    z-index: 1;
+    transition: all 0.4s ease-in-out;
+    z-index: 2;
 }
-#video .video-js.vjs-playing.vjs-has-started .vjs-title-bar,
-#video .video-js.vjs-waiting.vjs-has-started .vjs-title-bar{
+#video.video-playing .video-title-bar{
+    opacity: 0;
+}
+
+#video .video-extra-bar{
+    display: flex;
+    height: 100px;
+    left: 50%;
+    margin-left: -220px;
+    margin-top: -50px;
+    position: absolute;
+    opacity: 1;
+    top: 50%;
+    transition: all 0.4s ease-in-out;
+    width: 440px;
+    z-index: 2;
+}
+#video.video-playing .video-extra-bar{
     display: none;
     opacity: 0;
 }
-#video .video-js .vjs-extra-action-bar{
-    display: none;
-    font-size: 1rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300px;
-    height: 100px;
-    margin-top: -50px;
-    margin-left: -150px;
-    z-index: 2;
-}
-#video .video-js.vjs-paused.vjs-has-started .vjs-extra-action-bar{
-    display: flex;
-}
-#video .video-js .vjs-extra-action-bar button{
+#video .video-extra-bar button{
     background: #F37521;
     border: 2px solid #FFF;
     border-bottom-width: 5px;
@@ -252,24 +367,38 @@ button:active {
     cursor: pointer;
     color: #FFF;
     flex: 1;
-    font-size: 3rem;
+    font-size: 2rem;
     height: 100px;
     padding: 10px 15px;
-    margin: 10px;
+    margin: 0 5px;
 }
-#video .video-js .vjs-extra-action-bar button.hover,
-#video .video-js .vjs-extra-action-bar button:hover,
-#video .video-js .vjs-extra-action-bar button:focus,
-#video .video-js .vjs-extra-action-bar button:active{
+#video .video-extra-bar button span{
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 60px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-indent: -9999em;
+}
+#video .video-extra-bar button.hover,
+#video .video-extra-bar button:hover,
+#video .video-extra-bar button:focus,
+#video .video-extra-bar button:active{
     border-color: #ffc095;
 }
-#video .vjs-error .vjs-error-display .vjs-modal-dialog-content{
-    top: 20%;
-    height: auto;
+#video .video-extra-bar button.video-extra-play span{
+    background-image: url(../icons/play.svg);
 }
-#video .vjs-error .vjs-error-display:before{
-    display: none;
-    opacity: 0;
+#video .video-extra-bar button.video-extra-watched span{
+    background-image: url(../icons/eye.svg);
+}
+#video .video-extra-bar button.video-extra-episodes span{
+    background-image: url(../icons/playlist.svg);
+}
+#video .video-extra-bar button.video-extra-close span{
+    background-image: url(../icons/exit.svg);
 }
 
 body.video-active #menu,
@@ -542,6 +671,7 @@ body.video-active #content{
     padding: 0;
 }
 #content .serie-item .list-item-image img{
+    border-radius: 2px 2px 0 0;
     position: static;
 }
 #content .serie-item .list-item-info{

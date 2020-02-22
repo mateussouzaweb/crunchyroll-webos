@@ -39,6 +39,23 @@ function createUuid(){
 }
 
 /**
+ * Format time
+ * @param {Number} time
+ * @return {Object}
+ */
+function formatTime(time){
+
+    var result = new Date(time * 1000).toISOString().substr(11, 8);
+    var minutes = result.substr(3, 2);
+    var seconds = result.substr(6, 2);
+
+    return {
+        m: minutes,
+        s: seconds
+    }
+}
+
+/**
  * Find next/closest available navigable element
  * @param {String} direction
  * @param {Element} element
@@ -142,13 +159,13 @@ V.component('[data-keyboard-navigation]', {
             }
         });
 
-        V.on(window, 'blur', function(e){
-            self.handleKeyPress(keys.PAUSE);
-        });
+        // V.on(window, 'blur', function(e){
+        //     self.handleKeyPress(keys.PAUSE);
+        // });
 
-        V.on(window, 'focus', function(e){
-            self.handleKeyPress(keys.PLAY);
-        });
+        // V.on(window, 'focus', function(e){
+        //     self.handleKeyPress(keys.PLAY);
+        // });
 
         // Public
         window.handleKeyPress = function(key){
@@ -211,7 +228,10 @@ V.component('[data-keyboard-navigation]', {
 
         element.scrollIntoViewIfNeeded();
         element.classList.add('hover');
-        element.focus();
+
+        if( element.nodeName !== 'INPUT' ){
+            element.focus();
+        }
 
         this.activeElement = element;
 
@@ -267,6 +287,8 @@ V.component('[data-keyboard-navigation]', {
 
             if( current && current.classList.contains('select') ){
                 current.firstChild.click();
+            }else if( current && current.nodeName == 'INPUT' ){
+                current.focus();
             }else if( current ){
                 current.click();
             }
@@ -1545,7 +1567,7 @@ V.component('[data-series]', {
         html += 'data-serie-id="{SERIE_ID}" ';
         html += 'data-serie-name="{SERIE_NAME}">';
             html += '<div class="list-item-image">';
-                html += '<img src="{SERIE_IMAGE}" />';
+                html += '<img src="{SERIE_IMAGE}" width="640" height="960" />';
             html += '</div>';
             html += '<div class="list-item-info">';
                 html += '<h2>{SERIE_NAME}</h2>';
@@ -1842,8 +1864,8 @@ V.component('[data-episode]', {
             window.serieId = element.dataset.serieId;
             window.serieName = element.dataset.serieName;
 
+            window.showVideo();
             window.loadVideo().then(function(){
-                window.showVideo();
                 window.playVideo();
             });
 
@@ -1921,6 +1943,9 @@ V.component('[data-video]', {
         window.backwardVideo = function(){
             return self.backwardVideo();
         }
+        window.setWatched = function(){
+            return self.setWatched();
+        }
 
         resolve(this);
 
@@ -1936,17 +1961,77 @@ V.component('[data-video]', {
 
         var self = this;
         var element = this.element;
-
-        var options = {
-            suppressNotSupportedError: true
-        };
-
         var video = V.$('video', element);
-        var player = videojs(video, options);
-            player.hide();
+            video.controls = false;
 
-        self.player = player;
+        self.video = video;
         self.playing = false;
+
+        // Video Events
+        V.on(video, 'click', function(e){
+            e.preventDefault();
+            self.toggleVideo();
+        });
+
+        V.on(video, 'loadedmetadata', function(e){
+            self.initializeVideo();
+        });
+
+        V.on(video, 'timeupdate', function(e){
+            self.updateTimeElapsed();
+            self.updateProgress();
+        });
+
+        // UI Events
+        self.on('click', '.video-extra-play', function(e){
+            e.preventDefault();
+            self.toggleVideo();
+        });
+
+        self.on('click', '.video-extra-watched', function(e){
+            e.preventDefault();
+            self.setWatched();
+        });
+
+        self.on('click', '.video-extra-episodes', function(e){
+            e.preventDefault();
+            self.pauseVideo();
+            self.hideVideo();
+            self.listRelatedEpisodes();
+        });
+
+        self.on('click', '.video-extra-close', function(e){
+            e.preventDefault();
+            self.pauseVideo();
+            self.hideVideo();
+        });
+
+        var controlsTimeout = null;
+        V.on(element, 'mouseenter mousemove', function(e){
+
+            element.classList.add('show-controls');
+
+            if( controlsTimeout ){
+                window.clearTimeout(controlsTimeout);
+            }
+
+            controlsTimeout = window.setTimeout(function(){
+                element.classList.remove('show-controls');
+            }, 2000); // 2s
+
+        });
+
+        V.on(element, 'mouseleave', function(e){
+            element.classList.remove('show-controls');
+        });
+
+        self.on('mousemove', 'input[type="range"]', function(e){
+            self.updateSeekTooltip(e);
+        });
+
+        self.on('input', 'input[type="range"]', function(e){
+            self.skipAhead(e.target.dataset.seek);
+        });
 
         // Private
         self.on('show', function(e){
@@ -1994,103 +2079,12 @@ V.component('[data-video]', {
             self.backwardVideo();
         });
 
-        this.appendComponents();
+        self.on('watched', function(){
+            e.preventDefault();
+            self.setWatched();
+        });
 
         resolve(this);
-    },
-
-    /**
-     * Append components to video player
-     * @return {void}
-     */
-    appendComponents: function(){
-
-        var self = this;
-        var player = self.player;
-        var Component = videojs.getComponent('Component');
-        var Button = videojs.getComponent('Button');
-
-        var TitleBar = videojs.extend(Component, {
-            createEl: function(){
-                return videojs.dom.createEl('div', {
-                    className: 'vjs-title-bar'
-                });
-            },
-            updateText: function(text){
-                videojs.dom.emptyEl( this.el() );
-                videojs.dom.appendContent( this.el(), text );
-            }
-        });
-
-        var ActionBar = videojs.extend(Component, {
-            createEl: function(){
-                return videojs.dom.createEl('div', {
-                    className: 'vjs-extra-action-bar'
-                });
-            }
-        });
-        var PlayButton = videojs.extend(Button, {
-            createEl: function(){
-                return videojs.dom.createEl('button', {
-                    className: 'vjs-extra-button-play',
-                    innerHTML: '<span class="vjs-icon-play"></span>'
-                },{
-                    tabIndex: -1
-                });
-            },
-            handleClick: function(e){
-                e.preventDefault();
-                self.playVideo();
-            }
-        });
-        var EpisodesButton = videojs.extend(Button, {
-            createEl: function(){
-                return videojs.dom.createEl('button', {
-                    className: 'vjs-extra-button-episodes',
-                    innerHTML: '<span class="vjs-icon-chapters"></span>',
-                },{
-                    tabIndex: -1
-                });
-            },
-            handleClick: function(e){
-                e.preventDefault();
-                self.pauseVideo();
-                self.hideVideo();
-                self.listRelatedEpisodes();
-            }
-        });
-        var CloseButton = videojs.extend(Button, {
-            createEl: function(){
-                return videojs.dom.createEl('button', {
-                    className: 'vjs-extra-button-close',
-                    innerHTML: '<span class="vjs-icon-fullscreen-exit"></span>',
-                },{
-                    tabIndex: -1
-                });
-            },
-            handleClick: function(e){
-                e.preventDefault();
-                self.pauseVideo();
-                self.hideVideo();
-            }
-        });
-
-        videojs.registerComponent('TitleBar', TitleBar);
-        videojs.registerComponent('ActionBar', ActionBar);
-        videojs.registerComponent('PlayButton', PlayButton);
-        videojs.registerComponent('EpisodesButton', EpisodesButton);
-        videojs.registerComponent('CloseButton', CloseButton);
-
-        player.addChild('TitleBar');
-        player.addChild('ActionBar');
-        player.getChild('ActionBar').addChild('PlayButton');
-        player.getChild('ActionBar').addChild('EpisodesButton');
-        player.getChild('ActionBar').addChild('CloseButton');
-
-        player.removeChild('BigPlayButton');
-        player.getChild('ControlBar').removeChild('PictureInPictureToggle');
-        player.getChild('ControlBar').removeChild('FullscreenToggle');
-
     },
 
     /**
@@ -2127,13 +2121,11 @@ V.component('[data-video]', {
 
         var self = this;
         var element = self.element;
-        var player = self.player;
+        var playButton = V.$('.video-extra-play', element);
 
         element.classList.add('active');
         document.body.classList.add('video-active');
-
-        player.show();
-        window.setActiveElement( V.$('.vjs-extra-button-play') );
+        window.setActiveElement(playButton);
 
     },
 
@@ -2145,12 +2137,9 @@ V.component('[data-video]', {
 
         var self = this;
         var element = self.element;
-        var player = self.player;
 
         element.classList.remove('active');
         document.body.classList.remove('video-active');
-
-        player.hide();
 
     },
 
@@ -2160,9 +2149,14 @@ V.component('[data-video]', {
      */
     loadVideo: function(){
 
+        if( !Hls.isSupported() ) {
+            throw Error('Video format not supported.');
+        }
+
         var self = this;
-        var player = self.player;
-        var title = player.getChild('TitleBar');
+        var element = self.element;
+        var video = self.video;
+        var title = V.$('.video-title-bar', element);
 
         var episodeId = window.episodeId;
         var episodeNumber = window.episodeNumber;
@@ -2174,6 +2168,9 @@ V.component('[data-video]', {
             return Promise.resolve();
         }
 
+        self.lastEpisodeId = episodeId;
+        title.innerHTML = serieName + ' / EP ' + episodeNumber + ' - ' + episodeName;
+
         var data = window.getSessionData();
         var fields = [
             'media.stream_data',
@@ -2183,6 +2180,7 @@ V.component('[data-video]', {
         ];
 
         window.pushHistory('video/' + episodeId);
+        element.classList.add('video-loading');
 
         return apiRequest('POST', '/info', {
             session_id: data.sessionId,
@@ -2201,21 +2199,46 @@ V.component('[data-video]', {
                 startTime = 0;
             }
 
-            player.src({
-                src: stream,
-                type: 'application/x-mpegURL',
-                withCredentials: true
+            return new Promise(function (resolve, reject){
+
+                var hls = new Hls();
+                    hls.loadSource(stream);
+                    hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function(){
+                    element.classList.remove('video-loading');
+                    element.classList.add('video-loaded');
+                    video.currentTime = startTime;
+                    resolve(response);
+                });
+
+                return response;
             });
-
-            title.updateText(
-                serieName + ' / EP ' + episodeNumber + ' - ' + episodeName
-            );
-
-            self.lastEpisodeId = episodeId;
-            player.currentTime(startTime);
-
-            return response;
         });
+    },
+
+    /**
+     * Initialize video
+     * @return {void}
+     */
+    initializeVideo: function(){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var duration = V.$('.duration', element);
+        var seek = V.$('input[type="range"]', element);
+        var progress = V.$('progress', element);
+
+        var time = Math.round(video.duration);
+        var format = formatTime(time);
+
+        duration.innerText = format.m + ':' + format.s;
+        duration.setAttribute('datetime', format.m + 'm ' + format.s + 's');
+
+        seek.setAttribute('max', time);
+        progress.setAttribute('max', time);
+
     },
 
     /**
@@ -2225,8 +2248,12 @@ V.component('[data-video]', {
     playVideo: function(){
 
         var self = this;
-        var player = self.player;
-            player.play();
+        var element = self.element;
+        var video = self.video;
+
+        video.play();
+        element.classList.remove('video-paused');
+        element.classList.add('video-playing');
 
         self.playing = true;
         self.trackProgress();
@@ -2240,8 +2267,12 @@ V.component('[data-video]', {
     pauseVideo: function(){
 
         var self = this;
-        var player = self.player;
-            player.pause();
+        var element = self.element;
+        var video = self.video;
+
+        video.pause();
+        element.classList.remove('video-playing');
+        element.classList.add('video-paused');
 
         self.playing = false;
         self.stopTrackProgress();
@@ -2255,13 +2286,9 @@ V.component('[data-video]', {
     stopVideo: function(){
 
         var self = this;
-        var player = self.player;
 
-        player.pause();
-        player.currentTime(0);
-
-        self.playing = false;
-        self.stopTrackProgress();
+        self.pauseVideo();
+        self.skipAhead(0);
 
     },
 
@@ -2288,8 +2315,9 @@ V.component('[data-video]', {
     forwardVideo: function(){
 
         var self = this;
-        var player = self.player;
-            player.currentTime( player.currentTime() + 10 );
+        var video = self.video;
+
+        self.skipAhead(video.currentTime + 10);
 
     },
 
@@ -2300,8 +2328,89 @@ V.component('[data-video]', {
     backwardVideo: function(){
 
         var self = this;
-        var player = self.player;
-            player.currentTime( player.currentTime() - 10 );
+        var video = self.video;
+
+        self.skipAhead(video.currentTime - 10);
+
+    },
+
+    /**
+     * Skip ahead video
+     * @param {Number} skipTo
+     * @return {void}
+     */
+    skipAhead: function(skipTo){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var seek = V.$('input[type="range"]', element);
+        var progress = V.$('progress', element);
+
+        video.currentTime = skipTo;
+        seek.value = skipTo;
+        progress.value = skipTo;
+
+    },
+
+    /**
+     * Update seek tooltip text and position
+     * @param {Event} event
+     * @return {void}
+     */
+    updateSeekTooltip: function(event){
+
+        var self = this;
+        var element = self.element;
+        var tooltip = V.$('.tooltip', element);
+        var seek = V.$('input[type="range"]', element);
+
+        var skipTo = Math.round(
+            (event.offsetX / event.target.clientWidth)
+            * parseInt(event.target.getAttribute('max'), 10)
+        );
+
+        var format = formatTime(skipTo);
+
+        seek.dataset.seek = skipTo;
+        tooltip.textContent = format.m + ':' + format.s;
+        tooltip.style.left = event.pageX + 'px';
+
+    },
+
+    /**
+     * Update video time elapsed
+     * @return {void}
+     */
+    updateTimeElapsed: function(){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var elapsed = V.$('.elapsed', element);
+
+        var time = Math.round(video.currentTime);
+        var format = formatTime(time);
+
+        elapsed.innerText = format.m + ':' + format.s;
+        elapsed.setAttribute('datetime', format.m + 'm ' + format.s + 's');
+
+    },
+
+    /**
+     * Update video progress
+     * @return {void}
+     */
+    updateProgress: function(){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var seek = V.$('input[type="range"]', element);
+        var progress = V.$('progress', element);
+
+        seek.value = Math.floor(video.currentTime);
+        progress.value = Math.floor(video.currentTime);
 
     },
 
@@ -2344,13 +2453,12 @@ V.component('[data-video]', {
     updatePlaybackStatus: function(){
 
         var self = this;
-        var player = self.player;
-
+        var video = self.video;
         var data = window.getSessionData();
 
         var elapsed = 30;
         var elapsedDelta = 30;
-        var playhead = player.currentTime();
+        var playhead = video.currentTime;
 
         return apiRequest('POST', '/log', {
             session_id: data.sessionId,
@@ -2363,6 +2471,33 @@ V.component('[data-video]', {
         }).then(function(response){
             self.trackProgress();
         });
+    },
+
+    /**
+     * Set video as watched at Crunchyroll
+     * @return {Promise}
+     */
+    setWatched: function(){
+
+        // var self = this;
+        // var video = self.video;
+        // var data = window.getSessionData();
+
+        // var elapsed = 30;
+        // var elapsedDelta = 30;
+        // var playhead = video.duration;
+
+        // return apiRequest('POST', '/log', {
+        //     session_id: data.sessionId,
+        //     locale: data.locale,
+        //     event: 'playback_status',
+        //     media_id: episodeId,
+        //     playhead: playhead,
+        //     elapsed: elapsed,
+        //     elapsedDelta: elapsedDelta
+        // }).then(function(response){
+        //     self.stopTrackProgress();
+        // });
     }
 
 });
