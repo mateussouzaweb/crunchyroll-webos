@@ -307,9 +307,13 @@ V.component('[data-video]', {
 
             return new Promise(function (resolve, reject){
 
-                var hls = new Hls();
-                    hls.loadSource(stream);
-                    hls.attachMedia(video);
+                var hls = new Hls({
+                    maxBufferLength: 15,
+                    maxBufferSize: 30 * 1000 * 1000
+                });
+
+                hls.loadSource(stream);
+                hls.attachMedia(video);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, function(){
                     window.hideLoading();
