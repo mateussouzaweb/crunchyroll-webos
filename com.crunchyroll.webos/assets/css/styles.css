@@ -3,15 +3,16 @@ html, body{
     background-color: #1f1a17;
     border: 0;
     color: #FFF;
+    font-size: 24px;
     margin: 0;
     padding: 0;
 }
 html, body, input, select, button{
-    font-size: 24px;
     font-family: Arial, Helvetica, sans-serif;
 }
 *, *::after, *::before{
     box-sizing: border-box;
+    outline: none;
 }
 h1{
     font-size: 2rem;
@@ -32,9 +33,10 @@ input{
     border: 2px solid transparent;
     color: #000;
     display: block;
-    height: 64px;
-    margin-bottom: 20px;
-    padding: 5px 25px;
+    font-size: 1rem;
+    height: 2.6rem;
+    margin-bottom: 0.85rem;
+    padding: 5px 1rem;
     width: 100%;
     border-radius: 5px;
     transition: border 0.2s ease-in-out;
@@ -54,10 +56,11 @@ button{
     color: #FFF;
     cursor: pointer;
     display: block;
-    height: 75px;
+    font-size: 1rem;
+    height: 3.12rem;
     text-transform: uppercase;
     transition: background 0.2s ease-in-out;
-    padding: 0 20px;
+    padding: 0 0.83rem;
     width: 100%;
 }
 button.hover,
@@ -73,8 +76,8 @@ button:active {
     border-radius: 5px;
     cursor: pointer;
     display: block;
-    height: 64px;
-    margin-bottom: 20px;
+    height: 2.6rem;
+    margin-bottom: 0.85rem;
     overflow: hidden;
     padding: 0;
     position: relative;
@@ -86,12 +89,12 @@ button:active {
     background-size: 100% auto;
     content: '';
     display: block;
-    height: 20px;
-    margin-top: -10px;
+    height: 0.83rem;
+    margin-top: -0.41rem;
     position: absolute;
-    right: 25px;
+    right: 1rem;
     top: 50%;
-    width: 20px;
+    width: 0.83rem;
     z-index: 12;
 }
 .select select {
@@ -103,10 +106,11 @@ button:active {
     border-radius: 0;
     cursor: pointer;
     color: #000;
-    height: 60px;
+    font-size: 1rem;
+    height: 100%;
     margin: 0 auto;
     outline: none;
-    padding: 5px 65px 5px 25px;
+    padding: 5px 2.70rem 5px 1rem;
     position: relative;
     text-indent: 0px;
     text-overflow: "";
@@ -178,7 +182,7 @@ input[type=range]::-webkit-slider-thumb {
 input[type=range]::-moz-range-thumb {
     background: #FFF;
     border: 1px solid #FFF;
-    border-radius: 50px;
+    border-radius: 100%;
     cursor: pointer;
     height: 14px;
     margin-top: 5px;
@@ -235,8 +239,8 @@ progress::-moz-progress-bar {
     background: transparent url(../icons/loading.svg) no-repeat;
     background-size: 100% auto;
     flex: 0 0 auto;
-    width: 100px;
-    height: 100px;
+    width: 4.15rem;
+    height: 4.15rem;
     margin: auto;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
@@ -308,10 +312,10 @@ progress::-moz-progress-bar {
     content: attr(data-title);
     display: none;
     font-size: 0.8rem;
-    margin-left: -50px;
+    margin-left: -2.8rem;
     text-align: center;
-    width: 100px;
-    padding: 5px;
+    width: 4.16rem;
+    padding: 5px 2px;
     position: absolute;
     top: -55px;
 }
@@ -327,7 +331,7 @@ progress::-moz-progress-bar {
     background: rgba(0, 0, 0, 0.65);
     color: #FFF;
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: bold;
     padding: 15px 25px;
     position: absolute;
@@ -346,15 +350,15 @@ progress::-moz-progress-bar {
 
 #video .video-extra-bar{
     display: flex;
-    height: 100px;
+    height: 3.34rem;
     left: 50%;
-    margin-left: -220px;
-    margin-top: -50px;
+    margin-left: -10rem;
+    margin-top: -4.17rem;
     position: absolute;
     opacity: 1;
     top: 50%;
     transition: all 0.4s ease-in-out;
-    width: 440px;
+    width: 20rem;
     z-index: 2;
 }
 #video.video-playing .video-extra-bar{
@@ -366,18 +370,21 @@ progress::-moz-progress-bar {
     border: 2px solid #FFF;
     border-bottom-width: 5px;
     border-radius: 5px;
+    box-shadow: inset 0px 0px 1px 1px #e2803f,
+                0px 2px 3px rgba(0, 0, 0, 0.4);
     cursor: pointer;
     color: #FFF;
     flex: 1;
     font-size: 2rem;
-    height: 100px;
-    padding: 10px 15px;
+    height: 3.34rem;
     margin: 0 5px;
+    padding: 5px;
+    text-align: center;
 }
 #video .video-extra-bar button span{
     background-repeat: no-repeat;
     background-position: center;
-    background-size: auto 60px;
+    background-size: auto 1.875rem;
     display: block;
     width: 100%;
     height: 100%;
@@ -431,9 +438,9 @@ body.video-active #content{
 
 #login form{
     background: url(../img/512px.png) no-repeat center center;
-    background-size: 200px auto;
+    background-size: 8.33rem auto;
     background-position: top center;
-    padding-top: 240px;
+    padding-top: 10rem;
     flex: 1;
     margin: auto;
     text-align: center;
@@ -442,7 +449,7 @@ body.video-active #content{
 #login input,
 #login .select,
 #login button{
-    margin-bottom: 40px;
+    margin-bottom: 1.6rem;
 }
 #login input.hover,
 #login input:hover,
@@ -464,7 +471,7 @@ body.video-active #content{
     background: #5d2500;
 }
 #login #message{
-    margin-top: 20px;
+    margin-top: 0.83rem;
 }
 
 /* MENU */
@@ -479,7 +486,7 @@ body.video-active #content{
     left: 0;
     position: fixed;
     top: 0;
-    width: 220px;
+    width: 9.16rem;
     z-index: 2;
 }
 #menu .links{
@@ -490,9 +497,9 @@ body.video-active #content{
     border-radius: 0 4px 4px 0;
     display: inline-block;
     cursor: pointer;
-    margin-top: 60px;
+    margin-top: 2.2rem;
     font-size: 1.2rem;
-    padding: 10px 60px 10px 20px;
+    padding: 10px 2.2rem 10px 0.83rem;
     transition: all 0.2s ease-in-out;
 }
 #menu .menu-link.hover,
@@ -507,13 +514,14 @@ body.video-active #content{
 
 #menu .account{
     flex: 0 1 auto;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 0.83rem;
+    margin-bottom: 0.83rem;
 }
 #menu .account-name{
-    padding: 10px 20px;
+    padding: 10px 0.83rem;
     font-size: 0.8rem;
     font-weight: bold;
+    margin-bottom: 10px;
     text-overflow: ellipsis;
     word-wrap: normal;
     word-break: keep-all;
@@ -522,9 +530,8 @@ body.video-active #content{
 #menu .account-logout{
     display: block;
     cursor: pointer;
-    margin-top: 10px;
     font-size: 1.2rem;
-    padding: 10px 20px;
+    padding: 10px 0.83rem;
     transition: all 0.2s ease-in-out;
 }
 #menu .account-logout.hover,
@@ -534,8 +541,9 @@ body.video-active #content{
 
 /* CONTENT */
 #content{
-    padding: 20px 40px;
-    padding-left: 260px;
+    padding: 0.83rem 1.16rem;
+    padding-left: 10.833rem;
+    padding-bottom: 2.5rem;
 }
 #content .inside{
     align-items: stretch;
@@ -544,12 +552,12 @@ body.video-active #content{
 }
 #content h1{
     flex: 1 1 100%;
-    margin: 40px 0 20px;
+    margin: 1.16rem 0 0.83rem;
 }
 
 #content .list-filters{
     flex: 1 1 100%;
-    margin: 0 0 20px;
+    margin: 0 0 0.83rem;
     display: flex;
     flex-flow: row;
     justify-content: space-between;
@@ -575,11 +583,11 @@ body.video-active #content{
     border-color: #F37521;
 }
 #content .list-filters input{
-    flex: 0 1 500px;
+    flex: 0 1 20rem;
 }
 #content .list-filters .select{
-    flex: 0 1 300px;
-    margin-right: 40px;
+    flex: 0 1 12.5rem;
+    margin-right: 1.6rem;
 }
 #content .list-filters .select:after{
     filter: invert(100%);
@@ -590,7 +598,7 @@ body.video-active #content{
 #content .list-filters button{
     border: 2px solid #FFF;
     flex: 0 0 auto;
-    height: 64px;
+    height: 2.6rem;
     width: auto;
 }
 
@@ -598,7 +606,7 @@ body.video-active #content{
     align-items: stretch;
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -20px;
+    margin: 0 -0.83rem;
 }
 #content .list-item{
     background: #000;
@@ -609,8 +617,8 @@ body.video-active #content{
     border-bottom-width: 10px;
     border-radius: 5px 5px 2px 2px;
     cursor: pointer;
-    flex: 0 1 300px;
-    margin: 20px;
+    flex: 0 1 12.5rem;
+    margin: 0.83rem;
     position: relative;
     transition: all 0.2s ease-in-out;
 }
@@ -644,19 +652,19 @@ body.video-active #content{
 }
 #content .list-item-premium{
     background: #FFF url(../icons/premium.svg) no-repeat center;
-    background-size: 40px auto;
-    border-radius: 20px;
-    height: 60px;
-    padding: 10px;
+    background-size: 1.6rem auto;
+    border-radius: 0.83rem;
+    height: 2.5rem;
+    padding: 0.42rem;
     position: absolute;
-    right: 15px;
-    top: 15px;
-    width: 60px;
+    right: 0.625rem;
+    top: 0.625rem;
+    width: 2.5rem;
 }
 #content .list-item-info{
     background: rgba(0, 0, 0, 0.75);
     border-radius: 0 0 2px 2px;
-    padding: 20px;
+    padding: 0.83rem;
     word-break: break;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -672,7 +680,7 @@ body.video-active #content{
 }
 #content .list-item-info h2 + h3{
     font-weight: normal;
-    margin-top: 20px;
+    margin-top: 0.83rem;
 }
 
 #content .serie-item .list-item-image{
@@ -687,4 +695,42 @@ body.video-active #content{
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+@media screen and (max-width: 1050px){
+    html, body{
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 860px){
+
+    html, body{
+        font-size: 16px;
+    }
+
+    #menu{
+        flex-flow: row;
+        position: static;
+        width: 100%;
+        padding: 0 0.83rem;
+    }
+    #menu .menu-link{
+        border-radius: 4px;
+        margin-top: 1rem;
+        padding: 10px 0.83rem;
+    }
+    #menu .account-name{
+        display: none;
+    }
+    #content{
+        padding-left: 1.16rem;
+    }
+
+}
+
+@media screen and (max-width: 640px){
+    html, body{
+        font-size: 14px;
+    }
 }
