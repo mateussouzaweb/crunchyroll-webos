@@ -32,7 +32,6 @@ Support me for future versions for Samsung, Android TV, Chromecast and Others.
 
 - Scrolling / pagination
 - Translations
-- Full Screen Mode
 - Picture In Picture Mode
 
 ## Bugs
