@@ -52,10 +52,12 @@ button{
     border: 0;
     border-radius: 5px;
     color: #FFF;
+    cursor: pointer;
     display: block;
     height: 75px;
     text-transform: uppercase;
     transition: background 0.2s ease-in-out;
+    padding: 0 20px;
     width: 100%;
 }
 button.hover,
@@ -584,6 +586,12 @@ body.video-active #content{
 }
 #content .list-filters .select option{
     color: #000;
+}
+#content .list-filters button{
+    border: 2px solid #FFF;
+    flex: 0 0 auto;
+    height: 64px;
+    width: auto;
 }
 
 #content .list-items{

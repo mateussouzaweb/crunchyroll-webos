@@ -7,134 +7,310 @@
 
     <title>Crunchyroll WebOS TV</title>
 
-    <script src="./assets/js/webos.tv.js"></script>
-    <script src="./assets/js/webos.tv.dev.js"></script>
-    <script src="./assets/js/hls.js"></script>
-    <script src="./assets/js/vanilla.ui.js"></script>
-    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/lib/webos.tv.js"></script>
+    <script src="./assets/js/lib/webos.tv.dev.js"></script>
+    <script src="./assets/js/lib/hls.js"></script>
+    <script src="./assets/js/lib/vanilla.ui.js"></script>
+    <script src="./assets/js/lib/template.js"></script>
+    <script src="./assets/js/lib/api.js"></script>
 
     <link href="./assets/css/styles.css" rel="stylesheet">
     <link rel="shortcut icon" href="./assets/img/130px.png" type="image/png">
 
 </head>
 <body>
-<div id="main" data-keyboard-navigation data-history-navigation>
+    <div id="main"
+        data-navigation-keyboard
+        data-navigation-history>
 
-    <div id="loading" data-loading>
-        <span>&nbsp;</span>
+        <div id="loading" data-loading>
+            <span>&nbsp;</span>
+        </div>
+
+        <div id="login" data-login>
+            <form action="#" method="POST">
+
+                <label for="email">E-mail:</label>
+                <input
+                    id="email"
+                    type="email"
+                    value=""
+                    tabindex="-1"
+                    required>
+
+                <label for="password">Password:</label>
+                <input
+                    id="password"
+                    type="password"
+                    value=""
+                    tabindex="-1"
+                    required>
+
+                <label for="locale">Locale:</label>
+                <div class="select" tabindex="-1">
+                    <select id="locale">
+                        <option value="enUS">English (US)</option>
+                        <option value="enGB">English (UK)</option>
+                        <option value="esLA">Español</option>
+                        <option value="esES">Español (España)</option>
+                        <option value="ptBR">Português (Brasil)</option>
+                        <option value="ptPT">Português (Portugal)</option>
+                        <option value="frFR">Français (France)</option>
+                        <option value="deDE">Deutsch</option>
+                        <option value="itIT">Italiano</option>
+                        <option value="ruRU">Русский</option>
+                        <option value="arME">العربية</option>
+                        <option value="jaJP">Japonês</option>
+                    </select>
+                </div>
+
+                <button type="submit" tabindex="-1">Login</button>
+                <div id="message"></div>
+
+            </form>
+        </div>
+
+        <div id="video" data-video>
+
+            <div class="video-title-bar"></div>
+            <div class="video-extra-bar">
+                <button tabindex="-1"
+                    class="video-extra-play">
+                    <span>Play</span>
+                </button>
+                <button tabindex="-1"
+                    class="video-extra-watched">
+                    <span>Watched</span>
+                </button>
+                <button tabindex="-1"
+                    class="video-extra-episodes">
+                    <span>Episodes</span>
+                </button>
+                <button tabindex="-1"
+                    class="video-extra-close">
+                    <span>Close</span>
+                </button>
+            </div>
+            <div class="video-control-bar">
+
+                <div class="video-progress">
+                    <progress value="0" min="0" max="0"></progress>
+                    <input type="range" value="0" min="0" max="0" step="1">
+                    <div class="tooltip">00:00</div>
+                </div>
+
+                <div class="video-time">
+                    <time class="elapsed">00:00</time>
+                    <span> / </span>
+                    <time class="duration">00:00</time>
+                </div>
+
+            </div>
+
+            <video class="video-element"
+                controls preload="metadata"></video>
+
+        </div>
+
+        <div id="menu" data-menu>
+
+            <div class="links">
+                <div
+                    class="menu-link menu-series active"
+                    data-content="series"
+                    tabindex="-1">Series</div>
+                <div
+                    class="menu-link menu-queue"
+                    data-content="queue"
+                    tabindex="-1">Queue</div>
+                <div
+                    class="menu-link menu-history"
+                    data-content="history"
+                    tabindex="-1">History</div>
+            </div>
+
+            <div class="account">
+                <div class="account-name">&nbsp;</div>
+                <div class="account-logout"
+                    tabindex="-1">Logout</div>
+            </div>
+
+        </div>
+
+        <div id="content"></div>
+
     </div>
 
-    <div id="login" data-login>
-        <form action="#" method="POST">
+    <template id="queue">
+        <h1>Queue</h1>
+        <div class="list-items">
+            {QUEUE_ITEMS}
+        </div>
+    </template>
 
-            <label for="email">E-mail:</label>
-            <input
-                id="email"
-                type="email"
-                value=""
-                tabindex="-1"
-                required>
+    <template id="queue-item">
+        <div class="list-item queue-item"
+            tabindex="-1"
+            data-episode-item
+            data-episode-id="{EPISODE_ID}"
+            data-episode-number="{EPISODE_NUMBER}"
+            data-episode-name="{EPISODE_NAME}"
+            data-episode-duration="{EPISODE_DURATION}"
+            data-episode-playhead="{EPISODE_PLAYHEAD}"
+            data-episode-premium="{EPISODE_PREMIUM}"
+            data-serie-id="{SERIE_ID}"
+            data-serie-name="{SERIE_NAME}">
+            <div class="list-item-image">
+                <img src="{EPISODE_IMAGE}" />
+                <div class="list-item-progress hidden">&nbsp;</div>
+                <div class="list-item-premium hidden">&nbsp;</div>
+            </div>
+            <div class="list-item-info">
+                <h2>{SERIE_NAME}</h2>
+                <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
+            </div>
+        </div>
+    </template>
 
-            <label for="password">Password:</label>
-            <input
-                id="password"
-                type="password"
-                value=""
-                tabindex="-1"
-                required>
+    <template id="history">
+        <h1>History</h1>
+        <div class="list-items">
+            {HISTORY_ITEMS}
+        </div>
+    </template>
 
-            <label for="locale">Locale:</label>
+    <template id="history-item">
+        <div class="list-item history-item"
+            tabindex="-1"
+            data-episode-item
+            data-episode-id="{EPISODE_ID}"
+            data-episode-number="{EPISODE_NUMBER}"
+            data-episode-name="{EPISODE_NAME}"
+            data-episode-duration="{EPISODE_DURATION}"
+            data-episode-playhead="{EPISODE_PLAYHEAD}"
+            data-episode-premium="{EPISODE_PREMIUM}"
+            data-serie-id="{SERIE_ID}"
+            data-serie-name="{SERIE_NAME}">
+                <div class="list-item-image">
+                    <img src="{EPISODE_IMAGE}" />
+                    <div class="list-item-progress hidden">&nbsp;</div>
+                    <div class="list-item-premium hidden">&nbsp;</div>
+                </div>
+                <div class="list-item-info">
+                <h2>{SERIE_NAME}</h2>
+                <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
+            </div>
+        </div>
+    </template>
+
+    <template id="series">
+        <h1>Series</h1>
+        <div class="list-filters">
             <div class="select" tabindex="-1">
-                <select id="locale">
-                    <option value="enUS">English (US)</option>
-                    <option value="enGB">English (UK)</option>
-                    <option value="esLA">Español</option>
-                    <option value="esES">Español (España)</option>
-                    <option value="ptBR">Português (Brasil)</option>
-                    <option value="ptPT">Português (Portugal)</option>
-                    <option value="frFR">Français (France)</option>
-                    <option value="deDE">Deutsch</option>
-                    <option value="itIT">Italiano</option>
-                    <option value="ruRU">Русский</option>
-                    <option value="arME">العربية</option>
-                    <option value="jaJP">Japonês</option>
+                <select id="filter">
+                    {SERIES_FILTER_OPTIONS}
+                </select>
+            </div>
+            <input type="text"
+                id="search"
+                value="{SERIES_SEARCH}"
+                placeholder="Search"
+                tabindex="-1">
+        </div>
+        <div class="list-items">
+            {SERIES_ITEMS}
+        </div>
+    </template>
+
+    <template id="serie-item">
+        <div class="list-item serie-item"
+            tabindex="-1"
+            data-serie-item
+            data-serie-id="{SERIE_ID}"
+            data-serie-name="{SERIE_NAME}"
+            data-serie-in-queue="{SERIE_IN_QUEUE}">
+            <div class="list-item-image">
+                <img src="{SERIE_IMAGE}" width="640" height="960" />
+            </div>
+            <div class="list-item-info">
+                <h2>{SERIE_NAME}</h2>
+                <!-- <p>{SERIE_DESCRIPTION}</p> -->
+            </div>
+        </div>
+    </template>
+
+    <template id="episodes-mount">
+        <div class="inside"
+            data-episodes
+            data-serie-id="{SERIE_ID}"
+            data-serie-name="{SERIE_NAME}"
+            data-serie-in-queue="{SERIE_IN_QUEUE}">
+        </div>
+    </template>
+
+    <template id="episodes">
+        <h1>
+            <small>Serie /</small><br/>
+            {SERIE_NAME} - Episodes
+        </h1>
+        <div class="list-filters">
+            <div class="select" tabindex="-1">
+                <select id="sort">
+                    {EPISODES_SORT_OPTIONS}
                 </select>
             </div>
 
-            <button type="submit" tabindex="-1">Login</button>
-            <div id="message"></div>
-
-        </form>
-    </div>
-
-    <div id="video" data-video>
-
-        <div class="video-title-bar"></div>
-        <div class="video-extra-bar">
-            <button tabindex="-1"
-                class="video-extra-play">
-                <span>Play</span>
-            </button>
-            <button tabindex="-1"
-                class="video-extra-watched">
-                <span>Watched</span>
-            </button>
-            <button tabindex="-1"
-                class="video-extra-episodes">
-                <span>Episodes</span>
-            </button>
-            <button tabindex="-1"
-                class="video-extra-close">
-                <span>Close</span>
-            </button>
+            <button
+                class="add-to-queue {ADD_QUEUE_CLASS}"
+                tabindex="-1">Add To Queue</button>
+            <button
+                class="remove-from-queue {REMOVE_QUEUE_CLASS}"
+                tabindex="-1">Remove From Queue</button>
         </div>
-        <div class="video-control-bar">
+        <div class="list-items">
+            {EPISODES_ITEMS}
+        </div>
+    </template>
 
-            <div class="video-progress">
-                <progress value="0" min="0"></progress>
-                <input type="range" value="0" min="0" step="1">
-                <div class="tooltip">00:00</div>
+    <template id="episode-item">
+        <div class="list-item episode-item" tabindex="-1"
+            data-episode-item
+            data-episode-id="{EPISODE_ID}"
+            data-episode-number="{EPISODE_NUMBER}"
+            data-episode-name="{EPISODE_NAME}"
+            data-episode-duration="{EPISODE_DURATION}"
+            data-episode-playhead="{EPISODE_PLAYHEAD}"
+            data-episode-premium="{EPISODE_PREMIUM}"
+            data-serie-id="{SERIE_ID}"
+            data-serie-name="{SERIE_NAME}">
+            <div class="list-item-image">
+                <img src="{EPISODE_IMAGE}" />
+                <div class="list-item-progress hidden">&nbsp;</div>
+                <div class="list-item-premium hidden">&nbsp;</div>
             </div>
-
-            <div class="video-time">
-                <time class="elapsed">00:00</time>
-                <span> / </span>
-                <time class="duration">00:00</time>
+            <div class="list-item-info">
+                <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
             </div>
-
         </div>
+    </template>
 
-        <video class="video-element"
-            controls preload="metadata"></video>
+    <script src="./assets/js/components/episode.item.js"></script>
+    <script src="./assets/js/components/episodes.js"></script>
+    <script src="./assets/js/components/history.js"></script>
+    <script src="./assets/js/components/loading.js"></script>
+    <script src="./assets/js/components/login.js"></script>
+    <script src="./assets/js/components/menu.js"></script>
+    <script src="./assets/js/components/navigation.history.js"></script>
+    <script src="./assets/js/components/navigation.keyboard.js"></script>
+    <script src="./assets/js/components/queue.js"></script>
+    <script src="./assets/js/components/serie.item.js"></script>
+    <script src="./assets/js/components/series.js"></script>
+    <script src="./assets/js/components/video.js"></script>
 
-    </div>
+    <script>
+    window.addEventListener('load', function(){
+        V.mount(document.body);
+    }, false);
+    </script>
 
-    <div id="menu" data-menu>
-
-        <div class="links">
-            <div
-                class="menu-link menu-series active"
-                data-content="series"
-                tabindex="-1">Series</div>
-            <div
-                class="menu-link menu-queue"
-                data-content="queue"
-                tabindex="-1">Queue</div>
-            <div
-                class="menu-link menu-history"
-                data-content="history"
-                tabindex="-1">History</div>
-        </div>
-
-        <div class="account">
-            <div class="account-name">&nbsp;</div>
-            <div class="account-logout"
-                tabindex="-1">Logout</div>
-        </div>
-
-    </div>
-
-    <div id="content"></div>
-
-</div>
 </body>

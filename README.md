@@ -30,9 +30,12 @@ Support me for future versions for Samsung, Android TV, Chromecast and Others.
 
 ## TODO
 
-- Finish controller and keyboard navigation
 - Scrolling / pagination
-- Mark as watched
-- Add to queue
-- Remove from queue
 - Translations
+- Full Screen Mode
+- Picture In Picture Mode
+
+## Bugs
+
+- Select dropdown does not trigger with controller
+- .hover and :hover css mixing after mouse enabled
