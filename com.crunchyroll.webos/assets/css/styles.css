@@ -409,6 +409,9 @@ progress::-moz-progress-bar {
 #video .video-extra-bar button.video-extra-close span{
     background-image: url(../icons/exit.svg);
 }
+#video .video-extra-bar button.video-extra-fullscreen span{
+    background-image: url(../icons/fullscreen.svg);
+}
 
 body.video-active #menu,
 body.video-active #content{

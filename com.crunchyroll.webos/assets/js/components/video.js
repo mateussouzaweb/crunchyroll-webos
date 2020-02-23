@@ -118,6 +118,11 @@ V.component('[data-video]', {
             self.hideVideo();
         });
 
+        self.on('click', '.video-extra-fullscreen', function(e){
+            e.preventDefault();
+            self.toggleFullScreen();
+        });
+
         var controlsTimeout = null;
         V.on(element, 'mouseenter mousemove', function(e){
 
@@ -463,6 +468,23 @@ V.component('[data-video]', {
         video.currentTime = skipTo;
         seek.value = skipTo;
         progress.value = skipTo;
+
+    },
+
+    /**
+     * Toggle full screen mode
+     * @return {void}
+     */
+    toggleFullScreen: function(){
+
+        var self = this;
+        var element = self.element;
+
+        if( document.fullscreenElement ){
+            document.exitFullscreen();
+        } else {
+            element.requestFullscreen();
+        }
 
     },
 
