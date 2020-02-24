@@ -50,8 +50,9 @@ V.component('[data-menu]', {
         });
 
         self.on('click', '.account-logout', function(e){
-            window.makeLogout();
-            window.resetHistory();
+            window.makeLogout().then(function(){
+                window.resetHistory();
+            });
         });
 
         self.updateMenu();
