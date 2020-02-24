@@ -136,22 +136,41 @@ V.component('[data-navigation-keyboard]', {
             self.lastKey = null;
             self.lastKeyTime = null;
             self.activeElement = null;
-            self.cursorVisible = false;
+            self.usingMouse = false;
 
-        V.on(document, 'cursorStateChange', function(e){
+        var handleMouse = function(){
 
-            self.cursorVisible = e.detail.visibility;
+            if( self.usingMouse ){
+                document.body.classList.add('mouse');
+            }else{
+                document.body.classList.remove('mouse');
+            }
 
             if( !self.activeElement ){
                 return;
             }
 
-            if( self.cursorVisible ){
+            if( self.usingMouse ){
                 self.activeElement.classList.remove('hover');
             }else{
                 self.activeElement.classList.add('hover');
             }
 
+        }
+
+        V.on(document, 'cursorStateChange', function(e){
+            self.usingMouse = e.detail.visibility;
+            handleMouse();
+        });
+
+        V.on(document, 'mouseenter mousemove', function(e){
+            self.usingMouse = true;
+            handleMouse();
+        });
+
+        V.on(document, 'mouseleave', function(e){
+            self.usingMouse = false;
+            handleMouse();
         });
 
         resolve(this);

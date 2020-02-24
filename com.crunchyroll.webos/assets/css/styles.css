@@ -41,8 +41,8 @@ input{
     border-radius: 5px;
     transition: border 0.2s ease-in-out;
 }
+.mouse input:hover,
 input.hover,
-input:hover,
 input:focus,
 input:active {
     border-color: #F37521;
@@ -63,8 +63,8 @@ button{
     padding: 0 0.83rem;
     width: 100%;
 }
+.mouse button:hover,
 button.hover,
-button:hover,
 button:focus,
 button:active {
     background: #F37521;
@@ -124,8 +124,8 @@ button:active {
 .select select::-ms-expand {
     display: none;
 }
+.mouse .select:hover,
 .select.hover,
-.select:hover,
 .select:focus,
 .select:active{
     border-color: #F37521;
@@ -226,7 +226,7 @@ progress::-moz-progress-bar {
     position: fixed;
     text-align: center;
     transition: background 0.25s ease-in-out;
-    top: -100vw;
+    top: -100vh;
     right: 0;
     width: 100vw;
     z-index: 999;
@@ -319,7 +319,7 @@ progress::-moz-progress-bar {
     position: absolute;
     top: -55px;
 }
-#video .video-progress:hover .tooltip {
+.mouse #video .video-progress:hover .tooltip {
     display: block;
 }
 #video .video-time{
@@ -391,8 +391,8 @@ progress::-moz-progress-bar {
     overflow: hidden;
     text-indent: -9999em;
 }
+.mouse #video .video-extra-bar button:hover,
 #video .video-extra-bar button.hover,
-#video .video-extra-bar button:hover,
 #video .video-extra-bar button:focus,
 #video .video-extra-bar button:active{
     border-color: #ffc095;
@@ -454,12 +454,12 @@ body.video-active #content{
 #login button{
     margin-bottom: 1.6rem;
 }
+.mouse #login input:hover,
+.mouse #login .select:hover,
 #login input.hover,
-#login input:hover,
 #login input:focus,
 #login input:active,
 #login .select.hover,
-#login .select:hover,
 #login .select:focus,
 #login .select:active{
     border-color: #000000;
@@ -467,8 +467,8 @@ body.video-active #content{
 #login .select:focus-within{
     border-color: #000000;
 }
+.mouse #login button:hover,
 #login button.hover,
-#login button:hover,
 #login button:focus,
 #login button:active{
     background: #5d2500;
@@ -505,8 +505,8 @@ body.video-active #content{
     padding: 10px 2.2rem 10px 0.83rem;
     transition: all 0.2s ease-in-out;
 }
-#menu .menu-link.hover,
-#menu .menu-link:hover{
+.mouse #menu .menu-link:hover,
+#menu .menu-link.hover{
     color: #F37521;
     background: #FFF;
 }
@@ -537,8 +537,8 @@ body.video-active #content{
     padding: 10px 0.83rem;
     transition: all 0.2s ease-in-out;
 }
-#menu .account-logout.hover,
-#menu .account-logout:hover{
+.mouse #menu .account-logout:hover,
+#menu .account-logout.hover{
     color: #e89f6d;
 }
 
@@ -572,12 +572,12 @@ body.video-active #content{
     border-color: #FFF;
     color: #FFF;
 }
+.mouse #content .list-filters input:hover,
+.mouse #content .list-filters .select:hover,
 #content .list-filters input.hover,
-#content .list-filters input:hover,
 #content .list-filters input:focus,
 #content .list-filters input:active,
 #content .list-filters .select.hover,
-#content .list-filters .select:hover,
 #content .list-filters .select:focus,
 #content .list-filters .select:active{
     border-color: #F37521;
@@ -612,6 +612,9 @@ body.video-active #content{
     margin: 0 -0.83rem;
 }
 #content .list-item{
+    flex: 0 1 12.5rem;
+}
+#content .list-item-inside{
     background: #000;
     border: 1px solid #FFF;
     border-top-width: 2px;
@@ -620,13 +623,12 @@ body.video-active #content{
     border-bottom-width: 10px;
     border-radius: 5px 5px 2px 2px;
     cursor: pointer;
-    flex: 0 1 12.5rem;
     margin: 0.83rem;
     position: relative;
     transition: all 0.2s ease-in-out;
 }
-#content .list-item.hover,
-#content .list-item:hover{
+.mouse #content .list-item:hover .list-item-inside,
+#content .list-item.hover .list-item-inside{
     border-color: #F37521;
 }
 #content .list-item-image {
@@ -673,8 +675,8 @@ body.video-active #content{
     overflow: hidden;
     transition: all 0.2s ease-in-out;
 }
-#content .list-item.hover .list-item-info,
-#content .list-item:hover .list-item-info{
+.mouse #content .list-item:hover .list-item-info,
+#content .list-item.hover .list-item-info{
     background: #000;
 }
 #content .list-item-info h2,
@@ -733,7 +735,13 @@ body.video-active #content{
 }
 
 @media screen and (max-width: 640px){
+
     html, body{
         font-size: 14px;
     }
+
+    #content .list-item{
+        flex-basis: 50%;
+    }
+
 }

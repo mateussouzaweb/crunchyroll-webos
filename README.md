@@ -33,8 +33,8 @@ Support me for future versions for Samsung, Android TV, Chromecast and Others.
 - Scrolling / pagination
 - Translations
 - Picture In Picture Mode
+- Touch support
 
 ## Bugs
 
 - Select dropdown does not trigger with controller
-- .hover and :hover css mixing after mouse enabled
