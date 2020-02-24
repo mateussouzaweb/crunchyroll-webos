@@ -33,6 +33,7 @@ V.component('[data-navigation-keyboard]', {
      */
     findClosestOnParents: function(direction, element, parent){
 
+        var self = this;
         var items = [];
         var closest = null;
 
@@ -111,10 +112,11 @@ V.component('[data-navigation-keyboard]', {
 
     /**
      * Find the next TAB stop element respecting only [tabindex]
+     * @param {String} direction
      * @param {Element} element
      * @return {Element}
      */
-    findNextTabElement: function(element){
+    findTabStopElement: function(direction, element){
 
         var items = Array.from( V.$$('[tabindex]') );
         var index;
@@ -126,8 +128,9 @@ V.component('[data-navigation-keyboard]', {
         });
 
         index = items.indexOf(element);
+        index = (direction == 'next') ? index + 1 : index - 1;
 
-        return items[index + 1] || items[0];
+        return items[index] || items[0];
     },
 
     /**
@@ -145,24 +148,12 @@ V.component('[data-navigation-keyboard]', {
         // Events
         V.on(window, 'keydown', function(e){
             if( _keys.indexOf(e.keyCode) !== -1
-                && self.handleKeyPress(e.keyCode) ){
+                && self.handleKeyPress(e) ){
                 e.preventDefault();
             }
         });
 
-        // V.on(window, 'blur', function(e){
-        //     self.handleKeyPress(keys.PAUSE);
-        // });
-
-        // V.on(window, 'focus', function(e){
-        //     self.handleKeyPress(keys.PLAY);
-        // });
-
         // Public
-        window.handleKeyPress = function(key){
-            return self.handleKeyPress(key);
-        };
-
         window.setActiveElement = function(element){
             return self.setActiveElement(element);
         };
@@ -249,10 +240,10 @@ V.component('[data-navigation-keyboard]', {
 
     /**
      * Handle key press
-     * @param {Number} key
+     * @param {Event} event
      * @return {Boolean}
      */
-    handleKeyPress: function(key){
+    handleKeyPress: function(event){
 
         var self = this;
         var body = document.body;
@@ -260,12 +251,12 @@ V.component('[data-navigation-keyboard]', {
         var result;
 
         if( videoActive ){
-            result = self.handleKeyOnVideo(key);
+            result = self.handleKeyOnVideo(event);
         }else{
-            result = self.handleKeyNavigation(key);
+            result = self.handleKeyNavigation(event);
         }
 
-        self.lastKey = key;
+        self.lastKey = e.keyCode;
         self.lastKeyTime = new Date();
 
         return result;
@@ -273,14 +264,15 @@ V.component('[data-navigation-keyboard]', {
 
     /**
      * Handle key press for navigation
-     * @param {Number} key
+     * @param {Event} event
      * @return {Boolean}
      */
-    handleKeyNavigation: function(key){
+    handleKeyNavigation: function(event){
 
         var self = this;
         var keys = self.keys;
         var current = self.activeElement;
+        var key = event.keyCode;
 
         if( !current ){
             return;
@@ -310,7 +302,10 @@ V.component('[data-navigation-keyboard]', {
         // TAB
         }else if( key == keys.TAB ){
 
-            var next = self.findNextTabElement(current);
+            var next = self.findTabStopElement(
+                (event.shiftKey) ? 'prev' : 'next',
+                current
+            );
 
             if( next != null ){
                 self.setActiveElement(next);
@@ -339,13 +334,14 @@ V.component('[data-navigation-keyboard]', {
 
     /**
      * Handle key press specific to video
-     * @param {Number} key
+     * @param {Event} event
      * @return {Boolean}
      */
-    handleKeyOnVideo: function(key){
+    handleKeyOnVideo: function(event){
 
         var self = this;
         var keys = self.keys;
+        var key = event.keyCode;
 
         // STOP
         if( key == keys.STOP ){
