@@ -443,7 +443,7 @@ body.video-active #content{
     background: url(../img/512px.png) no-repeat center center;
     background-size: 8.33rem auto;
     background-position: top center;
-    padding-top: 10rem;
+    padding: 10rem 0.83rem 0.83rem;
     flex: 1;
     margin: auto;
     text-align: center;
