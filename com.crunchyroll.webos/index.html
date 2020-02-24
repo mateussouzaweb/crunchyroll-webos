@@ -35,7 +35,7 @@
                     id="email"
                     type="email"
                     value=""
-                    tabindex="-1"
+                    tabindex="0"
                     required>
 
                 <label for="password">Password:</label>
@@ -43,11 +43,11 @@
                     id="password"
                     type="password"
                     value=""
-                    tabindex="-1"
+                    tabindex="0"
                     required>
 
                 <label for="locale">Locale:</label>
-                <div class="select" tabindex="-1">
+                <div class="select" tabindex="0">
                     <select id="locale">
                         <option value="enUS">English (US)</option>
                         <option value="enGB">English (UK)</option>
@@ -64,7 +64,7 @@
                     </select>
                 </div>
 
-                <button type="submit" tabindex="-1">Login</button>
+                <button type="submit" tabindex="0">Login</button>
                 <div id="message"></div>
 
             </form>
@@ -74,23 +74,23 @@
 
             <div class="video-title-bar"></div>
             <div class="video-extra-bar">
-                <button tabindex="-1"
+                <button tabindex="0"
                     class="video-extra-play">
                     <span>Play</span>
                 </button>
-                <button tabindex="-1"
+                <button tabindex="0"
                     class="video-extra-fullscreen">
                     <span>FullScreen</span>
                 </button>
-                <button tabindex="-1"
+                <button tabindex="0"
                     class="video-extra-watched">
                     <span>Watched</span>
                 </button>
-                <button tabindex="-1"
+                <button tabindex="0"
                     class="video-extra-episodes">
                     <span>Episodes</span>
                 </button>
-                <button tabindex="-1"
+                <button tabindex="0"
                     class="video-extra-close">
                     <span>Close</span>
                 </button>
@@ -122,21 +122,21 @@
                 <div
                     class="menu-link menu-series active"
                     data-content="series"
-                    tabindex="-1">Series</div>
+                    tabindex="0">Series</div>
                 <div
                     class="menu-link menu-queue"
                     data-content="queue"
-                    tabindex="-1">Queue</div>
+                    tabindex="0">Queue</div>
                 <div
                     class="menu-link menu-history"
                     data-content="history"
-                    tabindex="-1">History</div>
+                    tabindex="0">History</div>
             </div>
 
             <div class="account">
                 <div class="account-name">&nbsp;</div>
                 <div class="account-logout"
-                    tabindex="-1">Logout</div>
+                    tabindex="0">Logout</div>
             </div>
 
         </div>
@@ -154,7 +154,7 @@
 
     <template id="queue-item">
         <div class="list-item queue-item"
-            tabindex="-1"
+            tabindex="0"
             data-episode-item
             data-episode-id="{EPISODE_ID}"
             data-episode-number="{EPISODE_NUMBER}"
@@ -188,7 +188,7 @@
 
     <template id="history-item">
         <div class="list-item history-item"
-            tabindex="-1"
+            tabindex="0"
             data-episode-item
             data-episode-id="{EPISODE_ID}"
             data-episode-number="{EPISODE_NUMBER}"
@@ -216,7 +216,7 @@
     <template id="series">
         <h1>Series</h1>
         <div class="list-filters">
-            <div class="select" tabindex="-1">
+            <div class="select" tabindex="0">
                 <select id="filter">
                     {SERIES_FILTER_OPTIONS}
                 </select>
@@ -225,7 +225,7 @@
                 id="search"
                 value="{SERIES_SEARCH}"
                 placeholder="Search"
-                tabindex="-1">
+                tabindex="0">
         </div>
         <div class="list-items">
             {SERIES_ITEMS}
@@ -234,7 +234,7 @@
 
     <template id="serie-item">
         <div class="list-item serie-item"
-            tabindex="-1"
+            tabindex="0"
             data-serie-item
             data-serie-id="{SERIE_ID}"
             data-serie-name="{SERIE_NAME}"
@@ -266,7 +266,7 @@
             {SERIE_NAME} - Episodes
         </h1>
         <div class="list-filters">
-            <div class="select" tabindex="-1">
+            <div class="select" tabindex="0">
                 <select id="sort">
                     {EPISODES_SORT_OPTIONS}
                 </select>
@@ -274,10 +274,10 @@
 
             <button
                 class="add-to-queue {ADD_QUEUE_CLASS}"
-                tabindex="-1">Add To Queue</button>
+                tabindex="0">Add To Queue</button>
             <button
                 class="remove-from-queue {REMOVE_QUEUE_CLASS}"
-                tabindex="-1">Remove From Queue</button>
+                tabindex="0">Remove From Queue</button>
         </div>
         <div class="list-items">
             {EPISODES_ITEMS}
@@ -285,7 +285,7 @@
     </template>
 
     <template id="episode-item">
-        <div class="list-item episode-item" tabindex="-1"
+        <div class="list-item episode-item" tabindex="0"
             data-episode-item
             data-episode-id="{EPISODE_ID}"
             data-episode-number="{EPISODE_NUMBER}"

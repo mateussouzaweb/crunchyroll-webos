@@ -17,7 +17,32 @@ V.component('[data-navigation-keyboard]', {
         LEFT: 37,
         UP: 38,
         DOWN: 40,
-        INFO: 457
+        INFO: 457,
+        TAB: 9,
+        SPACE: 32,
+        BACKSPACE: 8,
+        DELETE: 46
+    },
+
+    /**
+     * Find on parent elements the closest available navigable element
+     * @param {String} direction
+     * @param {Element} element
+     * @param {Element} parent
+     * @return {mixed}
+     */
+    findClosestOnParents: function(direction, element, parent){
+
+        var items = [];
+        var closest = null;
+
+        while( parent && closest == null ){
+            items = Array.from( V.$$('[tabindex]', parent) );
+            closest = self.findClosest(direction, element, items);
+            parent = parent.parentElement;
+        }
+
+        return closest;
     },
 
     /**
@@ -25,6 +50,7 @@ V.component('[data-navigation-keyboard]', {
      * @param {String} direction
      * @param {Element} element
      * @param {Array} items
+     * @return {mixed}
      */
     findClosest: function(direction, element, items){
 
@@ -81,6 +107,27 @@ V.component('[data-navigation-keyboard]', {
         });
 
         return (matches.length) ? matches[0].element : null;
+    },
+
+    /**
+     * Find the next TAB stop element respecting only [tabindex]
+     * @param {Element} element
+     * @return {Element}
+     */
+    findNextTabElement: function(element){
+
+        var items = Array.from( V.$$('[tabindex]') );
+        var index;
+
+        items = items.filter(function(item){
+            return item.offsetWidth > 0
+                  || item.offsetHeight > 0
+                  || item === element;
+        });
+
+        index = items.indexOf(element);
+
+        return items[index + 1] || items[0];
     },
 
     /**
@@ -245,8 +292,10 @@ V.component('[data-navigation-keyboard]', {
             directions[ keys.UP ] = 'up';
             directions[ keys.DOWN ] = 'down';
 
-        // OK / INFO
-        if( key == keys.OK || key == keys.INFO ){
+        // OK / INFO / SPACE
+        if( key == keys.OK
+            || key == keys.INFO
+            || key == keys.SPACE ){
 
             if( current && current.classList.contains('select') ){
                 current.firstChild.click();
@@ -258,18 +307,25 @@ V.component('[data-navigation-keyboard]', {
 
             return true;
 
+        // TAB
+        }else if( key == keys.TAB ){
+
+            var next = self.findNextTabElement(current);
+
+            if( next != null ){
+                self.setActiveElement(next);
+            }
+
+            return true;
+
         // RIGHT / LEFT / UP / DOWN
         }else if( directions[key] ){
 
-            var parent = current.parentElement;
-            var items = [];
-            var closest = null;
-
-            while( parent && closest == null ){
-                items = Array.from( V.$$('[tabindex]', parent) );
-                closest = self.findClosest(directions[key], current, items);
-                parent = parent.parentElement;
-            }
+            var closest = self.findClosestOnParents(
+                directions[key],
+                current,
+                current.parentElement
+            );
 
             if( closest != null ){
                 self.setActiveElement(closest);
@@ -306,8 +362,9 @@ V.component('[data-navigation-keyboard]', {
             window.playVideo();
             return true;
 
-        // OK
-        }else if( key == keys.OK ){
+        // OK / SPACE
+        }else if( key == keys.OK
+                  || key == keys.SPACE ){
             window.toggleVideo();
             return true;
 
@@ -332,23 +389,25 @@ V.component('[data-navigation-keyboard]', {
             return true;
 
         // BACK
-        }else if( key == keys.BACK ){
+        }else if( key == keys.BACK
+                  || key == keys.BACKSPACE
+                  || key == keys.DELETE ){
             window.pauseVideo();
             window.hideVideo();
             return true;
 
         // UP (behavior as left navigation)
         // DOWN (behavior as right navigation)
-        }else if( key == keys.UP || key == keys.DOWN ){
+        }else if( key == keys.UP
+                  || key == keys.DOWN ){
 
             var current = self.activeElement;
-            var parent = V.$('.vjs-extra-action-bar');
-            var items = Array.from( V.$$('[tabindex]', parent) );
+            var parent = self.element;
 
-            var closest = self.findClosest(
+            var closest = self.findClosestOnParents(
                 (key == keys.UP) ? 'left' : 'right',
                 current,
-                items
+                parent
             );
 
             if( closest != null ){
