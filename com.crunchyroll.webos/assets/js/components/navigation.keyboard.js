@@ -256,7 +256,7 @@ V.component('[data-navigation-keyboard]', {
             result = self.handleKeyNavigation(event);
         }
 
-        self.lastKey = e.keyCode;
+        self.lastKey = event.keyCode;
         self.lastKeyTime = new Date();
 
         return result;
