@@ -142,11 +142,11 @@ V.component('[data-video]', {
             element.classList.remove('show-controls');
         });
 
-        self.on('mousemove', 'input[type="range"]', function(e){
+        self.on('mousemove touchmove', 'input[type="range"]', function(e){
             self.updateSeekTooltip(e);
         });
 
-        self.on('input', 'input[type="range"]', function(e){
+        self.on('click input', 'input[type="range"]', function(e){
             self.skipAhead(e.target.dataset.seek);
         });
 
@@ -459,6 +459,10 @@ V.component('[data-video]', {
      */
     skipAhead: function(skipTo){
 
+        if( !skipTo ){
+            return;
+        }
+
         var self = this;
         var element = self.element;
         var video = self.video;
@@ -496,9 +500,17 @@ V.component('[data-video]', {
         var element = self.element;
         var tooltip = V.$('.tooltip', element);
         var seek = V.$('input[type="range"]', element);
+        var bcr = event.target.getBoundingClientRect();
+        var offsetX = event.offsetX;
+        var pageX = event.pageX;
+
+        if( event instanceof TouchEvent ){
+            offsetX = event.targetTouches[0].clientX - bcr.x;
+            pageX = event.targetTouches[0].pageX;
+        }
 
         var skipTo = Math.round(
-            (event.offsetX / event.target.clientWidth)
+            (offsetX / event.target.clientWidth)
             * parseInt(event.target.getAttribute('max'), 10)
         );
 
@@ -506,7 +518,7 @@ V.component('[data-video]', {
 
         seek.dataset.seek = skipTo;
         tooltip.textContent = format.m + ':' + format.s;
-        tooltip.style.left = event.pageX + 'px';
+        tooltip.style.left = pageX + 'px';
 
     },
 
