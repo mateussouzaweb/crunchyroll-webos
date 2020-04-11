@@ -133,6 +133,11 @@ V.component('[data-queue]', {
 
         var serie = data.series;
         var episode = data.most_likely_media;
+
+        if( !episode ){
+            return '';
+        }
+
         var playhead = episode.playhead;
         var duration = episode.duration;
 
