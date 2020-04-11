@@ -477,13 +477,10 @@ V.component('[data-video]', {
      */
     toggleFullScreen: function(){
 
-        var self = this;
-        var element = self.element;
-
         if( document.fullscreenElement ){
             document.exitFullscreen();
         } else {
-            element.requestFullscreen();
+            document.body.requestFullscreen();
         }
 
     },
