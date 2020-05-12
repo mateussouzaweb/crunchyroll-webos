@@ -3,10 +3,9 @@ V.component('[data-loading]', {
     /**
      * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    constructor: function(resolve, reject){
+    constructor: function(resolve){
 
         var self = this;
 
@@ -25,10 +24,9 @@ V.component('[data-loading]', {
     /**
      * On render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    onRender: function(resolve){
 
         var self = this;
 

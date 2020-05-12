@@ -1,12 +1,38 @@
 V.component('[data-queue]', {
 
     /**
-     * After render
+     * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    afterRender: async function(resolve, reject){
+    constructor: function(resolve){
+
+        // Route
+        V.router.add({
+            id: 'queue',
+            path: '/queue',
+            title: 'Queue',
+            component: this
+        });
+
+        resolve(this);
+
+    },
+
+    /**
+     * Retrieve router HTML
+     * @return {String}
+     */
+    getHTML: function(){
+        return '<div data-queue></div>';
+    },
+
+    /**
+     * After render
+     * @param {Function} resolve
+     * @return {void}
+     */
+    afterRender: async function(resolve){
         await this.listQueue();
         resolve(this);
     },
@@ -15,7 +41,7 @@ V.component('[data-queue]', {
      * List queue
      * @return {Promise}
      */
-    listQueue: function(){
+    listQueue: async function(){
 
         var data = window.getSessionData();
         var self = this;
@@ -87,7 +113,6 @@ V.component('[data-queue]', {
             'series.year'
         ];
 
-        window.pushHistory('queue');
         window.showLoading();
 
         return Api.request('POST', '/queue', {
@@ -99,9 +124,7 @@ V.component('[data-queue]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.makeLogin().then(function(){
-                    return self.listQueue();
-                });
+                    return window.tryLogin().then(self.listQueue);
             }
 
             var items = response.data.map(function(item){
@@ -119,7 +142,7 @@ V.component('[data-queue]', {
             window.setActiveElement( V.$('#content .list-item') );
 
         })
-        .catch(function(error){
+        .catch(function(){
             window.hideLoading();
         });
     },
@@ -140,11 +163,11 @@ V.component('[data-queue]', {
 
         var playhead = episode.playhead;
         var duration = episode.duration;
+        var url = '/serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
 
         var html = template('queue-item')
             .replace('{SERIE_ID}', serie.series_id)
             .replace('{SERIE_NAME}', serie.name)
-            .replace('{SERIE_IN_QUEUE}', (serie.in_queue) ? 1 : 0)
             .replace('{EPISODE_ID}', episode.media_id)
             .replace('{EPISODE_NAME}', episode.name)
             .replace('{EPISODE_NUMBER}', episode.episode_number)
@@ -152,6 +175,7 @@ V.component('[data-queue]', {
             .replace('{EPISODE_DURATION}', duration)
             .replace('{EPISODE_PLAYHEAD}', playhead)
             .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
+            .replace('{EPISODE_URL}', url)
             .render();
 
         return html;

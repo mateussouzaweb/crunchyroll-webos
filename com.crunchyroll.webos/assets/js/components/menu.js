@@ -3,10 +3,9 @@ V.component('[data-menu]', {
     /**
      * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    constructor: function(resolve, reject){
+    constructor: function(resolve){
 
         var self = this;
 
@@ -20,48 +19,34 @@ V.component('[data-menu]', {
     },
 
     /**
-     * On render
+     * After render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    afterRender: function(resolve){
 
         var self = this;
         var element = this.element;
-        var content = V.$('#content');
 
-        self.on('click', '.menu-link', function(e){
+        V.router.afterChange(function(resolve){
 
-            e.preventDefault();
+            if( V.$('.menu-link.active', element) ){
+                V.$('.menu-link.active', element).classList.remove('active');
+            }
 
-            V.$('.menu-link.active', element).classList.remove('active');
-            this.classList.add('active');
+            if( this.next.id ){
+                var item = V.$('.menu-' + this.next.id, element);
+                if( item ){
+                    item.classList.add('active');
+                }
+            }
 
-            var html = '<div class="inside" ';
-                html += 'data-' + this.dataset.content + '>';
-                html += '</div>';
-
-            content.innerHTML = html;
-            V.mount(content);
-
-            window.setActiveElement(this);
-
-        });
-
-        self.on('click', '.account-logout', function(e){
-            window.makeLogout().then(function(){
-                window.resetHistory();
-            });
+            resolve(this);
         });
 
         self.updateMenu();
-
-        if( window.isLoggedIn() ){
-            V.trigger('.menu-link.active', 'click');
-        }
-
         resolve(this);
+
     },
 
     /**

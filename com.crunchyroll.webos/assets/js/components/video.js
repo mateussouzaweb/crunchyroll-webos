@@ -1,42 +1,15 @@
 V.component('[data-video]', {
 
     /**
-     * Format time
-     * @param {Number} time
-     * @return {Object}
-     */
-    formatTime: function(time){
-
-        var result = new Date(time * 1000).toISOString().substr(11, 8);
-        var minutes = result.substr(3, 2);
-        var seconds = result.substr(6, 2);
-
-        return {
-            m: minutes,
-            s: seconds
-        }
-    },
-
-    /**
      * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    constructor: function(resolve, reject){
+    constructor: function(resolve){
 
         var self = this;
 
         // Public
-        window.showVideo = function(){
-            return self.showVideo();
-        };
-        window.hideVideo = function(){
-            return self.hideVideo();
-        };
-        window.loadVideo = function(){
-            return self.loadVideo();
-        };
         window.playVideo = function(){
             return self.playVideo();
         };
@@ -55,29 +28,47 @@ V.component('[data-video]', {
         window.backwardVideo = function(){
             return self.backwardVideo();
         }
-        window.setWatched = function(){
-            return self.setWatched();
-        }
+
+        V.router.add({
+            id: 'video',
+            path: '/serie/:serieId/episode/:episodeId/video',
+            title: 'Episode Video',
+            component: this
+        });
 
         resolve(this);
 
     },
 
     /**
+     * Retrieve router HTML
+     * @return {String}
+     */
+    getHTML: function(){
+        return '<div data-video></div>';
+    },
+
+    /**
      * On render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    onRender: async function(resolve){
 
         var self = this;
         var element = this.element;
+        var html = template('video').render();
+
+        element.innerHTML = html;
+        //await V.mount(element);
+
         var video = V.$('video', element);
             video.controls = false;
 
         self.video = video;
         self.playing = false;
+
+        var serieId = V.router.$active.getParam('serieId');
 
         // Video Events
         V.on(video, 'click', function(e){
@@ -85,11 +76,11 @@ V.component('[data-video]', {
             self.toggleVideo();
         });
 
-        V.on(video, 'loadedmetadata', function(e){
+        V.on(video, 'loadedmetadata', function(){
             self.initializeVideo();
         });
 
-        V.on(video, 'timeupdate', function(e){
+        V.on(video, 'timeupdate', function(){
             self.updateTimeElapsed();
             self.updateProgress();
         });
@@ -109,13 +100,14 @@ V.component('[data-video]', {
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
-            self.listRelatedEpisodes();
+            V.router.redirect('/serie/' + serieId);
         });
 
         self.on('click', '.video-extra-close', function(e){
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
+            V.router.redirect('/home');
         });
 
         self.on('click', '.video-extra-fullscreen', function(e){
@@ -124,7 +116,7 @@ V.component('[data-video]', {
         });
 
         var controlsTimeout = null;
-        V.on(element, 'mouseenter mousemove', function(e){
+        V.on(element, 'mouseenter mousemove', function(){
 
             element.classList.add('show-controls');
 
@@ -138,7 +130,7 @@ V.component('[data-video]', {
 
         });
 
-        V.on(element, 'mouseleave', function(e){
+        V.on(element, 'mouseleave', function(){
             element.classList.remove('show-controls');
         });
 
@@ -150,76 +142,39 @@ V.component('[data-video]', {
             self.skipAhead(e.target.dataset.seek);
         });
 
-        // Private
-        self.on('show', function(e){
-            e.preventDefault();
-            self.showVideo();
-        });
+        resolve(this);
+    },
 
-        self.on('hide', function(e){
-            e.preventDefault();
-            self.hideVideo();
-        });
+    /**
+     * After render
+     * @param {Function} resolve
+     * @return {void}
+     */
+    afterRender: async function(resolve){
 
-        self.on('load', function(e){
-            e.preventDefault();
-            self.loadVideo();
-        });
+        await this.loadVideo();
 
-        self.on('play', function(e){
-            e.preventDefault();
-            self.playVideo();
-        });
-
-        self.on('pause', function(e){
-            e.preventDefault();
-            self.pauseVideo();
-        });
-
-        self.on('stop', function(){
-            e.preventDefault();
-            self.stopVideo();
-        });
-
-        self.on('toggle', function(){
-            e.preventDefault();
-            self.toggleVideo();
-        });
-
-        self.on('forward', function(){
-            e.preventDefault();
-            self.forwardVideo();
-        });
-
-        self.on('backward', function(){
-            e.preventDefault();
-            self.backwardVideo();
-        });
-
-        self.on('watched', function(){
-            e.preventDefault();
-            self.setWatched();
-        });
+        this.showVideo();
+        this.playVideo();
 
         resolve(this);
     },
 
     /**
-     * List related episodes
-     * @return {void}
+     * Format time
+     * @param {Number} time
+     * @return {Object}
      */
-    listRelatedEpisodes: function(){
+    formatTime: function(time){
 
-        var serieId = window.serieId;
-        var serieName = window.serieName;
-        var serieInQueue = window.serieInQueue;
+        var result = new Date(time * 1000).toISOString().substr(11, 8);
+        var minutes = result.substr(3, 2);
+        var seconds = result.substr(6, 2);
 
-        window.mountEpisodes(
-            serieId,
-            serieName,
-            serieInQueue
-        );
-
+        return {
+            m: minutes,
+            s: seconds
+        }
     },
 
     /**
@@ -232,8 +187,7 @@ V.component('[data-video]', {
         var element = self.element;
         var playButton = V.$('.video-extra-play', element);
 
-        element.classList.add('active');
-        document.body.classList.add('video-active');
+        element.classList.add('video-active');
         window.setActiveElement(playButton);
         self.toggleFullScreen();
 
@@ -248,8 +202,7 @@ V.component('[data-video]', {
         var self = this;
         var element = self.element;
 
-        element.classList.remove('active');
-        document.body.classList.remove('video-active');
+        element.classList.remove('video-active');
         self.toggleFullScreen();
 
     },
@@ -258,7 +211,7 @@ V.component('[data-video]', {
      * Load video
      * @return {Promise}
      */
-    loadVideo: function(){
+    loadVideo: async function(){
 
         if( !Hls.isSupported() ) {
             throw Error('Video format not supported.');
@@ -269,30 +222,22 @@ V.component('[data-video]', {
         var video = self.video;
         var title = V.$('.video-title-bar', element);
 
-        var episodeId = window.episodeId;
-        var episodeNumber = window.episodeNumber;
-        var episodeName = window.episodeName;
-        var serieId = window.serieId;
-        var serieName = window.serieName;
-
-        if( self.lastEpisodeId == episodeId ){
-            return Promise.resolve();
-        }
-
-        self.lastEpisodeId = episodeId;
-        title.innerHTML = serieName + ' / EP ' + episodeNumber + ' - ' + episodeName;
+        var active = V.router.$active;
+        var episodeId = active.getParam('episodeId');
 
         var data = window.getSessionData();
         var fields = [
+            'media.episode_number',
+            'media.name',
             'media.stream_data',
             'media.media_id',
             'media.playhead',
-            'media.duration'
+            'media.duration',
+            'media.series_id',
+            'media.series_name'
         ];
 
-        window.pushHistory('video/' + serieId + '/' + episodeId);
         window.showLoading();
-
         element.classList.add('video-loading');
 
         return Api.request('POST', '/info', {
@@ -301,6 +246,12 @@ V.component('[data-video]', {
             media_id: episodeId,
             fields: fields.join(',')
         }).then(function(response){
+
+            var episodeNumber = response.data.episode_number;
+            var episodeName = response.data.name;
+            var serieName = response.data.series_name;
+
+            title.innerHTML = serieName + ' / EP ' + episodeNumber + ' - ' + episodeName;
 
             var streams = response.data.stream_data.streams;
             var stream = streams[ streams.length - 1 ].url;
@@ -312,7 +263,7 @@ V.component('[data-video]', {
                 startTime = 0;
             }
 
-            return new Promise(function (resolve, reject){
+            return new Promise(function (resolve){
 
                 var hls = new Hls({
                     maxBufferLength: 15,
@@ -330,9 +281,9 @@ V.component('[data-video]', {
                     resolve(response);
                 });
 
-                return response;
             });
-        }).catch(function(error){
+
+        }).catch(function(){
             window.hideLoading();
         });
     },
@@ -489,7 +440,10 @@ V.component('[data-video]', {
         if( document.fullscreenElement ){
             document.exitFullscreen();
         } else {
-            element.requestFullscreen();
+            try{
+                element.requestFullscreen();
+            } catch (error) {
+            }
         }
 
     },
@@ -599,11 +553,14 @@ V.component('[data-video]', {
      * Update playback status at Crunchyroll
      * @return {Promise}
      */
-    updatePlaybackStatus: function(){
+    updatePlaybackStatus: async function(){
 
         var self = this;
         var video = self.video;
         var data = window.getSessionData();
+
+        var active = V.router.$active;
+        var episodeId = active.getParam('episodeId');
 
         var elapsed = 30;
         var elapsedDelta = 30;
@@ -617,7 +574,7 @@ V.component('[data-video]', {
             playhead: playhead,
             elapsed: elapsed,
             elapsedDelta: elapsedDelta
-        }).then(function(response){
+        }).then(function(){
             self.trackProgress();
         });
     },
@@ -626,11 +583,14 @@ V.component('[data-video]', {
      * Set video as watched at Crunchyroll
      * @return {Promise}
      */
-    setWatched: function(){
+    setWatched: async function(){
 
         var self = this;
         var video = self.video;
         var data = window.getSessionData();
+
+        var active = V.router.$active;
+        var episodeId = active.getParam('episodeId');
 
         var duration = Math.floor(video.duration);
         var playhead = Math.floor(video.currentTime);
@@ -645,7 +605,7 @@ V.component('[data-video]', {
             playhead: duration,
             elapsed: elapsed,
             elapsedDelta: elapsedDelta
-        }).then(function(response){
+        }).then(function(){
             self.stopTrackProgress();
         });
     }

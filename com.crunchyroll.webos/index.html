@@ -11,6 +11,7 @@
     <script src="./assets/js/lib/webos.tv.dev.js?v=1"></script>
     <script src="./assets/js/lib/hls.js?v=1"></script>
     <script src="./assets/js/lib/vanilla.ui.js?v=1"></script>
+    <script src="./assets/js/lib/vanilla.router.js?v=1"></script>
     <script src="./assets/js/lib/template.js?v=1"></script>
     <script src="./assets/js/lib/api.js?v=1"></script>
 
@@ -19,58 +20,42 @@
 
 </head>
 <body>
-    <div id="main"
-        data-navigation-keyboard
-        data-navigation-history>
+    <div id="main" data-navigation-keyboard>
 
         <div id="loading" data-loading>
             <span>&nbsp;</span>
         </div>
 
-        <div id="login" data-login>
-            <form action="#" method="POST">
+        <div id="menu" data-menu>
 
-                <label for="email">E-mail:</label>
-                <input
-                    id="email"
-                    type="email"
-                    value=""
-                    tabindex="0"
-                    required>
+            <div class="links">
+                <a href="/series"
+                    class="menu-link menu-series menu-serie active"
+                    tabindex="0">Series</a>
+                <a href="/queue"
+                    class="menu-link menu-queue"
+                    data-content="queue"
+                    tabindex="0">Queue</a>
+                <a href="/history"
+                    class="menu-link menu-history"
+                    tabindex="0">History</a>
+            </div>
 
-                <label for="password">Password:</label>
-                <input
-                    id="password"
-                    type="password"
-                    value=""
-                    tabindex="0"
-                    required>
+            <div class="account">
+                <div class="account-name">&nbsp;</div>
+                <a href="/logout"
+                    class="account-logout"
+                    tabindex="0">Logout</a>
+            </div>
 
-                <label for="locale">Locale:</label>
-                <div class="select" tabindex="0">
-                    <select id="locale">
-                        <option value="enUS">English (US)</option>
-                        <option value="enGB">English (UK)</option>
-                        <option value="esLA">Español</option>
-                        <option value="esES">Español (España)</option>
-                        <option value="ptBR">Português (Brasil)</option>
-                        <option value="ptPT">Português (Portugal)</option>
-                        <option value="frFR">Français (France)</option>
-                        <option value="deDE">Deutsch</option>
-                        <option value="itIT">Italiano</option>
-                        <option value="ruRU">Русский</option>
-                        <option value="arME">العربية</option>
-                        <option value="jaJP">Japonês</option>
-                    </select>
-                </div>
-
-                <button type="submit" tabindex="0">Login</button>
-                <div id="message"></div>
-
-            </form>
         </div>
 
-        <div id="video" data-video>
+        <div id="content" data-router></div>
+
+    </div>
+
+    <template id="video">
+        <div id="video">
 
             <div class="video-title-bar"></div>
             <div class="video-extra-bar">
@@ -112,38 +97,55 @@
             </div>
 
             <video class="video-element"
-                controls preload="metadata"></video>
+                controls preload="metadata" allow="autoplay; fullscreen"></video>
 
         </div>
+    </template>
 
-        <div id="menu" data-menu>
+    <template id="login">
+        <div id="login">
+            <form action="#" method="POST">
 
-            <div class="links">
-                <div
-                    class="menu-link menu-series active"
-                    data-content="series"
-                    tabindex="0">Series</div>
-                <div
-                    class="menu-link menu-queue"
-                    data-content="queue"
-                    tabindex="0">Queue</div>
-                <div
-                    class="menu-link menu-history"
-                    data-content="history"
-                    tabindex="0">History</div>
-            </div>
+                <label for="email">E-mail:</label>
+                <input
+                    id="email"
+                    type="email"
+                    value=""
+                    tabindex="0"
+                    required>
 
-            <div class="account">
-                <div class="account-name">&nbsp;</div>
-                <div class="account-logout"
-                    tabindex="0">Logout</div>
-            </div>
+                <label for="password">Password:</label>
+                <input
+                    id="password"
+                    type="password"
+                    value=""
+                    tabindex="0"
+                    required>
 
+                <label for="locale">Locale:</label>
+                <div class="select" tabindex="0">
+                    <select id="locale">
+                        <option value="enUS">English (US)</option>
+                        <option value="enGB">English (UK)</option>
+                        <option value="esLA">Español</option>
+                        <option value="esES">Español (España)</option>
+                        <option value="ptBR">Português (Brasil)</option>
+                        <option value="ptPT">Português (Portugal)</option>
+                        <option value="frFR">Français (France)</option>
+                        <option value="deDE">Deutsch</option>
+                        <option value="itIT">Italiano</option>
+                        <option value="ruRU">Русский</option>
+                        <option value="arME">العربية</option>
+                        <option value="jaJP">Japonês</option>
+                    </select>
+                </div>
+
+                <button type="submit" tabindex="0">Login</button>
+                <div id="message"></div>
+
+            </form>
         </div>
-
-        <div id="content"></div>
-
-    </div>
+    </template>
 
     <template id="queue">
         <h1>Queue</h1>
@@ -161,11 +163,8 @@
             data-episode-name="{EPISODE_NAME}"
             data-episode-duration="{EPISODE_DURATION}"
             data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}"
-            data-serie-id="{SERIE_ID}"
-            data-serie-name="{SERIE_NAME}"
-            data-serie-in-queue="{SERIE_IN_QUEUE}">
-            <div class="list-item-inside">
+            data-episode-premium="{EPISODE_PREMIUM}">
+            <a href="{EPISODE_URL}" class="list-item-inside">
                 <div class="list-item-image">
                     <img src="{EPISODE_IMAGE}" />
                     <div class="list-item-progress hidden">&nbsp;</div>
@@ -175,7 +174,7 @@
                     <h2>{SERIE_NAME}</h2>
                     <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
                 </div>
-            </div>
+            </a>
         </div>
     </template>
 
@@ -195,11 +194,8 @@
             data-episode-name="{EPISODE_NAME}"
             data-episode-duration="{EPISODE_DURATION}"
             data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}"
-            data-serie-id="{SERIE_ID}"
-            data-serie-name="{SERIE_NAME}"
-            data-serie-in-queue="{SERIE_IN_QUEUE}">
-            <div class="list-item-inside">
+            data-episode-premium="{EPISODE_PREMIUM}">
+            <a href="{EPISODE_URL}" class="list-item-inside">
                 <div class="list-item-image">
                     <img src="{EPISODE_IMAGE}" />
                     <div class="list-item-progress hidden">&nbsp;</div>
@@ -209,7 +205,7 @@
                     <h2>{SERIE_NAME}</h2>
                     <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
                 </div>
-            </div>
+            </a>
         </div>
     </template>
 
@@ -232,14 +228,10 @@
         </div>
     </template>
 
-    <template id="serie-item">
-        <div class="list-item serie-item"
-            tabindex="0"
-            data-serie-item
-            data-serie-id="{SERIE_ID}"
-            data-serie-name="{SERIE_NAME}"
-            data-serie-in-queue="{SERIE_IN_QUEUE}">
-            <div class="list-item-inside">
+    <template id="series-item">
+        <div class="list-item series-item"
+            tabindex="0">
+            <a href="{SERIE_URL}" class="list-item-inside">
                 <div class="list-item-image">
                     <img src="{SERIE_IMAGE}" width="640" height="960" />
                 </div>
@@ -247,20 +239,11 @@
                     <h2>{SERIE_NAME}</h2>
                     <!-- <p>{SERIE_DESCRIPTION}</p> -->
                 </div>
-            </div>
+            </a>
         </div>
     </template>
 
-    <template id="episodes-mount">
-        <div class="inside"
-            data-episodes
-            data-serie-id="{SERIE_ID}"
-            data-serie-name="{SERIE_NAME}"
-            data-serie-in-queue="{SERIE_IN_QUEUE}">
-        </div>
-    </template>
-
-    <template id="episodes">
+    <template id="serie">
         <h1>
             <small>Serie /</small><br/>
             {SERIE_NAME} - Episodes
@@ -268,7 +251,7 @@
         <div class="list-filters">
             <div class="select" tabindex="0">
                 <select id="sort">
-                    {EPISODES_SORT_OPTIONS}
+                    {SORT_OPTIONS}
                 </select>
             </div>
 
@@ -280,23 +263,20 @@
                 tabindex="0">Remove From Queue</button>
         </div>
         <div class="list-items">
-            {EPISODES_ITEMS}
         </div>
     </template>
 
-    <template id="episode-item">
-        <div class="list-item episode-item" tabindex="0"
+    <template id="serie-episode-item">
+        <div class="list-item serie-episode-item"
+            tabindex="0"
             data-episode-item
             data-episode-id="{EPISODE_ID}"
             data-episode-number="{EPISODE_NUMBER}"
             data-episode-name="{EPISODE_NAME}"
             data-episode-duration="{EPISODE_DURATION}"
             data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}"
-            data-serie-id="{SERIE_ID}"
-            data-serie-name="{SERIE_NAME}"
-            data-serie-in-queue="{SERIE_IN_QUEUE}">
-            <div class="list-item-inside">
+            data-episode-premium="{EPISODE_PREMIUM}">
+            <a href="{EPISODE_URL}" class="list-item-inside">
                 <div class="list-item-image">
                     <img src="{EPISODE_IMAGE}" />
                     <div class="list-item-progress hidden">&nbsp;</div>
@@ -305,27 +285,30 @@
                 <div class="list-item-info">
                     <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
                 </div>
-            </div>
+            </a>
         </div>
     </template>
 
-    <script src="./assets/js/components/episode.item.js?v=1"></script>
-    <script src="./assets/js/components/episodes.js?v=1"></script>
-    <script src="./assets/js/components/history.js?v=1"></script>
     <script src="./assets/js/components/loading.js?v=1"></script>
     <script src="./assets/js/components/login.js?v=1"></script>
+    <script src="./assets/js/components/logout.js?v=1"></script>
     <script src="./assets/js/components/menu.js?v=1"></script>
-    <script src="./assets/js/components/navigation.history.js?v=1"></script>
-    <script src="./assets/js/components/navigation.keyboard.js?v=1"></script>
-    <script src="./assets/js/components/queue.js?v=1"></script>
-    <script src="./assets/js/components/serie.item.js?v=1"></script>
-    <script src="./assets/js/components/series.js?v=1"></script>
     <script src="./assets/js/components/video.js?v=1"></script>
+    <script src="./assets/js/components/history.js?v=1"></script>
+    <script src="./assets/js/components/queue.js?v=1"></script>
+    <script src="./assets/js/components/series.js?v=1"></script>
+    <script src="./assets/js/components/serie.js?v=1"></script>
+    <script src="./assets/js/components/router.js?v=1"></script>
+    <script src="./assets/js/components/episode.item.js?v=1"></script>
+    <script src="./assets/js/components/navigation.keyboard.js?v=1"></script>
 
     <script>
-    window.addEventListener('load', function(){
-        V.mount(document.body);
-    }, false);
+    V.on(window, 'load', function(){
+        V.mount(document.body).then(function(){
+            V.router.$mode = 'hash';
+            V.trigger(window, 'popstate');
+        });
+    });
     </script>
 
 </body>

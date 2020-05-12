@@ -36,7 +36,7 @@ function build(){
 }
 
 function install(){
-    $ARES_SDK/ares-install -s internal --device $DEVICE ./bin/${ID}_1.0.0_all.ipk
+    $ARES_SDK/ares-install -s internal --device $DEVICE ./bin/${ID}_1.1.0_all.ipk
 }
 
 function launch(){

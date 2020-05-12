@@ -7,6 +7,9 @@ html, body{
     margin: 0;
     padding: 0;
 }
+body{
+    min-height: 100vh;
+}
 html, body, input, select, button{
     font-family: Arial, Helvetica, sans-serif;
 }
@@ -23,6 +26,11 @@ h2{
 h3{
     font-size: 1rem;
 }
+a{
+    color: #FFF;
+    text-decoration: none;
+}
+
 label{
     display: block;
     margin-bottom: 3px;
@@ -250,13 +258,21 @@ progress::-moz-progress-bar {
 }
 
 /* VIDEO */
-#video{
+body.page-video{
+    background-color: #000;
+}
+body.page-video #menu{
     display: none;
+}
+body.page-video #content{
+    padding: 0 !important;
+}
+
+#video{
     z-index: 10;
     width: 100vw;
     height: 100vh;
     position: relative;
-    background: #000;
     color: #fff;
     padding: 0;
 }
@@ -269,9 +285,6 @@ progress::-moz-progress-bar {
 #video video:-webkit-full-screen {
     width: 100% !important;
     height: 100% !important;
-}
-#video.active{
-    display: block;
 }
 #video .video-control-bar{
     align-items: center;
@@ -287,10 +300,10 @@ progress::-moz-progress-bar {
     width: 100%;
     z-index: 2;
 }
-#video.video-playing .video-control-bar{
+.video-playing #video .video-control-bar{
     opacity: 0;
 }
-#video.show-controls .video-control-bar{
+.show-controls #video .video-control-bar{
     opacity: 1 !important;
 }
 
@@ -344,7 +357,7 @@ progress::-moz-progress-bar {
     transition: all 0.4s ease-in-out;
     z-index: 2;
 }
-#video.video-playing .video-title-bar{
+.video-playing #video .video-title-bar{
     opacity: 0;
 }
 
@@ -361,7 +374,7 @@ progress::-moz-progress-bar {
     width: 20rem;
     z-index: 2;
 }
-#video.video-playing .video-extra-bar{
+.video-playing #video .video-extra-bar{
     display: none;
     opacity: 0;
 }
@@ -413,32 +426,21 @@ progress::-moz-progress-bar {
     background-image: url(../icons/fullscreen.svg);
 }
 
-body.video-active #menu,
-body.video-active #content{
-    display: none;
-}
-
 /* LOGIN */
-#login{
+body.page-login{
     background-color: #F37521;
-    display: none;
-    width: 100vw;
-    height: 100vh;
-    transition: background 0.25s;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    max-width: 100vw;
-    max-height: 100vh;
-    overflow: auto;
-    z-index: 99;
 }
-#login.active{
-    display: flex;
+body.page-login #menu{
+    display: none;
+}
+body.page-login #content{
+    padding: 0 !important;
 }
 
+#login{
+    display: flex;
+    transition: background 0.25s;
+}
 #login form{
     background: url(../img/512px.png) no-repeat center center;
     background-size: 8.33rem auto;
@@ -498,11 +500,13 @@ body.video-active #content{
 #menu .menu-link{
     background: transparent;
     border-radius: 0 4px 4px 0;
-    display: inline-block;
     cursor: pointer;
-    margin-top: 2.2rem;
+    color: #FFF;
+    display: inline-block;
     font-size: 1.2rem;
+    margin-top: 2.2rem;
     padding: 10px 2.2rem 10px 0.83rem;
+    text-decoration: none;
     transition: all 0.2s ease-in-out;
 }
 .mouse #menu .menu-link:hover,
@@ -623,6 +627,7 @@ body.video-active #content{
     border-bottom-width: 10px;
     border-radius: 5px 5px 2px 2px;
     cursor: pointer;
+    display: block;
     margin: 0.83rem;
     position: relative;
     transition: all 0.2s ease-in-out;
@@ -688,14 +693,14 @@ body.video-active #content{
     margin-top: 0.83rem;
 }
 
-#content .serie-item .list-item-image{
+#content .series-item .list-item-image{
     padding: 0;
 }
-#content .serie-item .list-item-image img{
+#content .series-item .list-item-image img{
     border-radius: 2px 2px 0 0;
     position: static;
 }
-#content .serie-item .list-item-info{
+#content .series-item .list-item-info{
     position: absolute;
     bottom: 0;
     left: 0;

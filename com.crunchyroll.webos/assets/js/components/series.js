@@ -1,22 +1,62 @@
 V.component('[data-series]', {
 
     /**
-     * On render
+     * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    constructor: function(resolve){
+
+        // Route
+        V.router.add({
+            id: 'series',
+            path: '/series',
+            title: 'Series',
+            component: this
+        });
+
+        V.router.add({
+            id: 'series',
+            path: '/series/:filter',
+            title: 'Series',
+            component: this
+        });
+
+        V.router.add({
+            id: 'series',
+            path: '/series/:filter/:pageNumber',
+            title: 'Series',
+            component: this
+        });
+
+        resolve(this);
+
+    },
+
+    /**
+     * Retrieve router HTML
+     * @return {String}
+     */
+    getHTML: function(){
+        return '<div data-series></div>';
+    },
+
+    /**
+     * On render
+     * @param {Function} resolve
+     * @return {void}
+     */
+    onRender: function(resolve){
 
         var self = this;
 
         // Private
-        self.on('change', 'select' , function(e){
-            self.listSeries();
+        self.on('change', 'select' , function(){
+            V.router.redirect('/series/' + this.value);
         });
 
-        self.on('change', 'input' , function(e){
-            self.listSeries();
+        self.on('change', 'input' , function(){
+            V.router.redirect('/series?search=' + encodeURI(this.value));
         });
 
         resolve(this);
@@ -26,10 +66,9 @@ V.component('[data-series]', {
     /**
      * After render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    afterRender: async function(resolve, reject){
+    afterRender: async function(resolve){
         await this.listSeries();
         resolve(this);
     },
@@ -43,18 +82,13 @@ V.component('[data-series]', {
         var data = window.getSessionData();
         var self = this;
         var element = self.element;
+        var active = V.router.$active;
 
         // Filter option
-        var filter = 'popular';
-        var search = '';
-
-        if( V.$('select#filter', element) ){
-            filter = V.$('select#filter', element).value;
-        }
-
-        if( V.$('input#search', element) ){
-            search = V.$('input#search', element).value;
-        }
+        var pageNumber = Number( active.getParam('pageNumber') || 1 );
+        var filter = String( active.getParam('filter') || 'popular' );
+        var search = String( active.getQuery('search') || '' );
+        var limit = 20;
 
         if( search ){
             filter = 'prefix:' + search;
@@ -83,7 +117,6 @@ V.component('[data-series]', {
             'image.full_url'
         ];
 
-        window.pushHistory('series/' + filter);
         window.showLoading();
 
         return Api.request('POST', '/list_series', {
@@ -92,15 +125,13 @@ V.component('[data-series]', {
             media_type: 'anime',
             filter: filter,
             fields: fields.join(','),
-            limit: 20,
-            offset: 0
+            limit: limit,
+            offset: (pageNumber - 1) * limit
         }).then(async function(response){
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.makeLogin().then(function(){
-                    return self.listSeries();
-                });
+                return window.tryLogin().then(self.listSeries);
             }
 
             var options = await self.getFiltersOptions(filter);
@@ -121,7 +152,7 @@ V.component('[data-series]', {
             window.setActiveElement( V.$('#content .list-item') );
 
         })
-        .catch(function(error){
+        .catch(function(){
             window.hideLoading();
         });
     },
@@ -195,10 +226,10 @@ V.component('[data-series]', {
      */
     toSerie: function(data){
 
-        var html = template('serie-item')
+        var html = template('series-item')
+            .replace('{SERIE_URL}', '/serie/' + data.series_id)
             .replace('{SERIE_ID}', data.series_id)
             .replace('{SERIE_NAME}', data.name)
-            .replace('{SERIE_IN_QUEUE}', (data.in_queue) ? 1 : 0)
             .replace('{SERIE_DESCRIPTION}', data.description)
             .replace('{SERIE_IMAGE}', data.portrait_image.full_url)
             .render();

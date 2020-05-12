@@ -1,12 +1,45 @@
 V.component('[data-history]', {
 
     /**
-     * After render
+     * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    afterRender: async function(resolve, reject){
+    constructor: function(resolve){
+
+        // Route
+        V.router.add({
+            id: 'history',
+            path: '/history',
+            title: 'History',
+            component: this
+        });
+
+        V.router.add({
+            id: 'history',
+            path: '/history/:pageNumber',
+            title: 'History',
+            component: this
+        });
+
+        resolve(this);
+
+    },
+
+    /**
+     * Retrieve router HTML
+     * @return {String}
+     */
+    getHTML: function(){
+        return '<div data-history></div>';
+    },
+
+    /**
+     * After render
+     * @param {Function} resolve
+     * @return {void}
+     */
+    afterRender: async function(resolve){
         await this.listHistory();
         resolve(this);
     },
@@ -15,11 +48,15 @@ V.component('[data-history]', {
      * List history
      * @return {Promise}
      */
-    listHistory: function(){
+    listHistory: async function(){
 
         var data = window.getSessionData();
         var self = this;
         var element = self.element;
+        var active = V.router.$active;
+
+        var pageNumber = Number( active.getParam('pageNumber') || 1 );
+        var limit = 8;
 
         var fields = [
             'media',
@@ -72,22 +109,19 @@ V.component('[data-history]', {
             'series.year'
         ];
 
-        window.pushHistory('history');
         window.showLoading();
 
         return Api.request('POST', '/recently_watched', {
             session_id: data.sessionId,
             locale: data.locale,
             fields: fields.join(','),
-            limit: 8,
-            offset: 0
+            limit: limit,
+            offset: (pageNumber - 1) * limit
         }).then(function(response){
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.makeLogin().then(function(){
-                    return self.listHistory();
-                });
+                return window.tryLogin().then(self.listHistory);
             }
 
             var items = response.data.map(function(item){
@@ -121,11 +155,11 @@ V.component('[data-history]', {
         var episode = data.media;
         var playhead = episode.playhead;
         var duration = episode.duration;
+        var url = '/serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
 
         var html = template('history-item')
             .replace('{SERIE_ID}', serie.series_id)
             .replace('{SERIE_NAME}', serie.name)
-            .replace('{SERIE_IN_QUEUE}', (serie.in_queue) ? 1 : 0)
             .replace('{EPISODE_ID}', episode.media_id)
             .replace('{EPISODE_NAME}', episode.name)
             .replace('{EPISODE_NUMBER}', episode.episode_number)
@@ -133,6 +167,7 @@ V.component('[data-history]', {
             .replace('{EPISODE_DURATION}', duration)
             .replace('{EPISODE_PLAYHEAD}', playhead)
             .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
+            .replace('{EPISODE_URL}', url)
             .render();
 
         return html;

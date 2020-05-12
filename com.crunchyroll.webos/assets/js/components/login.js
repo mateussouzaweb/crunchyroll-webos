@@ -3,81 +3,63 @@ V.component('[data-login]', {
     /**
      * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    constructor: function(resolve, reject){
+    constructor: function(resolve){
 
         var self = this;
 
         // Public
-        window.showLogin = function(){
-            return self.showLogin();
-        };
-        window.hideLogin = function(){
-            return self.hideLogin();
-        }
-        window.makeLogin = function(){
-            return self.makeLogin();
-        }
-        window.makeLogout = function(){
-            return self.makeLogout();
-        }
         window.getSessionData = function(){
             return self.getSessionData();
+        }
+        window.setSessionData = function(data){
+            return self.setSessionData(data);
+        }
+        window.tryLogin = function(){
+            return self.tryLogin();
         }
         window.isLoggedIn = function(){
             return self.isLoggedIn();
         }
+
+        // Route
+        V.router.add({
+            id: 'login',
+            path: '/login',
+            title: 'Login',
+            component: this
+        });
 
         resolve(this);
 
     },
 
     /**
+     * Retrieve router HTML
+     * @return {String}
+     */
+    getHTML: function(){
+        return template('login').render();
+    },
+
+    /**
      * On render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    onRender: function(resolve){
 
         var self = this;
-            self.firstLogin = false;
 
         // Private
-        self.on('show', function(e){
-            e.preventDefault();
-            self.showLogin();
-        });
-
-        self.on('hide', function(e){
-            e.preventDefault();
-            self.hideLogin();
-        });
-
         self.on('submit', 'form', function(e){
             e.preventDefault();
             self.makeLogin();
         });
 
-        self.on('login', function(e){
-            e.preventDefault();
-            self.makeLogin();
-        });
-
-        self.on('logout', function(e){
-            e.preventDefault();
-            self.makeLogout();
-        });
-
         // Init
-        self.loadSessionData();
-
-        if( !self.isLoggedIn() ){
-            self.firstLogin = true;
-            self.showLogin();
-        }
+        self.fillSessionData();
 
         resolve(this);
     },
@@ -105,10 +87,10 @@ V.component('[data-login]', {
     },
 
     /**
-     * Load login data
+     * Fill login data on form
      * @return {void}
      */
-    loadSessionData: function(){
+    fillSessionData: function(){
 
         var self = this;
         var element = self.element;
@@ -146,40 +128,17 @@ V.component('[data-login]', {
     },
 
     /**
-     * Show login box
-     * @return {void}
-     */
-    showLogin: function(){
-        var element = this.element;
-            element.classList.add('active');
-
-        window.setActiveElement( V.$('#login label') );
-    },
-
-    /**
-     * Hide login box
-     * @return {void}
-     */
-    hideLogin: function(){
-        var element = this.element;
-            element.classList.remove('active');
-    },
-
-    /**
-     * Try make login on Crunchyroll
+     * Try login within the set session data on API
      * @return {Promise}
      */
-    makeLogin: function(){
+    tryLogin: async function(){
 
         var self = this;
-        var element = this.element;
+        var data = self.getSessionData();
 
-        var message = V.$('#message', element);
-            message.innerHTML = '';
-
-        var email = V.$('input#email', element);
-        var password = V.$('input#password', element);
-        var locale = V.$('select#locale', element);
+        var email = data.email;
+        var password = data.password;
+        var locale = data.locale;
 
         var accessToken = 'LNDJgOit5yaRIWN';
         var deviceType = 'com.crunchyroll.windows.desktop';
@@ -192,7 +151,7 @@ V.component('[data-login]', {
             access_token: accessToken,
             device_type: deviceType,
             device_id: deviceId,
-            locale: locale.value
+            locale: locale
         })
         .then(function(response){
 
@@ -204,9 +163,9 @@ V.component('[data-login]', {
 
             return Api.request('POST', '/login', {
                 session_id: sessionId,
-                account: email.value,
-                password: password.value,
-                locale: locale.value
+                account: email,
+                password: password,
+                locale: locale
             });
         })
         .then(function(response){
@@ -220,77 +179,56 @@ V.component('[data-login]', {
                 deviceType: deviceType,
                 deviceId: deviceId,
                 sessionId: sessionId,
-                locale: locale.value,
-                email: email.value,
-                password: password.value,
+                locale: locale,
+                email: email,
+                password: password,
                 userId: response.data.user.user_id,
                 userName: response.data.user.username,
                 auth: response.data.auth,
                 expires: response.data.expires
             });
 
-            self.hideLogin();
             window.hideLoading();
-
-            if( self.firstLogin ){
-                self.firstLogin = false;
-                V.trigger('.menu-link.active', 'click');
-            }
 
             return response;
         })
         .catch(function(error){
-
-            password.value = '';
-            message.innerHTML = error.message;
-
-            self.showLogin();
             window.hideLoading();
-
+            throw error;
         });
     },
 
     /**
-     * Try make logout on Crunchyroll
+     * Try make login from input data
      * @return {Promise}
      */
-    makeLogout: function(){
-
-        if( !this.isLoggedIn() ){
-            this.showLogin();
-            return Promise.resolve();
-        }
+    makeLogin: async function(){
 
         var self = this;
         var element = this.element;
 
-        var password = V.$('input#password', element);
-            password.value = '';
-
         var message = V.$('#message', element);
             message.innerHTML = '';
 
-        var data = this.getSessionData();
+        var email = V.$('input#email', element);
+        var password = V.$('input#password', element);
+        var locale = V.$('select#locale', element);
 
-        self.showLogin();
-        window.showLoading();
+        var data = self.getSessionData();
+            data.email = email.value;
+            data.password = password.value;
+            data.locale = locale.value;
 
-        return Api.request('POST', '/logout', {
-            session_id: data.sessionId,
-            locale: data.locale
-        }).then(function(response){
+        self.setSessionData(data);
 
-            // Clear all session data
-            self.setSessionData({});
-            self.firstLogin = true;
-
-            window.hideLoading();
-
+        return self.tryLogin()
+        .then(function(response){
+            V.router.redirect('/home');
             return response;
         })
         .catch(function(error){
+            password.value = '';
             message.innerHTML = error.message;
-            window.hideLoading();
         });
     }
 

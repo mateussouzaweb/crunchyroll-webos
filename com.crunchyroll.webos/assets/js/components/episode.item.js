@@ -1,44 +1,11 @@
 V.component('[data-episode-item]', {
 
     /**
-     * On render
-     * @param {Function} resolve
-     * @param {Function} reject
-     * @return {void}
-     */
-    onRender: function(resolve, reject){
-
-        var self = this;
-        var element = this.element;
-
-        self.on('click', function(e){
-
-            e.preventDefault();
-
-            window.episodeId = element.dataset.episodeId;
-            window.episodeNumber = element.dataset.episodeNumber;
-            window.episodeName = element.dataset.episodeName;
-            window.serieId = element.dataset.serieId;
-            window.serieName = element.dataset.serieName;
-            window.serieInQueue = element.dataset.serieInQueue;
-
-            window.loadVideo().then(function(){
-                window.showVideo();
-                window.playVideo();
-            });
-
-        });
-
-        resolve(this);
-    },
-
-    /**
      * After render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    afterRender: function(resolve, reject){
+    afterRender: function(resolve){
 
         var self = this;
         var element = self.element;

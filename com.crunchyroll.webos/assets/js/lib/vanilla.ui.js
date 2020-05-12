@@ -1,10 +1,17 @@
 (function () {
 
-    // Core lib
-    var Core = {
+    /**
+     * Vanilla UI core lib
+     * @global
+     * @name V
+     */
+    window.V = {
 
         /**
          * Run loop on items
+         * @public
+         * @name V.each
+         * @kind function
          * @param {Array|Object} items
          * @param {Function} callback
          * @return {void}
@@ -26,20 +33,22 @@
 
         /**
          * Load an plugin on the library
+         * @public
+         * @name V.extend
+         * @kind function
+         * @param {Object} library
          * @param {Object} plugin
          * @return {void}
          */
-        extend: function (plugin) {
+        extend: function (library, plugin) {
 
-            const self = this;
+            this.each(plugin, function (value, key) {
 
-            self.each(plugin, function (value, key) {
-
-                if (self[key] !== undefined) {
+                if (library[key] !== undefined) {
                     console.warn('Warning, the method {key} is being overwrite be another plugin', key);
                 }
 
-                self[key] = value;
+                library[key] = value;
 
             });
 
@@ -47,6 +56,9 @@
 
         /**
          * Promisify the callback
+         * @public
+         * @name V.promisify
+         * @kind function
          * @param {Object} scope
          * @param {Function} callback
          * @return {Promise}
@@ -55,41 +67,86 @@
             return new Promise(function (resolve, reject) {
                 return callback.apply(scope, [resolve, reject]);
             });
+        },
+
+        /**
+        * Fake promise instance
+        * @public
+        * @name V.fakePromise
+        * @kind function
+        * @param {Function} resolve
+        * @return {void}
+        */
+        fakePromise: function (resolve) {
+            resolve(this);
+        },
+
+        /**
+         * Wait the resolution of various promisify callbacks
+         * @param {Object} scope
+         * @param {Array} callbacks
+         * @return {Promise}
+         */
+        promises: async function (scope, callbacks) {
+
+            const self = this;
+            var promises = [];
+
+            for (let index = 0; index < callbacks.length; index++) {
+                if( typeof callbacks[index] === 'function' ){
+                    promises.push(
+                        self.promisify(scope, callbacks[index])
+                    );
+                }
+            }
+
+            await Promise.all(promises);
+
+            return scope;
         }
 
     };
 
-    window.V = Core;
-
 })();(function (V) {
 
     // Selector lib
-    V.extend({
+    V.extend(V, {
 
         /**
          * Select an single element
+         * @public
+         * @name V.$
+         * @kind function
          * @param {String} selector
          * @param {Mixed} context
          * @return {Node}
          */
         $: function (selector, context) {
+            context = (context instanceof String) ? this.$(context) : context;
             context = (context instanceof Node) ? context : document;
             return context.querySelector(selector);
         },
 
         /**
          * Select multiples elements
+         * @public
+         * @name V.$$
+         * @kind function
          * @param {String} selector
          * @param {Mixed} context
          * @return {NodeList}
          */
         $$: function (selector, context) {
+            context = (context instanceof String) ? this.$(context) : context;
             context = (context instanceof Node) ? context : document;
             return context.querySelectorAll(selector);
         },
 
         /**
          * Parse selector and return array of items
+         * @public
+         * @name V.items
+         * @kind function
          * @param {Mixed} element
          * @param {Mixed} context
          * @return {Array}
@@ -131,6 +188,7 @@
 
     /**
      * Attach event to element
+     * @private
      * @param {String} action
      * @param {Mixed} element
      * @param {String} event
@@ -189,10 +247,13 @@
 
     // PUBLIC
 
-    V.extend({
+    V.extend(V, {
 
         /**
          * Add event to element
+         * @public
+         * @name V.on
+         * @kind function
          * @param {Node} element
          * @param {String} event
          * @param {String} selector
@@ -205,6 +266,9 @@
 
         /**
          * Remove event from element
+         * @public
+         * @name V.off
+         * @kind function
          * @param {Node} element
          * @param {String} event
          * @param {String} selector
@@ -217,6 +281,9 @@
 
         /**
          * Trigger event on element
+         * @public
+         * @name V.trigger
+         * @kind function
          * @param {Node} element
          * @param {String} event
          * @return {void}
@@ -241,84 +308,628 @@
     // PRIVATE
 
     /**
-    * Promise instance
-    * @param {Function} resolve
-    * @param {Function} reject
-    * @return {void}
-    */
-    var _promise = function (resolve, reject) {
-        resolve(this);
-    };
-
-    /**
      * Global data
+     * @private
      * @param {Object}
      */
     var _global = {
-        components: [],
-        events: {},
+        beforeConstructorHooks: [],
+        afterConstructorHooks: [],
+        beforeDestructorHooks: [],
+        afterDestructorHooks: []
+    };
+
+    // PUBLIC
+
+    V.extend(V, {
+
+        /**
+         * Abstract component
+         * @private
+         * @var {Object}
+         */
+        _abstractComponent: {
+
+            /**
+             * Component DOM element
+             * @public
+             * @name V.component.element
+             * @var {Node}
+             */
+            element: null,
+
+            /**
+             * Component DOM selector
+             * @public
+             * @name V.component.element
+             * @var {String}
+             */
+            selector: null,
+
+            /**
+             * Component namespace
+             * @private
+             * @name V.component.namespace
+             * @var {String}
+             */
+            namespace: null,
+
+            /**
+             * Component constructor
+             * @public
+             * @name V.component.constructor
+             * @kind function
+             * @param {Function} resolve
+             * @param {Function} reject
+             * @return {Promise}
+             */
+            constructor: V.fakePromise,
+
+            /**
+             * Component destructor
+             * @public
+             * @name V.component.destructor
+             * @kind function
+             * @param {Function} resolve
+             * @param {Function} reject
+             * @return {Promise}
+             */
+            destructor: V.fakePromise
+        },
+
+        /**
+         * Global components registry
+         * @private
+         * @var {Object}
+         */
+        _components: [],
+
+        /**
+         * Add global callback before component constructor
+         * @public
+         * @name V.beforeConstructor
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        beforeConstructor: function (callback) {
+            _global.beforeConstructorHooks.push(callback);
+        },
+
+        /**
+         * Add global callback after component constructor
+         * @public
+         * @name V.afterConstructor
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        afterConstructor: function (callback) {
+            _global.afterConstructorHooks.push(callback);
+        },
+
+        /**
+         * Add global callback before component destructor
+         * @public
+         * @name V.beforeDestructor
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        beforeDestructor: function (callback) {
+            _global.beforeDestructorHooks.push(callback);
+        },
+
+        /**
+         * Add global callback after component destructor
+         * @public
+         * @name V.afterDestructor
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        afterDestruct: function (callback) {
+            _global.afterDestructorHooks.push(callback);
+        },
+
+        /**
+         * Create new component
+         * @public
+         * @name V.component
+         * @kind function
+         * @param {String} selector
+         * @param {Object} data
+         * @return {Promise}
+         */
+        component: async function (selector, data) {
+
+            var component = Object.assign(
+                {},
+                this._abstractComponent,
+                data
+            );
+
+            component.selector = selector;
+            component.namespace = selector.replace(/[\W_]+/g, '_');
+
+            try {
+
+                var callbacks = [].concat(
+                    _global.beforeConstructorHooks,
+                    [component.constructor],
+                    _global.afterConstructorHooks
+                );
+
+                await this.promises(component, callbacks);
+                this._components.push(component);
+
+            } catch (error) {
+                console.warn('Component construct error:', error);
+            }
+
+            return component;
+        },
+
+        /**
+         * Remove component
+         * @public
+         * @name V.removeComponent
+         * @kind function
+         * @param {String} selector
+         * @return {Promise}
+         */
+        removeComponent: async function (selector) {
+
+            var component = null;
+            var index = null;
+
+            this._components.forEach(function (theComponent, theIndex) {
+                if (theComponent.selector == selector) {
+                    component = theComponent;
+                    index = theIndex;
+                }
+            });
+
+            if (!component) {
+                return selector;
+            }
+
+            try {
+
+                var callbacks = [].concat(
+                    _global.beforeDestructorHooks,
+                    [component.destructor],
+                    _global.afterDestructorHooks
+                );
+
+                await this.promises(component, callbacks);
+                delete this._components[index];
+
+            } catch (error) {
+                console.warn('Component destruct error:', error);
+            }
+
+            return selector;
+        }
+
+    });
+
+})(window.V);(function (V) {
+
+    // PRIVATE
+
+    /**
+     * Global data
+     * @private
+     * @param {Object}
+     */
+    var _global = {
+        beforeMountHooks: [],
+        afterMountHooks: []
+    };
+
+    // PUBLIC
+
+    V.extend(V._abstractComponent, {
+
+        /**
+         * Component before mount
+         * @public
+         * @name V.component.beforeMount
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        beforeMount: V.fakePromise,
+
+        /**
+         * Component on mount
+         * @public
+         * @name V.component.onMount
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        onMount: V.fakePromise,
+
+        /**
+         * Component after mount
+         * @public
+         * @name V.component.afterMount
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        afterMount: V.fakePromise
+
+    });
+
+    V.extend(V, {
+
+        /**
+         * Add global callback before component mount
+         * @public
+         * @name V.beforeMount
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        beforeMount: function (callback) {
+            _global.beforeMountHooks.push(callback);
+        },
+
+        /**
+         * Add global callback after component mount
+         * @public
+         * @name V.afterMount
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        afterMount: function (callback) {
+            _global.afterMountHooks.push(callback);
+        },
+
+        /**
+         * Mount components on given target child elements
+         * @public
+         * @name V.mount
+         * @kind function
+         * @param {Node} target
+         * @return {Promise}
+         */
+        mount: async function (target) {
+
+            var promises = [];
+
+            V._components.forEach(function (component) {
+
+                V.items(component.selector, target)
+                .forEach(function (element) {
+
+                    if (element._components === undefined) {
+                        element._components = {};
+                    }
+
+                    var key = component.namespace;
+
+                    // Already mounted
+                    if (element._components[key] !== undefined) {
+                        return;
+                    }
+
+                    element._components[key] = {};
+                    element.dataset.vid = Math.random().toString(16).substr(2, 8);
+
+                    component.element = element;
+
+                    var callbacks = [].concat(
+                        _global.beforeMountHooks,
+                        [component.beforeMount]
+                        [component.onMount],
+                        [component.afterMount],
+                        _global.afterMountHooks
+                    );
+
+                    promises.push(
+                        V.promises(component, callbacks)
+                    );
+
+                });
+
+            });
+
+            await Promise.all(promises);
+
+            return target;
+        }
+
+    });
+
+})(window.V);(function (V) {
+
+    // PRIVATE
+
+    /**
+     * Global data
+     * @private
+     * @param {Object}
+     */
+    var _global = {
         beforeRenderHooks: [],
-        afterRenderHooks: [],
+        afterRenderHooks: []
+    };
+
+    // PUBLIC
+
+    V.extend(V._abstractComponent, {
+
+        /**
+         * Component should render
+         * @public
+         * @name V.component.shouldRender
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        shouldRender: V.fakePromise,
+
+        /**
+         * Component before render
+         * @public
+         * @name V.component.beforeRender
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        beforeRender: V.fakePromise,
+
+        /**
+         * Component on render
+         * @public
+         * @name V.component.onRender
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        onRender: V.fakePromise,
+
+        /**
+         * Component after render
+         * @public
+         * @name V.component.afterRender
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        afterRender: V.fakePromise
+
+    });
+
+    V.extend(V, {
+
+        /**
+         * Add global callback before component render
+         * @public
+         * @name V.beforeRender
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        beforeRender: function (callback) {
+            _global.beforeRenderHooks.push(callback);
+        },
+
+        /**
+         * Add global callback after component render
+         * @public
+         * @name V.afterRender
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        afterRender: function (callback) {
+            _global.afterRenderHooks.push(callback);
+        }
+
+    });
+
+    // API
+
+    /**
+     * Render component
+     * @private
+     * @param {Function} resolve
+     * @return {Promise}
+     */
+    var render = async function (resolve) {
+
+        var component = this;
+
+        try {
+
+            var callbacks = [].concat(
+                [ component.shouldRender ],
+                _global.beforeRenderHooks,
+                [ component.beforeRender ],
+                [ component.onRender ],
+                [ component.afterRender ],
+                _global.afterRenderHooks
+            );
+
+            await V.promises(component, callbacks);
+
+            // Mount child elements
+            await V.mount(component.element);
+
+        } catch (error) {
+            console.warn('Component render error:', error);
+            //reject(error);
+        }
+
+        return resolve(component);
+    }
+
+    V.afterMount(render);
+
+})(window.V);(function (V) {
+
+    // PRIVATE
+
+    /**
+     * Global data
+     * @private
+     * @param {Object}
+     */
+    var _global = {
         beforeDestroyHooks: [],
         afterDestroyHooks: []
     };
 
+    // PUBLIC
+
+    V.extend(V._abstractComponent, {
+
+        /**
+         * Component before destroy
+         * @public
+         * @name V.component.beforeDestroy
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        beforeDestroy: V.fakePromise,
+
+        /**
+         * Component on destroy
+         * @public
+         * @name V.component.onDestroy
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        onDestroy: V.fakePromise,
+
+        /**
+         * Component after destroy
+         * @public
+         * @name V.component.afterDestroy
+         * @kind function
+         * @param {Function} resolve
+         * @param {Function} reject
+         * @return {Promise}
+         */
+        afterDestroy: V.fakePromise
+
+    });
+
+    V.extend(V, {
+
+        /**
+         * Add global callback before component destroy
+         * @public
+         * @name V.beforeDestroy
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        beforeDestroy: function (callback) {
+            _global.beforeDestroyHooks.push(callback);
+        },
+
+        /**
+         * Add global callback after component destroy
+         * @public
+         * @name V.afterDestroy
+         * @kind function
+         * @param {Function} callback
+         * @return {void}
+         */
+        afterDestroy: function (callback) {
+            _global.afterDestroyHooks.push(callback);
+        },
+
+        /**
+         * destroy components on given target child elements
+         * @public
+         * @name V.destroy
+         * @kind function
+         * @param {Node} target
+         * @return {Promise}
+         */
+        destroy: async function (target) {
+
+            var promises = [];
+
+            V._components.forEach(function (component) {
+                V.items(component.selector, target)
+                .forEach(function (element) {
+
+                    if (element._components === undefined) {
+                        return;
+                    }
+
+                    var key = component.namespace;
+                    if (element._components[key] === undefined) {
+                        return;
+                    }
+
+                    component.element = element;
+                    delete element._components[key];
+
+                    var callbacks = [].concat(
+                        _global.beforeDestroyHooks,
+                        [ component.beforeDestroy ],
+                        [ component.onDestroy ],
+                        [ component.afterDestroy ],
+                        _global.afterDestroyHooks
+                    );
+
+                    promises.push(
+                        V.promises(component, callbacks)
+                    );
+
+                });
+            });
+
+            await Promise.all(promises);
+
+            return target;
+        }
+
+    });
+
+})(window.V);(function (V) {
+
+    // PRIVATE
+
     /**
-     * Abstract component
+     * Global data
+     * @private
      * @param {Object}
      */
-    var _abstractComponent = {
+    var _global = {
+        events: {}
+    };
 
-        element: null,
-        selector: null,
-        namespace: null,
+    // PUBLIC
 
-        constructor: _promise,
-        destructor: _promise,
-        shouldRender: _promise,
-        beforeRender: _promise,
-        onRender: _promise,
-        afterRender: _promise,
-        beforeDestroy: _promise,
-        onDestroy: _promise,
-        afterDestroy: _promise,
-
-        /**
-         * Set element data
-         * @param {String} key
-         * @param {mixed} value
-         * @return {Object}
-         */
-        set: function (key, value) {
-
-            this
-                .element
-                ._components[this.namespace][key] = value;
-
-            return this;
-        },
-
-        /**
-         * Get element data
-         * @param {String} key
-         * @param {mixed} defaultValue
-         * @return {mixed}
-         */
-        get: function (key, defaultValue) {
-
-            var value = this
-                .element
-                ._components[this.namespace][key];
-
-            if (value === undefined) {
-                return defaultValue;
-            }
-
-            return value;
-        },
+    V.extend(V._abstractComponent, {
 
         /**
          * Attach event on component
+         * @public
+         * @name V.component.on
+         * @kind function
          * @param {String} event
          * @param {String|Function} selector
          * @param {Function} callback
@@ -347,7 +958,7 @@
                 }
 
                 self.element = element;
-                callback.apply(e.target, [e]);
+                callback.apply(e.target.closest(selector), [e]);
 
             };
 
@@ -355,12 +966,17 @@
                 _global.events[event] = {};
             }
 
-            _global.events[event][selector] = V.on(document, event, selector, fn);
+            _global.events[event][selector] = V.on(
+                document, event, selector, fn
+            );
 
         },
 
         /**
          * Remove event on component
+         * @public
+         * @name V.component.off
+         * @kind function
          * @param {String} event
          * @param {String} selector
          * @return {void}
@@ -389,476 +1005,52 @@
 
         }
 
-    };
+    });
 
-    /**
-     * Run before render hooks
-     * @param {Object} instance
-     * @return {Promise}
-     */
-    var beforeRender = async function (instance) {
-
-        var promises = [];
-
-        if (instance.beforeRender) {
-            promises.push(
-                V.promisify(instance, instance.beforeRender)
-            );
-        }
-
-        var hooks = _global.beforeRenderHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(instance, hooks[index])
-            );
-        }
-
-        await Promise.all(promises);
-
-        return instance;
-    };
-
-    /**
-     * Run after render hooks
-     * @param {Object} instance
-     * @return {Promise}
-     */
-    var afterRender = async function (instance) {
-
-        var promises = [];
-
-        if (instance.afterRender) {
-            promises.push(
-                V.promisify(instance, instance.afterRender)
-            );
-        }
-
-        var hooks = _global.afterRenderHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(instance, hooks[index])
-            );
-        }
-
-        // Mount child components
-        promises.push(
-            V.mount(instance.element)
-        );
-
-        await Promise.all(promises);
-
-        return instance;
-    };
-
-    /**
-     * Run before destroy hooks
-     * @param {Object} instance
-     * @return {Promise}
-     */
-    var beforeDestroy = async function (instance) {
-
-        var promises = [];
-
-        if (instance.beforeDestroy) {
-            promises.push(
-                V.promisify(instance, instance.beforeDestroy)
-            );
-        }
-
-        var hooks = _global.beforeDestroyHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(instance, hooks[index])
-            );
-        }
-
-        await Promise.all(promises);
-
-        return instance;
-    };
-
-    /**
-     * Run after destroy hooks
-     * @param {Object} instance
-     * @return {Promise}
-     */
-    var afterDestroy = async function (instance) {
-
-        var promises = [];
-
-        if (instance.afterDestroy) {
-            promises.push(
-                V.promisify(instance, instance.afterDestroy)
-            );
-        }
-
-        var hooks = _global.afterDestroyHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(instance, hooks[index])
-            );
-        }
-
-        // unMount child components
-        promises.push(
-            V.unMount(instance.element)
-        );
-
-        await Promise.all(promises);
-
-        return instance;
-    };
-
-    /**
-     * Mount component on matches selector for given target
-     * @param {Object} component
-     * @param {Node} target
-     * @return {Promise}
-     */
-    var mountComponent = async function (component, target) {
-
-        var promises = [];
-
-        V.items(component.selector, target)
-            .forEach(function (element) {
-
-                if (element._components === undefined) {
-                    element._components = {};
-                }
-
-                var key = component.namespace;
-
-                // Already mounted
-                if (element._components[key] !== undefined) {
-                    return;
-                }
-
-                element._components[key] = {};
-                element.dataset.vid = Math.random().toString(16).substr(2, 8);
-
-                component.element = element;
-
-                promises.push(
-                    V.mountComponent(component)
-                );
-
-            });
-
-        await Promise.all(promises);
-
-        return component;
-    };
-
-    /**
-     * unMount component on matches selector for given target
-     * @param {Object} component
-     * @param {Node} target
-     * @return {Promise}
-     */
-    var unMountComponent = async function (component, target) {
-
-        var promises = [];
-
-        // Find items for the component on target
-        V.items(component.selector, target)
-            .forEach(function (element) {
-
-                if (element._components === undefined) {
-                    return;
-                }
-
-                var key = component.namespace;
-                if (element._components[key] === undefined) {
-                    return;
-                }
-
-                component.element = element;
-                delete element._components[key];
-
-                promises.push(
-                    V.unMountComponent(component)
-                );
-
-            });
-
-        await Promise.all(promises);
-
-        return component;
-    };
+})(window.V);(function (V) {
 
     // PUBLIC
 
-    V.extend({
+    V.extend(V._abstractComponent, {
 
         /**
-         * Add global callback before component render
-         * @param {Function} callback
-         * @return {void}
+         * Set element data
+         * @public
+         * @name V.component.set
+         * @kind function
+         * @param {String} key
+         * @param {mixed} value
+         * @return {Object}
          */
-        beforeRender: function (callback) {
-            _global.beforeRenderHooks.push(callback);
+        set: function (key, value) {
+
+            this
+                .element
+                ._components[this.namespace][key] = value;
+
+            return this;
         },
 
         /**
-         * Add global callback after component render
-         * @param {Function} callback
-         * @return {void}
+         * Get element data
+         * @public
+         * @name V.component.get
+         * @kind function
+         * @param {String} key
+         * @param {mixed} defaultValue
+         * @return {mixed}
          */
-        afterRender: function (callback) {
-            _global.afterRenderHooks.push(callback);
-        },
+        get: function (key, defaultValue) {
 
-        /**
-         * Add global callback before component destroy
-         * @param {Function} callback
-         * @return {void}
-         */
-        beforeDestroy: function (callback) {
-            _global.beforeDestroyHooks.push(callback);
-        },
+            var value = this
+                .element
+                ._components[this.namespace][key];
 
-        /**
-         * Add global callback after component destroy
-         * @param {Function} callback
-         * @return {void}
-         */
-        afterDestroy: function (callback) {
-            _global.afterDestroyHooks.push(callback);
-        },
-
-        /**
-         * Create new component
-         * @param {String} selector
-         * @param {Object} data
-         * @return {Promise}
-         */
-        component: async function (selector, data) {
-
-            var promises = [];
-            var component = Object.assign(
-                {},
-                _abstractComponent,
-                data
-            );
-
-            component.selector = selector;
-            component.namespace = selector.replace(/[\W_]+/g, '_');
-
-            if (typeof component.constructor == 'function') {
-                promises.push(
-                    V.promisify(component, component.constructor)
-                );
+            if (value === undefined) {
+                return defaultValue;
             }
 
-            try {
-
-                await Promise.all(promises);
-                _global.components.push(component);
-
-            } catch (error) {
-                console.warn('Component construct error:', error);
-            }
-
-            return component;
-        },
-
-        /**
-         * Remove component
-         * @param {String} selector
-         * @return {Promise}
-         */
-        removeComponent: async function (selector) {
-
-            var promises = [];
-            var component = null;
-            var index = null;
-
-            _global.components.forEach(function (theComponent, theIndex) {
-                if (theComponent.selector == selector) {
-                    component = theComponent;
-                    index = theIndex;
-                }
-            });
-
-            if (!component) {
-                return selector;
-            }
-
-            promises.push(
-                unMountComponent(component, document.body)
-            );
-
-            if (typeof component.destructor == 'function') {
-                promises.push(
-                    V.promisify(component, component.destructor)
-                );
-            }
-
-            try {
-
-                await Promise.all(promises);
-                delete _global.components[index];
-
-            } catch (error) {
-                console.warn('Component destruct error:', error);
-            }
-
-            return selector;
-        },
-
-        /**
-         * Mount components on given target child elements
-         * @param {Node} target
-         * @return {Promise}
-         */
-        mount: async function (target) {
-
-            var promises = [];
-
-            _global.components.forEach(function (component) {
-                promises.push(
-                    mountComponent(component, target)
-                );
-            });
-
-            await Promise.all(promises);
-
-            return target;
-        },
-
-        /**
-         * unMount components on given target child elements
-         * @param {Node} target
-         * @return {Promise}
-         */
-        unMount: async function (target) {
-
-            var promises = [];
-
-            _global.components.forEach(function (component) {
-                promises.push(
-                    unMountComponent(component, target)
-                );
-            });
-
-            await Promise.all(promises);
-
-            return target;
-        },
-
-        /**
-         * Mount component to start render process
-         * @param {Object} component
-         * @return {Promise}
-         */
-        mountComponent: async function (component) {
-
-            var self = this;
-
-            var resolve = function (instance) {
-                return self.render(instance);
-            };
-
-            var reject = function (instance) {
-                return self.render(instance);
-            };
-
-            if (typeof component == 'function') {
-
-                try {
-                    let instance = await new Promise(component);
-                    await resolve(instance);
-                } catch (error) {
-                    reject(instance);
-                }
-
-            } else if (typeof component == 'object') {
-                return resolve(component);
-            }
-
-            throw 'Unknown component reference';
-
-        },
-
-        /**
-         * UnMount component to start destroy process
-         * @param {mixed} component
-         * @return {Promise}
-         */
-        unMountComponent: async function (component) {
-
-            var self = this;
-
-            var resolve = function (instance) {
-                return self.destroy(instance);
-            };
-
-            var reject = function (instance) {
-                return self.destroy(instance);
-            };
-
-            if (typeof component == 'function') {
-                try {
-                    let instance = await new Promise(component);
-                    await resolve(instance);
-                } catch (error) {
-                    reject(instance);
-                }
-            } else if (typeof component == 'object') {
-                return resolve(component);
-            }
-
-            throw 'Unknown component reference';
-
-        },
-
-        /**
-         * Render component
-         * @param {Object} component
-         * @return {Promise}
-         */
-        render: async function (component) {
-
-            try {
-
-                var promises = [
-                    V.promisify(component, component.shouldRender),
-                    beforeRender(component),
-                    V.promisify(component, component.onRender),
-                    afterRender(component)
-                ];
-
-                await Promise.all(promises);
-
-            } catch (error) {
-                console.warn('Component render error:', error);
-            }
-
-            return component;
-        },
-
-        /**
-         * Process component destroy
-         * @param {Object} component
-         * @return {Promise}
-         */
-        destroy: async function (component) {
-
-            try {
-
-                var promises = [
-                    beforeDestroy(component),
-                    V.promisify(component, component.onDestroy),
-                    afterDestroy(component)
-                ];
-
-                await Promise.all(promises);
-
-            } catch (error) {
-                console.warn('Component destroy error:', error);
-            }
-
-            return component;
+            return value;
         }
 
     });
@@ -869,6 +1061,7 @@
 
     /**
      * Global data
+     * @private
      * @param {Object}
      */
     var _global = {
@@ -877,49 +1070,8 @@
     };
 
     /**
-     * Run intercept before hooks
-     * @param {Object} request
-     * @return {Promise}
-     */
-    var interceptBefore = async function (request) {
-
-        var promises = [];
-
-        var hooks = _global.interceptBeforeHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(request, hooks[index])
-            );
-        }
-
-        await Promise.all(promises);
-
-        return request;
-    };
-
-    /**
-     * Run intercept after hooks
-     * @param {Object} request
-     * @return {Promise}
-     */
-    var interceptAfter = async function (request) {
-
-        var promises = [];
-
-        var hooks = _global.interceptAfterHooks;
-        for (let index = 0; index < hooks.length; index++) {
-            promises.push(
-                V.promisify(request, hooks[index])
-            );
-        }
-
-        await Promise.all(promises);
-
-        return request;
-    };
-
-    /**
      * Decode data to the correct format
+     * @private
      * @param {mixed} data
      * @return {Object}
      */
@@ -951,11 +1103,19 @@
     };
 
     // PUBLIC
-    V.extend({
+    V.extend(V, {
+
+        /**
+         * HTTP request lib
+         * @name V.http
+         */
         http: {
 
             /**
              * Add interceptor callback before each HTTP request
+             * @public
+             * @name V.http.interceptBefore
+             * @kind function
              * @param {Function} callback
              * @return {void}
              */
@@ -965,6 +1125,9 @@
 
             /**
              * Add interceptor callback after each HTTP request
+             * @public
+             * @name V.http.interceptAfter
+             * @kind function
              * @param {Function} callback
              * @return {void}
              */
@@ -974,6 +1137,10 @@
 
             /**
              * Make HTTP requests
+             * @async
+             * @public
+             * @name V.http.request
+             * @kind function
              * @param {String} method
              * @param {String} url
              * @param {Object} data
@@ -991,7 +1158,10 @@
                     response: null
                 };
 
-                request = await interceptBefore(request);
+                request = await V.promises(
+                    request,
+                    _global.interceptBeforeHooks
+                );
 
                 if (request.headers) {
                     request.options.headers = request.headers;
@@ -1029,7 +1199,11 @@
                     fetch(request.url, request.options)
                         .then(function (response) {
                             request.response = response;
-                            return interceptAfter(request);
+
+                            return V.promises(
+                                request,
+                                _global.interceptAfterHooks
+                            );
                         })
                         .then(function (request) {
                             return request.response;
@@ -1061,6 +1235,9 @@
 
             /**
              * Make GET HTTP requests
+             * @public
+             * @name V.http.get
+             * @kind function
              * @param {String} url
              * @param {Object} data
              * @param {Object} headers
@@ -1072,6 +1249,9 @@
 
             /**
              * Make POST HTTP requests
+             * @public
+             * @name V.http.post
+             * @kind function
              * @param {String} url
              * @param {Object} data
              * @param {Object} headers
@@ -1083,6 +1263,9 @@
 
             /**
              * Make PUT HTTP requests
+             * @public
+             * @name V.http.put
+             * @kind function
              * @param {String} url
              * @param {Object} data
              * @param {Object} headers
@@ -1094,6 +1277,9 @@
 
             /**
              * Make DELETE HTTP requests
+             * @public
+             * @name V.http.delete
+             * @kind function
              * @param {String} url
              * @param {Object} data
              * @param {Object} headers
@@ -1102,7 +1288,113 @@
             delete: function (url, data, headers) {
                 return this.request('DELETE', url, data, headers);
             }
+
         }
+
+    });
+
+})(window.V);(function (V) {
+
+    V.extend(V, {
+
+        /**
+         * Local storage lib
+         * @name V.local
+         */
+        local: {
+
+            /**
+             * Set item on localStorage
+             * @public
+             * @name V.local.set
+             * @kind function
+             * @param {String} name
+             * @param {Mixed} value
+             * @return {Object}
+             */
+            set: function (name, value) {
+
+                if (value instanceof Object) {
+                    value = JSON.stringify(value);
+                }
+
+                return localStorage.setItem(name, value);
+            },
+
+            /**
+             * Retrieve item of localStorage
+             * @public
+             * @name V.local.get
+             * @kind function
+             * @param {String} name
+             * @param {Boolean} parse
+             * @return {Mixed}
+             */
+            get: function (name, parse) {
+
+                var value = localStorage.getItem(name);
+
+                if (parse == true && value) {
+                    value = JSON.parse(value);
+                }
+
+                return value;
+            }
+
+        }
+
+    });
+
+})(window.V);(function (V) {
+
+    V.extend(V, {
+
+        /**
+         * Session storage lib
+         * @name V.session
+         */
+        session: {
+
+            /**
+             * Set item on sessionStorage
+             * @public
+             * @name V.session.set
+             * @kind function
+             * @param {String} name
+             * @param {Mixed} value
+             * @return {Object}
+             */
+            set: function (name, value) {
+
+                if (value instanceof Object) {
+                    value = JSON.stringify(value);
+                }
+
+                return sessionStorage.setItem(name, value);
+            },
+
+            /**
+             * Retrieve item of sessionStorage
+             * @public
+             * @name V.session.get
+             * @kind function
+             * @param {String} name
+             * @param {Boolean} parse
+             * @return {Mixed}
+             */
+            get: function (name, parse) {
+
+                var value = sessionStorage.getItem(name);
+
+                if (parse == true && value) {
+                    value = JSON.parse(value);
+                }
+
+                return value;
+            }
+
+        }
+
     });
 
 })(window.V);

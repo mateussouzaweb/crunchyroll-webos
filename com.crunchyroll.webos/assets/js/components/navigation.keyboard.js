@@ -136,10 +136,9 @@ V.component('[data-navigation-keyboard]', {
     /**
      * Constructor
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    constructor: function(resolve, reject){
+    constructor: function(resolve){
 
         var self = this;
         var keys = self.keys;
@@ -165,10 +164,9 @@ V.component('[data-navigation-keyboard]', {
     /**
      * On render
      * @param {Function} resolve
-     * @param {Function} reject
      * @return {void}
      */
-    onRender: function(resolve, reject){
+    onRender: function(resolve){
 
         var self = this;
             self.lastKey = null;
@@ -247,7 +245,7 @@ V.component('[data-navigation-keyboard]', {
 
         var self = this;
         var body = document.body;
-        var videoActive = body.classList.contains('video-active');
+        var videoActive = body.classList.contains('page-video');
         var result;
 
         if( videoActive ){
@@ -389,7 +387,6 @@ V.component('[data-navigation-keyboard]', {
                   || key == keys.BACKSPACE
                   || key == keys.DELETE ){
             window.pauseVideo();
-            window.hideVideo();
             return true;
 
         // UP (behavior as left navigation)
