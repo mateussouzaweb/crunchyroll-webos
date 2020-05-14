@@ -40,7 +40,7 @@ V.component('[data-login]', {
      * @return {String}
      */
     getHTML: function(){
-        return template('login').render();
+        return '<div data-login></div>';
     },
 
     /**
@@ -51,6 +51,8 @@ V.component('[data-login]', {
     onRender: function(resolve){
 
         var self = this;
+
+        self.element.innerHTML = template('login').render();
 
         // Private
         self.on('submit', 'form', function(e){
