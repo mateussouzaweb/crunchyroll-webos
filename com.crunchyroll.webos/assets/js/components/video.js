@@ -189,7 +189,6 @@ V.component('[data-video]', {
 
         element.classList.add('video-active');
         window.setActiveElement(playButton);
-        self.toggleFullScreen();
 
     },
 
@@ -203,7 +202,10 @@ V.component('[data-video]', {
         var element = self.element;
 
         element.classList.remove('video-active');
-        self.toggleFullScreen();
+
+        if( document.fullscreenElement ){
+            document.exitFullscreen();
+        }
 
     },
 
@@ -440,10 +442,7 @@ V.component('[data-video]', {
         if( document.fullscreenElement ){
             document.exitFullscreen();
         } else {
-            try{
-                element.requestFullscreen();
-            } catch (error) {
-            }
+            element.requestFullscreen().catch(function(){});
         }
 
     },
