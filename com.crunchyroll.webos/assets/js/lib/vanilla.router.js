@@ -165,6 +165,7 @@
                 path = path.replace(new RegExp('[/]*$'), '');
                 path = path.replace(new RegExp('^[/]*'), '');
                 path = ('/' + path).replace('//', '/').replace('/?', '?');
+                path = path.split('?')[0];
 
                 return path;
             },
@@ -243,7 +244,7 @@
                     }
 
                     var query = V.router.retrieveQueryFor(
-                        window.location.search
+                        this.location
                     );
                     var params = V.router.retrieveParamsFor(
                         this.location, next
@@ -258,8 +259,6 @@
                 };
 
                 try {
-
-                    location = this.normalizePath(location);
 
                     var change = {
                         previous: V.router.$active,
@@ -296,8 +295,14 @@
             retrieveParamsFor: function (path, match) {
 
                 var params = {};
-                var parts = this.normalizePath(match.path).split('/').filter(Boolean);
-                var url = this.normalizePath(path).split('/').filter(Boolean);
+
+                var parts = this.normalizePath(match.path)
+                    .split('/')
+                    .filter(Boolean);
+
+                var url = this.normalizePath(path)
+                    .split('/')
+                    .filter(Boolean);
 
                 url.forEach(function (value, index) {
                     if (parts[index] !== undefined && ':'.charCodeAt(0) === parts[index].charCodeAt(0)) {
@@ -321,6 +326,8 @@
 
                 var query = {};
 
+                search = search.split('?');
+                search = (search[1]) ? search[1] : search[0];
                 search = search.trim().replace(/^(\?|#|&)/, '')
 
                 if (search == '') {
