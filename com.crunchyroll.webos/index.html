@@ -29,21 +29,21 @@
         <div id="menu" data-menu>
 
             <div class="links">
-                <a href="/series"
+                <a href="./series"
                     class="menu-link menu-series menu-serie active"
                     tabindex="0">Series</a>
-                <a href="/queue"
+                <a href="./queue"
                     class="menu-link menu-queue"
                     data-content="queue"
                     tabindex="0">Queue</a>
-                <a href="/history"
+                <a href="./history"
                     class="menu-link menu-history"
                     tabindex="0">History</a>
             </div>
 
             <div class="account">
                 <div class="account-name">&nbsp;</div>
-                <a href="/logout"
+                <a href="./logout"
                     class="account-logout"
                     tabindex="0">Logout</a>
             </div>
@@ -306,6 +306,7 @@
     V.on(window, 'load', function(){
         V.mount(document.body).then(function(){
             V.router.$mode = 'hash';
+            V.router.$base = window.location.pathname;
             V.trigger(window, 'popstate');
         });
     });

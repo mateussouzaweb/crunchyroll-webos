@@ -155,7 +155,7 @@ V.component('[data-history]', {
         var episode = data.media;
         var playhead = episode.playhead;
         var duration = episode.duration;
-        var url = '/serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
+        var url = './serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
 
         var html = template('history-item')
             .replace('{SERIE_ID}', serie.series_id)

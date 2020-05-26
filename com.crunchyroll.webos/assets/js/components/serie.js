@@ -289,7 +289,7 @@ V.component('[data-serie]', {
         var episode = data;
         var playhead = episode.playhead;
         var duration = episode.duration;
-        var url = '/serie/' + episode.series_id + '/episode/' + episode.media_id + '/video';
+        var url = './serie/' + episode.series_id + '/episode/' + episode.media_id + '/video';
 
         var html = template('serie-episode-item')
             .replace('{EPISODE_ID}', episode.media_id)

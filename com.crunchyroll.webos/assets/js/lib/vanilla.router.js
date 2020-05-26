@@ -121,6 +121,13 @@
             $mode: window.history.pushState ? 'history' : 'hash',
 
             /**
+             * Route base URL
+             * @public
+             * @var {String}
+             */
+            $base: '',
+
+            /**
              * Active route definition
              * @public
              * @var {Object}
@@ -157,15 +164,20 @@
              * @name V.router.normalizePath
              * @kind function
              * @param {String} path
+             * @param {Boolean} removeQuery
              * @return {String}
              */
-            normalizePath: function (path) {
+            normalizePath: function (path, removeQuery) {
 
                 path = path.replace(window.location.origin, '');
+                path = path.replace(this.$base, '');
                 path = path.replace(new RegExp('[/]*$'), '');
                 path = path.replace(new RegExp('^[/]*'), '');
                 path = ('/' + path).replace('//', '/').replace('/?', '?');
-                path = path.split('?')[0];
+
+                if( removeQuery ){
+                    path = path.split('?')[0];
+                }
 
                 return path;
             },
@@ -194,7 +206,7 @@
                     definition
                 );
 
-                route.path = this.normalizePath(route.path);
+                route.path = this.normalizePath(route.path, true);
 
                 var regex = route.path;
                 var pattern = ['(:[a-zA-Z]+)'];
@@ -260,6 +272,8 @@
 
                 try {
 
+                    location = this.normalizePath(location);
+
                     var change = {
                         previous: V.router.$active,
                         next: V.router.getMatch(location),
@@ -296,11 +310,11 @@
 
                 var params = {};
 
-                var parts = this.normalizePath(match.path)
+                var parts = this.normalizePath(match.path, true)
                     .split('/')
                     .filter(Boolean);
 
-                var url = this.normalizePath(path)
+                var url = this.normalizePath(path, true)
                     .split('/')
                     .filter(Boolean);
 
@@ -359,7 +373,7 @@
              */
             getMatch: function (path) {
 
-                var url = this.normalizePath(path);
+                var url = this.normalizePath(path, true);
                 var routes = _global.routes;
                 var match = null;
 

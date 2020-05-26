@@ -163,7 +163,7 @@ V.component('[data-queue]', {
 
         var playhead = episode.playhead;
         var duration = episode.duration;
-        var url = '/serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
+        var url = './serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
 
         var html = template('queue-item')
             .replace('{SERIE_ID}', serie.series_id)

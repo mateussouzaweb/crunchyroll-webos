@@ -227,7 +227,7 @@ V.component('[data-series]', {
     toSerie: function(data){
 
         var html = template('series-item')
-            .replace('{SERIE_URL}', '/serie/' + data.series_id)
+            .replace('{SERIE_URL}', './serie/' + data.series_id)
             .replace('{SERIE_ID}', data.series_id)
             .replace('{SERIE_NAME}', data.name)
             .replace('{SERIE_DESCRIPTION}', data.description)
