@@ -440,7 +440,7 @@
 
     V.on(document, 'click', 'a', function (e) {
 
-        var link = e.currentTarget;
+        var link = e.target;
         var location = window.location;
 
         var stripHash = function (location) {
@@ -465,6 +465,7 @@
 
         // Ignore case when a hash is being tacked on the current URL
         if (V.router.$mode !== 'hash'
+            && link.href
             && link.href.indexOf('#') > -1
             && stripHash(link) == stripHash(location)) {
             return;
