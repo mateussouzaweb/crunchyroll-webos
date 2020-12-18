@@ -1,4 +1,3 @@
-
 V.component('[data-navigation-keyboard]', {
 
     /**
@@ -225,7 +224,7 @@ V.component('[data-navigation-keyboard]', {
             this.activeElement.blur();
         }
 
-        element.scrollIntoViewIfNeeded();
+        element.scrollIntoView();
         element.classList.add('hover');
 
         if( element.nodeName !== 'INPUT' ){
