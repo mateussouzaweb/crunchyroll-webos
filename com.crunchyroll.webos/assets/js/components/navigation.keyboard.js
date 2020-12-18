@@ -133,34 +133,6 @@ V.component('[data-navigation-keyboard]', {
     },
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
-     */
-    constructor: function(resolve){
-
-        var self = this;
-        var keys = self.keys;
-        var _keys = Object.values(keys);
-
-        // Events
-        V.on(window, 'keydown', function(e){
-            if( _keys.indexOf(e.keyCode) !== -1
-                && self.handleKeyPress(e) ){
-                e.preventDefault();
-            }
-        });
-
-        // Public
-        window.setActiveElement = function(element){
-            return self.setActiveElement(element);
-        };
-
-        resolve(this);
-
-    },
-
-    /**
      * On render
      * @param {Function} resolve
      * @return {void}
@@ -173,6 +145,7 @@ V.component('[data-navigation-keyboard]', {
             self.activeElement = null;
             self.usingMouse = false;
 
+        // Mouse events
         var handleMouse = function(){
 
             if( self.usingMouse ){
@@ -198,15 +171,31 @@ V.component('[data-navigation-keyboard]', {
             handleMouse();
         });
 
-        V.on(document, 'mouseenter mousemove', function(e){
+        V.on(document, 'mouseenter mousemove', function(){
             self.usingMouse = true;
             handleMouse();
         });
 
-        V.on(document, 'mouseleave', function(e){
+        V.on(document, 'mouseleave', function(){
             self.usingMouse = false;
             handleMouse();
         });
+
+        // Keyboard Events
+        var keys = self.keys;
+        var _keys = Object.values(keys);
+
+        V.on(window, 'keydown', function(e){
+            if( _keys.indexOf(e.keyCode) !== -1
+                && self.handleKeyPress(e) ){
+                e.preventDefault();
+            }
+        });
+
+        // Public
+        window.setActiveElement = function(element){
+            return self.setActiveElement(element);
+        };
 
         resolve(this);
 

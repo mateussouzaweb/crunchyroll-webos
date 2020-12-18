@@ -1,24 +1,6 @@
 V.component('[data-menu]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
-     */
-    constructor: function(resolve){
-
-        var self = this;
-
-        // Public
-        window.updateMenu = function(){
-            return self.updateMenu();
-        };
-
-        resolve(this);
-
-    },
-
-    /**
      * After render
      * @param {Function} resolve
      * @return {void}
@@ -43,6 +25,11 @@ V.component('[data-menu]', {
 
             resolve(this);
         });
+
+        // Public
+        window.updateMenu = function(){
+            return self.updateMenu();
+        };
 
         self.updateMenu();
         resolve(this);

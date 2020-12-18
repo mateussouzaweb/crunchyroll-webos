@@ -7,28 +7,6 @@ V.component('[data-video]', {
      */
     constructor: function(resolve){
 
-        var self = this;
-
-        // Public
-        window.playVideo = function(){
-            return self.playVideo();
-        };
-        window.pauseVideo = function(){
-            return self.pauseVideo();
-        };
-        window.stopVideo = function(){
-            return self.stopVideo();
-        };
-        window.toggleVideo = function(){
-            return self.toggleVideo();
-        }
-        window.forwardVideo = function(){
-            return self.forwardVideo();
-        }
-        window.backwardVideo = function(){
-            return self.backwardVideo();
-        }
-
         V.router.add({
             id: 'video',
             path: '/serie/:serieId/episode/:episodeId/video',
@@ -141,6 +119,26 @@ V.component('[data-video]', {
         self.on('click input', 'input[type="range"]', function(e){
             self.skipAhead(e.target.dataset.seek);
         });
+
+        // Public
+        window.playVideo = function(){
+            return self.playVideo();
+        };
+        window.pauseVideo = function(){
+            return self.pauseVideo();
+        };
+        window.stopVideo = function(){
+            return self.stopVideo();
+        };
+        window.toggleVideo = function(){
+            return self.toggleVideo();
+        }
+        window.forwardVideo = function(){
+            return self.forwardVideo();
+        }
+        window.backwardVideo = function(){
+            return self.backwardVideo();
+        }
 
         resolve(this);
     },
