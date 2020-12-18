@@ -232,6 +232,7 @@ V.component('[data-series]', {
             .replace('{SERIE_NAME}', data.name)
             .replace('{SERIE_DESCRIPTION}', data.description)
             .replace('{SERIE_IMAGE}', data.portrait_image.full_url)
+            .replace('data-src', 'src')
             .render();
 
         return html;

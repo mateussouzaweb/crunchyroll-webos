@@ -300,6 +300,7 @@ V.component('[data-serie]', {
             .replace('{EPISODE_PLAYHEAD}', playhead)
             .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
             .replace('{EPISODE_URL}', url)
+            .replace('data-src', 'src')
             .render();
 
         return html;
