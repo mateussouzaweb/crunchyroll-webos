@@ -3,15 +3,18 @@
 # App scripts
 # http://webostv.developer.lge.com/sdk/tools/using-webos-tv-cli
 
-# Linux
-# export ARES_SDK="/usr/local/share/webOS_TV_SDK/CLI/bin"
-
 # Mac
-export ARES_SDK="/opt/webOS_TV_SDK/CLI/bin"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export ARES_SDK="/opt/webOS_TV_SDK/CLI/bin"
+# Linux
+else
+    export ARES_SDK="/usr/local/share/webOS_TV_SDK/CLI/bin"
+fi
 
 # Others
 export ID="com.crunchyroll.webos"
 export DEVICE="tv"
+export VERSION="1.1.0"
 
 # TV METHODS
 function list_device(){
@@ -36,7 +39,7 @@ function build(){
 }
 
 function install(){
-    $ARES_SDK/ares-install -s internal --device $DEVICE ./bin/${ID}_1.1.0_all.ipk
+    $ARES_SDK/ares-install -s internal --device $DEVICE ./bin/${ID}_${VERSION}.ipk
 }
 
 function launch(){
