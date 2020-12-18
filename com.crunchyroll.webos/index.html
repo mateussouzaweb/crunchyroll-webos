@@ -304,9 +304,14 @@
     <script>
     V.on(window, 'load', function(){
         V.mount(document.body).then(function(){
+
             V.router.$mode = 'hash';
             V.router.$base = window.location.pathname;
-            V.trigger(window, 'popstate');
+
+            window.setTimeout(function(){
+                V.trigger(window, 'popstate');
+            }, 500);
+
         });
     });
     </script>
