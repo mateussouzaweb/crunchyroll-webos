@@ -12,6 +12,12 @@ var Api = {
         var url = 'https://api.crunchyroll.com';
             url += endpoint + '.0.json';
 
+        var proxy = document.body.dataset.proxy;
+
+        if( proxy ){
+            url = proxy + encodeURI(url);
+        }
+
         data.version = '0';
         data.connectivity_type = 'ethernet';
 

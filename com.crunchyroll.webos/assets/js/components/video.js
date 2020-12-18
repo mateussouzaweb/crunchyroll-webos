@@ -272,6 +272,12 @@ V.component('[data-video]', {
                     maxBufferSize: 30 * 1000 * 1000
                 });
 
+                var proxy = document.body.dataset.proxy;
+
+                if( proxy ){
+                    stream = proxy + encodeURI(stream);
+                }
+
                 hls.loadSource(stream);
                 hls.attachMedia(video);
 
