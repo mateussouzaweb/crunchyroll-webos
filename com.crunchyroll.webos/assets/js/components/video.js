@@ -468,7 +468,7 @@ V.component('[data-video]', {
         var offsetX = event.offsetX;
         var pageX = event.pageX;
 
-        if( event instanceof TouchEvent ){
+        if( window.TouchEvent && event instanceof TouchEvent ){
             offsetX = event.targetTouches[0].clientX - bcr.x;
             pageX = event.targetTouches[0].pageX;
         }
