@@ -310,7 +310,7 @@
         V.mount(document.body).then(function(){
 
             V.router.$mode = 'hash';
-            V.router.$base = window.location.pathname;
+            V.router.$base = window.location.pathname.replace('index.html', '');
 
             window.setTimeout(function(){
                 V.trigger(window, 'popstate');
