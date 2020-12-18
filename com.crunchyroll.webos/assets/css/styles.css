@@ -693,6 +693,22 @@ body.page-login #content{
     margin-top: 0.83rem;
 }
 
+#content .list-pagination{
+    padding: 1rem 0;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+#content .list-pagination a{
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+}
+#content .list-pagination a[href=""]{
+    opacity: 0;
+    pointer-events: none;
+}
+
 #content .series-item .list-item-image{
     padding: 0;
 }

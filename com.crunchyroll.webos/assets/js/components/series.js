@@ -139,10 +139,19 @@ V.component('[data-series]', {
                 return self.toSerie(item);
             }).join('');
 
+            var nextPage = '/series/' + filter + '/' + (pageNumber + 1);
+            var previousPage = '';
+
+            if( pageNumber > 1 ){
+                previousPage = '/series/' + filter + '/' + (pageNumber - 1)
+            }
+
             var html = template('series')
                 .replace('{SERIES_FILTER_OPTIONS}', options)
                 .replace('{SERIES_SEARCH}', search)
                 .replace('{SERIES_ITEMS}', items)
+                .replace('{SERIES_PREVIOUS_PAGE}', previousPage)
+                .replace('{SERIES_NEXT_PAGE}', nextPage)
                 .render();
 
             element.innerHTML = html;
