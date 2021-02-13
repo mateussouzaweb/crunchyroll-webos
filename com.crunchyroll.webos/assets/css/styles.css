@@ -260,6 +260,7 @@ progress::-moz-progress-bar {
 /* VIDEO */
 body.page-video{
     background-color: #000;
+    overflow: hidden;
 }
 body.page-video #menu{
     display: none;
@@ -275,16 +276,19 @@ body.page-video #content{
     position: relative;
     color: #fff;
     padding: 0;
+    overflow: hidden;
 }
 #video video{
     width: 100vw;
     height: 100vh;
     background: #000;
     color: #fff;
+    overflow: hidden;
 }
 #video video:-webkit-full-screen {
     width: 100% !important;
     height: 100% !important;
+    overflow: hidden;
 }
 #video .video-control-bar{
     align-items: center;
@@ -374,7 +378,7 @@ body.page-video #content{
     opacity: 1;
     top: 50%;
     transition: all 0.4s ease-in-out;
-    width: 20rem;
+    width: 22rem;
     z-index: 2;
 }
 .video-playing #video .video-extra-bar{
