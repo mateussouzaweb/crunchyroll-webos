@@ -14,7 +14,7 @@ fi
 # Others
 export ID="com.crunchyroll.webos"
 export DEVICE="tv"
-export VERSION="1.2.0"
+export VERSION="1.3.0"
 
 # TV METHODS
 function list_device(){

@@ -7,53 +7,50 @@
 
     <title>Crunchyroll WebOS TV</title>
 
-    <script src="./assets/js/lib/hls.js"></script>
-    <script src="./assets/js/lib/vanilla.ui.js"></script>
-    <script src="./assets/js/lib/vanilla.router.js"></script>
-    <script src="./assets/js/lib/vanilla.component.js"></script>
-    <script src="./assets/js/lib/template.js"></script>
-    <script src="./assets/js/lib/api.js"></script>
-
-    <link href="./assets/css/styles.css" rel="stylesheet">
-    <link rel="shortcut icon" href="./assets/img/130px.png" type="image/png">
+    <link href="/assets/css/styles.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/assets/img/130px.png" type="image/png">
 
 </head>
 <body data-proxy="">
-    <div id="main" data-navigation-keyboard>
+
+    <div id="main" data-keyboard-navigation>
 
         <div id="loading" data-loading>
             <span>&nbsp;</span>
         </div>
 
-        <div id="menu" data-menu>
-
-            <div class="links">
-                <a href="./series"
-                    class="menu-link menu-series menu-serie active"
-                    tabindex="0">Series</a>
-                <a href="./queue"
-                    class="menu-link menu-queue"
-                    data-content="queue"
-                    tabindex="0">Queue</a>
-                <a href="./history"
-                    class="menu-link menu-history"
-                    tabindex="0">History</a>
-            </div>
-
-            <div class="account">
-                <div class="account-name">&nbsp;</div>
-                <a href="./logout"
-                    class="account-logout"
-                    tabindex="0">Logout</a>
-            </div>
-
-        </div>
-
-        <div id="content" data-router></div>
+        <div id="menu" data-menu></div>
+        <div id="content" data-view></div>
 
     </div>
 
-    <template id="video">
+    <script type="text/vanilla-template" id="template-menu">
+
+        <div class="links">
+            <a href="/series"
+                class="link active"
+                tabindex="0">Series</a>
+            <a href="/queue"
+                class="link"
+                data-content="queue"
+                tabindex="0">Queue</a>
+            <a href="/history"
+                class="link"
+                tabindex="0">History</a>
+        </div>
+
+        {{ if store('sessionId') }}
+        <div class="account">
+            <div class="account-name">{{ store('userName') }}</div>
+            <a href="/logout"
+                class="account-logout"
+                tabindex="0">Logout</a>
+        </div>
+        {{ end }}
+
+    </script>
+
+    <script type="text/vanilla-template" id="template-video">
         <div id="video">
 
             <div class="video-title-bar"></div>
@@ -65,6 +62,10 @@
                 <button tabindex="0"
                     class="video-extra-fullscreen">
                     <span>FullScreen</span>
+                </button>
+                <button tabindex="0"
+                    class="video-extra-reload">
+                    <span>Reload</span>
                 </button>
                 <button tabindex="0"
                     class="video-extra-watched">
@@ -99,9 +100,9 @@
                 controls preload="metadata" allow="autoplay; fullscreen"></video>
 
         </div>
-    </template>
+    </script>
 
-    <template id="login">
+    <script type="text/vanilla-template" id="template-login">
         <div id="login">
             <form action="#" method="POST">
 
@@ -109,7 +110,7 @@
                 <input
                     id="email"
                     type="email"
-                    value=""
+                    value="{{ store('email', '') }}"
                     tabindex="0"
                     required>
 
@@ -117,207 +118,241 @@
                 <input
                     id="password"
                     type="password"
-                    value=""
+                    value="{{ store('password', '') }}"
                     tabindex="0"
                     required>
 
                 <label for="locale">Locale:</label>
                 <div class="select" tabindex="0">
                     <select id="locale">
-                        <option value="enUS">English (US)</option>
-                        <option value="enGB">English (UK)</option>
-                        <option value="esLA">Español</option>
-                        <option value="esES">Español (España)</option>
-                        <option value="ptBR">Português (Brasil)</option>
-                        <option value="ptPT">Português (Portugal)</option>
-                        <option value="frFR">Français (France)</option>
-                        <option value="deDE">Deutsch</option>
-                        <option value="itIT">Italiano</option>
-                        <option value="ruRU">Русский</option>
-                        <option value="arME">العربية</option>
-                        <option value="jaJP">Japonês</option>
+                        <option value="enUS" {{ selected( store('locale') == 'enUS' ) }}>English (US)</option>
+                        <option value="enGB" {{ selected( store('locale') == 'enGB' ) }}>English (UK)</option>
+                        <option value="esLA" {{ selected( store('locale') == 'esLA' ) }}>Español</option>
+                        <option value="esES" {{ selected( store('locale') == 'esES' ) }}>Español (España)</option>
+                        <option value="ptBR" {{ selected( store('locale') == 'ptBR' ) }}>Português (Brasil)</option>
+                        <option value="ptPT" {{ selected( store('locale') == 'ptPT' ) }}>Português (Portugal)</option>
+                        <option value="frFR" {{ selected( store('locale') == 'frFR' ) }}>Français (France)</option>
+                        <option value="deDE" {{ selected( store('locale') == 'deDE' ) }}>Deutsch</option>
+                        <option value="itIT" {{ selected( store('locale') == 'itIT' ) }}>Italiano</option>
+                        <option value="ruRU" {{ selected( store('locale') == 'ruRU' ) }}>Русский</option>
+                        <option value="arME" {{ selected( store('locale') == 'arME' ) }}>العربية</option>
+                        <option value="jaJP" {{ selected( store('locale') == 'jaJP' ) }}>Japonês</option>
                     </select>
                 </div>
 
                 <button type="submit" tabindex="0">Login</button>
-                <div id="message"></div>
+
+                {{ if message }}
+                    <div id="message">{{ message }}</div>
+                {{ end }}
 
             </form>
         </div>
-    </template>
+    </script>
 
-    <template id="queue">
+    <script type="text/vanilla-template" id="template-queue">
         <h1>Queue</h1>
+
+        {{ if !loaded }}
+            <p>Loading...</p>
+        {{ end }}
+
         <div class="list-items">
-            {QUEUE_ITEMS}
+            {{ each item in items }}
+            <div class="list-item queue-item"
+                tabindex="0"
+                data-episode
+                data-episode-id="{{ item.id }}"
+                data-episode-number="{{ item.number }}"
+                data-episode-name="{{ item.name }}"
+                data-episode-duration="{{ item.duration }}"
+                data-episode-playhead="{{ item.playhead }}"
+                data-episode-premium="{{ item.premium }}">
+                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                    <div class="list-item-image">
+                        <img src="{{ item.image }}" />
+                        <div class="list-item-progress hidden">&nbsp;</div>
+                        <div class="list-item-premium hidden">&nbsp;</div>
+                    </div>
+                    <div class="list-item-info">
+                        <h2>{{ item.serie_name }}</h2>
+                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                    </div>
+                </a>
+            </div>
+            {{ end }}
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
         </div>
-    </template>
+    </script>
 
-    <template id="queue-item">
-        <div class="list-item queue-item"
-            tabindex="0"
-            data-episode-item
-            data-episode-id="{EPISODE_ID}"
-            data-episode-number="{EPISODE_NUMBER}"
-            data-episode-name="{EPISODE_NAME}"
-            data-episode-duration="{EPISODE_DURATION}"
-            data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}">
-            <a href="{EPISODE_URL}" class="list-item-inside">
-                <div class="list-item-image">
-                    <img data-src="{EPISODE_IMAGE}" />
-                    <div class="list-item-progress hidden">&nbsp;</div>
-                    <div class="list-item-premium hidden">&nbsp;</div>
-                </div>
-                <div class="list-item-info">
-                    <h2>{SERIE_NAME}</h2>
-                    <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
-                </div>
-            </a>
-        </div>
-    </template>
-
-    <template id="history">
+    <script type="text/vanilla-template" id="template-history">
         <h1>History</h1>
+
+        {{ if !loaded }}
+            <p>Loading...</p>
+        {{ end }}
+
         <div class="list-items">
-            {HISTORY_ITEMS}
+            {{ each item in items }}
+            <div class="list-item history-item"
+                tabindex="0"
+                data-episode
+                data-episode-id="{{ item.id }}"
+                data-episode-number="{{ item.number }}"
+                data-episode-name="{{ item.name }}"
+                data-episode-duration="{{ item.duration }}"
+                data-episode-playhead="{{ item.playhead }}"
+                data-episode-premium="{{ item.premium }}">
+                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                    <div class="list-item-image">
+                        <img src="{{ item.image }}" />
+                        <div class="list-item-progress hidden">&nbsp;</div>
+                        <div class="list-item-premium hidden">&nbsp;</div>
+                    </div>
+                    <div class="list-item-info">
+                        <h2>{{ item.serie_name }}</h2>
+                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                    </div>
+                </a>
+            </div>
+            {{ end }}
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
         </div>
-    </template>
+    </script>
 
-    <template id="history-item">
-        <div class="list-item history-item"
-            tabindex="0"
-            data-episode-item
-            data-episode-id="{EPISODE_ID}"
-            data-episode-number="{EPISODE_NUMBER}"
-            data-episode-name="{EPISODE_NAME}"
-            data-episode-duration="{EPISODE_DURATION}"
-            data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}">
-            <a href="{EPISODE_URL}" class="list-item-inside">
-                <div class="list-item-image">
-                    <img data-src="{EPISODE_IMAGE}" />
-                    <div class="list-item-progress hidden">&nbsp;</div>
-                    <div class="list-item-premium hidden">&nbsp;</div>
-                </div>
-                <div class="list-item-info">
-                    <h2>{SERIE_NAME}</h2>
-                    <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
-                </div>
-            </a>
-        </div>
-    </template>
-
-    <template id="series">
+    <script type="text/vanilla-template" id="template-series">
         <h1>Series</h1>
+
         <div class="list-filters">
             <div class="select" tabindex="0">
                 <select id="filter">
-                    {SERIES_FILTER_OPTIONS}
+                    {{ options }}
                 </select>
             </div>
             <input type="text"
                 id="search"
-                value="{SERIES_SEARCH}"
+                value="{{ search }}"
                 placeholder="Search"
                 tabindex="0">
         </div>
+
+        {{ if !loaded }}
+            <p>Loading...</p>
+        {{ end }}
+
         <div class="list-items">
-            {SERIES_ITEMS}
+            {{ each item in items }}
+            <div class="list-item series-item"
+                tabindex="0">
+                <a href="/serie/{{ item.id }}" class="list-item-inside">
+                    <div class="list-item-image">
+                        <img src="{{ item.image }}" width="640" height="960" />
+                    </div>
+                    <div class="list-item-info">
+                        <h2>{{ item.name }}</h2>
+                        <!-- <p>{{ item.description }}</p> -->
+                    </div>
+                </a>
+            </div>
+            {{ end }}
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
         </div>
-        <div class="list-pagination">
-            <a href="{SERIES_PREVIOUS_PAGE}" title="Previous page"><span>Previous Page</span></a>
-            <a href="{SERIES_NEXT_PAGE}" title="Next page"><span>Next Page</span></a>
-        </div>
-    </template>
 
-    <template id="series-item">
-        <div class="list-item series-item"
-            tabindex="0">
-            <a href="{SERIE_URL}" class="list-item-inside">
-                <div class="list-item-image">
-                    <img data-src="{SERIE_IMAGE}" width="640" height="960" />
-                </div>
-                <div class="list-item-info">
-                    <h2>{SERIE_NAME}</h2>
-                    <!-- <p>{SERIE_DESCRIPTION}</p> -->
-                </div>
-            </a>
-        </div>
-    </template>
+        {{ if previousPage || nextPage }}
+            <div class="list-pagination">
+                {{ if previousPage }}
+                    <a href="{{ previousPage }}" title="Previous page"><span>Previous Page</span></a>
+                {{ end }}
+                {{ if nextPage }}
+                    <a href="{{ nextPage }}" title="Next page"><span>Next Page</span></a>
+                {{ end }}
+            </div>
+        {{ end }}
 
-    <template id="serie">
+    </script>
+
+    <script type="text/vanilla-template" id="template-serie">
         <h1>
             <small>Serie /</small><br/>
-            {SERIE_NAME} - Episodes
+            {{ serieName }} - Episodes
         </h1>
         <div class="list-filters">
             <div class="select" tabindex="0">
                 <select id="sort">
-                    {SORT_OPTIONS}
+                    <option value="asc" {{ selected(sort == 'asc') }}>Ascending</option>
+                    <option value="desc" {{ selected(sort == 'desc') }}>Descending</option>
                 </select>
             </div>
 
             <button
-                class="add-to-queue {ADD_QUEUE_CLASS}"
+                class="add-to-queue {{ inQueue ? 'hidden' : '' }}"
                 tabindex="0">Add To Queue</button>
             <button
-                class="remove-from-queue {REMOVE_QUEUE_CLASS}"
+                class="remove-from-queue {{ inQueue ? '' : 'hidden' }}"
                 tabindex="0">Remove From Queue</button>
         </div>
+
+        {{ if !loaded }}
+            <p>Loading...</p>
+        {{ end }}
+
         <div class="list-items">
+            {{ each item in items }}
+            <div class="list-item serie-episode-item"
+                tabindex="0"
+                data-episode
+                data-episode-id="{{ item.id }}"
+                data-episode-number="{{ item.number }}"
+                data-episode-name="{{ item.name }}"
+                data-episode-duration="{{ item.duration }}"
+                data-episode-playhead="{{ item.playhead }}"
+                data-episode-premium="{{ item.premium }}">
+                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                    <div class="list-item-image">
+                        <img src="{{ item.image }}" />
+                        <div class="list-item-progress hidden">&nbsp;</div>
+                        <div class="list-item-premium hidden">&nbsp;</div>
+                    </div>
+                    <div class="list-item-info">
+                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                    </div>
+                </a>
+            </div>
+            {{ end }}
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
+            <div class="fill"></div>
         </div>
-    </template>
-
-    <template id="serie-episode-item">
-        <div class="list-item serie-episode-item"
-            tabindex="0"
-            data-episode-item
-            data-episode-id="{EPISODE_ID}"
-            data-episode-number="{EPISODE_NUMBER}"
-            data-episode-name="{EPISODE_NAME}"
-            data-episode-duration="{EPISODE_DURATION}"
-            data-episode-playhead="{EPISODE_PLAYHEAD}"
-            data-episode-premium="{EPISODE_PREMIUM}">
-            <a href="{EPISODE_URL}" class="list-item-inside">
-                <div class="list-item-image">
-                    <img data-src="{EPISODE_IMAGE}" />
-                    <div class="list-item-progress hidden">&nbsp;</div>
-                    <div class="list-item-premium hidden">&nbsp;</div>
-                </div>
-                <div class="list-item-info">
-                    <h3>{EPISODE_NUMBER} - {EPISODE_NAME}</h3>
-                </div>
-            </a>
-        </div>
-    </template>
-
-    <script src="./assets/js/components/loading.js"></script>
-    <script src="./assets/js/components/login.js"></script>
-    <script src="./assets/js/components/logout.js"></script>
-    <script src="./assets/js/components/menu.js"></script>
-    <script src="./assets/js/components/video.js"></script>
-    <script src="./assets/js/components/history.js"></script>
-    <script src="./assets/js/components/queue.js"></script>
-    <script src="./assets/js/components/series.js"></script>
-    <script src="./assets/js/components/serie.js"></script>
-    <script src="./assets/js/components/router.js"></script>
-    <script src="./assets/js/components/episode.item.js"></script>
-    <script src="./assets/js/components/navigation.keyboard.js"></script>
-
-    <script>
-    V.on(window, 'load', function(){
-        V.mount(document.body).then(function(){
-
-            V.router.$mode = 'hash';
-            V.router.$base = window.location.pathname.replace('index.html', '');
-
-            window.setTimeout(function(){
-                V.trigger(window, 'popstate');
-            }, 500);
-
-        });
-    });
     </script>
+
+    <script defer src="/assets/js/lib/store.js"></script>
+    <script defer src="/assets/js/lib/api.js"></script>
+    <script defer src="/assets/js/lib/hls.min.js"></script>
+    <script defer src="/assets/js/lib/vanilla.ui.js"></script>
+
+    <script defer src="/assets/js/components/loading.js"></script>
+    <script defer src="/assets/js/components/login.js"></script>
+    <script defer src="/assets/js/components/logout.js"></script>
+    <script defer src="/assets/js/components/menu.js"></script>
+    <script defer src="/assets/js/components/video.js"></script>
+    <script defer src="/assets/js/components/history.js"></script>
+    <script defer src="/assets/js/components/queue.js"></script>
+    <script defer src="/assets/js/components/series.js"></script>
+    <script defer src="/assets/js/components/serie.js"></script>
+    <script defer src="/assets/js/components/episode.js"></script>
+    <script defer src="/assets/js/components/keyboard.js"></script>
+    <script defer src="/assets/js/components/view.js"></script>
+
+    <script defer src="/assets/js/bootstrap.js"></script>
 
 </body>

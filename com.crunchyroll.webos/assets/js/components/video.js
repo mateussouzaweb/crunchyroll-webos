@@ -1,72 +1,41 @@
+V.route.add({
+    id: 'video',
+    path: '/serie/:serieId/episode/:episodeId/video',
+    title: 'Episode Video',
+    component: '<div data-video></div>',
+    authenticated: true
+});
+
 V.component('[data-video]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
+     * Return template data
+     * @return {string}
      */
-    constructor: function(resolve){
-
-        V.router.add({
-            id: 'video',
-            path: '/serie/:serieId/episode/:episodeId/video',
-            title: 'Episode Video',
-            component: this
-        });
-
-        resolve(this);
-
+    template: function(){
+        return V.$('#template-video').innerHTML;
     },
 
     /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-video></div>';
-    },
-
-    /**
-     * On render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    onRender: async function(resolve){
+    onMount: function(){
 
         var self = this;
         var element = this.element;
-        var html = template('video').render();
-
-        element.innerHTML = html;
-        //await V.mount(element);
-
-        var video = V.$('video', element);
-            video.controls = false;
-
-        self.video = video;
-        self.playing = false;
-
-        var serieId = V.router.$active.getParam('serieId');
-
-        // Video Events
-        V.on(video, 'click', function(e){
-            e.preventDefault();
-            self.toggleVideo();
-        });
-
-        V.on(video, 'loadedmetadata', function(){
-            self.initializeVideo();
-        });
-
-        V.on(video, 'timeupdate', function(){
-            self.updateTimeElapsed();
-            self.updateProgress();
-        });
+        var serieId = V.route.active().param('serieId');
+        var controlsTimeout = null;
 
         // UI Events
         self.on('click', '.video-extra-play', function(e){
             e.preventDefault();
             self.toggleVideo();
+        });
+
+        self.on('click', '.video-extra-reload', function(e){
+            e.preventDefault();
+            self.render();
         });
 
         self.on('click', '.video-extra-watched', function(e){
@@ -78,14 +47,14 @@ V.component('[data-video]', {
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
-            V.router.redirect('/serie/' + serieId);
+            V.route.redirect('/serie/' + serieId);
         });
 
         self.on('click', '.video-extra-close', function(e){
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
-            V.router.redirect('/home');
+            V.route.redirect('/home');
         });
 
         self.on('click', '.video-extra-fullscreen', function(e){
@@ -93,7 +62,7 @@ V.component('[data-video]', {
             self.toggleFullScreen();
         });
 
-        var controlsTimeout = null;
+        // Mouse Events
         V.on(element, 'mouseenter mousemove', function(){
 
             element.classList.add('show-controls');
@@ -112,7 +81,7 @@ V.component('[data-video]', {
             element.classList.remove('show-controls');
         });
 
-        self.on('mousemove touchmove', 'input[type="range"]', function(e){
+        V.on(element, 'mousemove touchmove', 'input[type="range"]', function(e){
             self.updateSeekTooltip(e);
         });
 
@@ -140,22 +109,54 @@ V.component('[data-video]', {
             return self.backwardVideo();
         }
 
-        resolve(this);
     },
 
     /**
      * After render
-     * @param {Function} resolve
      * @return {void}
      */
-    afterRender: async function(resolve){
+    afterRender: async function(){
 
-        await this.loadVideo();
+        var self = this;
+        var element = self.element;
 
-        this.showVideo();
-        this.playVideo();
+        element.classList.remove('video-error');
+        element.classList.remove('video-active');
+        element.classList.remove('video-loading');
+        element.classList.remove('video-loaded');
+        element.classList.remove('video-playing');
+        element.classList.remove('video-paused');
 
-        resolve(this);
+        window.setTimeout(async function(){
+
+            var video = V.$('video', self.element);
+                video.controls = false;
+
+            self.video = video;
+            self.playing = false;
+
+            // Video Events
+            V.on(video, 'click', function(e){
+                e.preventDefault();
+                self.toggleVideo();
+            });
+
+            V.on(video, 'loadedmetadata', function(){
+                self.initializeVideo();
+            });
+
+            V.on(video, 'timeupdate', function(){
+                self.updateTimeElapsed();
+                self.updateProgress();
+            });
+
+            await self.loadVideo();
+
+            self.showVideo();
+            self.playVideo();
+
+        });
+
     },
 
     /**
@@ -213,19 +214,12 @@ V.component('[data-video]', {
      */
     loadVideo: async function(){
 
-        if( !Hls.isSupported() ) {
-            throw Error('Video format not supported.');
-        }
-
         var self = this;
         var element = self.element;
         var video = self.video;
         var title = V.$('.video-title-bar', element);
+        var episodeId = V.route.active().param('episodeId');
 
-        var active = V.router.$active;
-        var episodeId = active.getParam('episodeId');
-
-        var data = window.getSessionData();
         var fields = [
             'media.episode_number',
             'media.name',
@@ -240,12 +234,17 @@ V.component('[data-video]', {
         window.showLoading();
         element.classList.add('video-loading');
 
-        return Api.request('POST', '/info', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            media_id: episodeId,
-            fields: fields.join(',')
-        }).then(function(response){
+        try {
+
+            var response = await Api.request('POST', '/info', {
+                media_id: episodeId,
+                fields: fields.join(',')
+            });
+
+            if( response.error
+                && response.code == 'bad_session' ){
+                return Api.tryLogin().then(self.loadVideo);
+            }
 
             var episodeNumber = response.data.episode_number;
             var episodeName = response.data.name;
@@ -263,35 +262,79 @@ V.component('[data-video]', {
                 startTime = 0;
             }
 
-            return new Promise(function (resolve){
+            var proxy = document.body.dataset.proxy;
 
-                var hls = new Hls({
-                    maxBufferLength: 15,
-                    maxBufferSize: 30 * 1000 * 1000
+            if( proxy ){
+                stream = proxy + encodeURI(stream);
+            }
+
+            if( video.canPlayType('application/vnd.apple.mpegurl') ){
+
+                element.classList.remove('video-loading');
+                element.classList.add('video-loaded');
+
+                video.src = stream;
+                video.currentTime = startTime;
+
+            }else{
+
+                await new Promise(function (resolve, reject){
+
+                    if( !Hls.isSupported() ) {
+                        throw Error('Video format not supported.');
+                    }
+
+                    var hls = new Hls({
+                        maxBufferLength: 15,
+                        maxBufferSize: 30 * 1000 * 1000
+                    });
+
+                    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                        hls.loadSource(stream);
+                    });
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, function(){
+                        element.classList.remove('video-loading');
+                        element.classList.add('video-loaded');
+                        video.currentTime = startTime;
+                        resolve(response);
+                    });
+
+                    hls.on(Hls.Events.ERROR, function(_event, data){
+
+                        if( !data.fatal ){
+                            return;
+                        }
+
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                hls.startLoad();
+                            break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hls.recoverMediaError();
+                            break;
+                            default:
+                                // cannot recover
+                                hls.destroy();
+                                element.classList.add('video-error');
+                                title.innerHTML = 'VIDEO PLAY ERROR';
+                            break;
+                        }
+
+                    });
+
+                    hls.attachMedia(video);
+
                 });
 
-                var proxy = document.body.dataset.proxy;
+            }
 
-                if( proxy ){
-                    stream = proxy + encodeURI(stream);
-                }
+        } catch (error) {
+            console.log(error);
+        }
 
-                hls.loadSource(stream);
-                hls.attachMedia(video);
+        window.hideLoading();
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function(){
-                    window.hideLoading();
-                    element.classList.remove('video-loading');
-                    element.classList.add('video-loaded');
-                    video.currentTime = startTime;
-                    resolve(response);
-                });
-
-            });
-
-        }).catch(function(){
-            window.hideLoading();
-        });
     },
 
     /**
@@ -560,26 +603,22 @@ V.component('[data-video]', {
 
         var self = this;
         var video = self.video;
-        var data = window.getSessionData();
-
-        var active = V.router.$active;
-        var episodeId = active.getParam('episodeId');
+        var episodeId = V.route.active().param('episodeId');
 
         var elapsed = 30;
         var elapsedDelta = 30;
         var playhead = video.currentTime;
 
-        return Api.request('POST', '/log', {
-            session_id: data.sessionId,
-            locale: data.locale,
+        await Api.request('POST', '/log', {
             event: 'playback_status',
             media_id: episodeId,
             playhead: playhead,
             elapsed: elapsed,
             elapsedDelta: elapsedDelta
-        }).then(function(){
-            self.trackProgress();
         });
+
+        self.trackProgress();
+
     },
 
     /**
@@ -590,27 +629,23 @@ V.component('[data-video]', {
 
         var self = this;
         var video = self.video;
-        var data = window.getSessionData();
-
-        var active = V.router.$active;
-        var episodeId = active.getParam('episodeId');
+        var episodeId = V.route.active().param('episodeId');
 
         var duration = Math.floor(video.duration);
         var playhead = Math.floor(video.currentTime);
         var elapsed = duration - playhead;
         var elapsedDelta = duration - playhead;
 
-        return Api.request('POST', '/log', {
-            session_id: data.sessionId,
-            locale: data.locale,
+        await Api.request('POST', '/log', {
             event: 'playback_status',
             media_id: episodeId,
             playhead: duration,
             elapsed: elapsed,
             elapsedDelta: elapsedDelta
-        }).then(function(){
-            self.stopTrackProgress();
         });
+
+        self.stopTrackProgress();
+
     }
 
 });

@@ -1,62 +1,50 @@
+V.route.add({
+    id: 'series',
+    path: '/serie/:serieId',
+    title: 'Serie',
+    component: '<div data-serie></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'series',
+    path: '/serie/:serieId/:sort',
+    title: 'Serie',
+    component: '<div data-serie></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'series',
+    path: '/serie/:serieId/:sort/:pageNumber',
+    title: 'Serie',
+    component: '<div data-serie></div>',
+    authenticated: true
+});
+
 V.component('[data-serie]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
+     * Return template data
+     * @return {string}
      */
-    constructor: function(resolve){
-
-        // Route
-        V.router.add({
-            id: 'serie',
-            path: '/serie/:serieId',
-            title: 'Serie',
-            component: this
-        });
-
-        V.router.add({
-            id: 'serie',
-            path: '/serie/:serieId/:sort',
-            title: 'Serie',
-            component: this
-        });
-
-        V.router.add({
-            id: 'serie',
-            path: '/serie/:serieId/:sort/:pageNumber',
-            title: 'Serie',
-            component: this
-        });
-
-        resolve(this);
-
+    template: function(){
+        return V.$('#template-serie').innerHTML;
     },
 
     /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-serie></div>';
-    },
-
-    /**
-     * On render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    onRender: function(resolve){
+    onMount: function(){
 
         var self = this;
-        var active = V.router.$active;
-        var serieId = active.getParam('serieId');
 
-        self.set('serieId', serieId);
+        var active = V.route.active();
+        var serieId = active.param('serieId');
+        var sort = active.param('sort') || 'desc';
+        var pageNumber = active.param('pageNumber') || 1;
 
-        // Private
         self.on('change', 'select', function(){
-            V.router.redirect('/serie/' + serieId + '/' + this.value);
+            V.route.redirect('/serie/' + serieId + '/' + this.value);
         });
 
         self.on('click', '.add-to-queue', function(e){
@@ -68,19 +56,15 @@ V.component('[data-serie]', {
             self.removeFromQueue();
         });
 
-        resolve(this);
+        self.set({
+            serieId: serieId,
+            sort: sort,
+            pageNumber: pageNumber
+        });
 
-    },
+        self.listSerieInfo();
+        self.listEpisodes();
 
-    /**
-     * After render
-     * @param {Function} resolve
-     * @return {void}
-     */
-    afterRender: async function(resolve){
-        await this.listSerieInfo();
-        await this.listEpisodes();
-        resolve(this);
     },
 
     /**
@@ -89,15 +73,13 @@ V.component('[data-serie]', {
      */
     addToQueue: function(){
 
-        var data = window.getSessionData();
-        var serieId = this.get('serieId');
+        var self = this;
+        var serieId = self.get('serieId');
 
         V.$('.add-to-queue').classList.add('hidden');
         V.$('.remove-from-queue').classList.remove('hidden');
 
         return Api.request('POST', '/add_to_queue', {
-            session_id: data.sessionId,
-            locale: data.locale,
             series_id: serieId,
             group_id: serieId
         });
@@ -109,15 +91,13 @@ V.component('[data-serie]', {
      */
     removeFromQueue: function(){
 
-        var data = window.getSessionData();
-        var serieId = this.get('serieId');
+        var self = this;
+        var serieId = self.get('serieId');
 
         V.$('.add-to-queue').classList.remove('hidden');
         V.$('.remove-from-queue').classList.add('hidden');
 
         return Api.request('POST', '/remove_from_queue', {
-            session_id: data.sessionId,
-            locale: data.locale,
             series_id: serieId,
             group_id: serieId
         });
@@ -129,13 +109,8 @@ V.component('[data-serie]', {
      */
     listSerieInfo: async function(){
 
-        var data = window.getSessionData();
         var self = this;
-        var element = self.element;
-        var active = V.router.$active;
-
-        var serieId = Number( active.getParam('serieId') );
-        var sort = String( active.getParam('sort') || 'desc' );
+        var serieId = self.get('serieId');
 
         var fields = [
             'series',
@@ -158,38 +133,32 @@ V.component('[data-serie]', {
 
         window.showLoading();
 
-        return Api.request('POST', '/info', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            series_id: serieId,
-            fields: fields.join(',')
-        }).then(async function(response){
+        try {
+
+            var response = await Api.request('POST', '/info', {
+                series_id: serieId,
+                fields: fields.join(',')
+            })
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.tryLogin().then(self.listSerieInfo);
+                return Api.tryLogin().then(self.listSerieInfo);
             }
 
             var serieName = response.data.name;
-            var sortOptions = await self.getSortOptions(sort);
             var inQueue = response.data.in_queue;
 
-            var html = template('serie')
-                .replace('{SERIE_NAME}', serieName)
-                .replace('{SORT_OPTIONS}', sortOptions)
-                .replace('{ADD_QUEUE_CLASS}', inQueue ? 'hidden' : '')
-                .replace('{REMOVE_QUEUE_CLASS}', inQueue ? '' : 'hidden')
-                .render();
+            self.set({
+                serieName: serieName,
+                inQueue: inQueue
+            });
 
-            element.innerHTML = html;
-            V.mount(element);
+        } catch (error) {
+            console.log(error);
+        }
 
-            window.hideLoading();
+        window.hideLoading();
 
-        })
-        .catch(function(){
-            window.hideLoading();
-        });
     },
 
     /**
@@ -198,14 +167,10 @@ V.component('[data-serie]', {
      */
     listEpisodes: async function(){
 
-        var data = window.getSessionData();
         var self = this;
-        var element = self.element;
-        var active = V.router.$active;
-
-        var serieId = Number( active.getParam('serieId') );
-        var pageNumber = Number( active.getParam('pageNumber') || 1 );
-        var sort = String( active.getParam('sort') || 'desc' );
+        var serieId = Number( self.get('serieId') );
+        var pageNumber = Number( self.get('pageNumber') );
+        var sort = String( self.get('sort') );
         var limit = 20;
 
         var fields = [
@@ -227,83 +192,39 @@ V.component('[data-serie]', {
 
         window.showLoading();
 
-        return Api.request('POST', '/list_media', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            series_id: serieId,
-            sort: sort,
-            fields: fields.join(','),
-            limit: limit,
-            offset: (pageNumber - 1) * limit
-        }).then(async function(response){
+        try {
+
+            var response = await Api.request('POST', '/list_media', {
+                series_id: serieId,
+                sort: sort,
+                fields: fields.join(','),
+                limit: limit,
+                offset: (pageNumber - 1) * limit
+            });
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.tryLogin().then(self.listEpisodes);
+                return Api.tryLogin().then(self.listEpisodes);
             }
 
-            var html = response.data.map(function(item){
-                return self.toSerieEpisode(item);
-            }).join('');
+            var items = response.data.map(function(item){
+                return Api.toSerieEpisode(item, 'serie');
+            });
 
-            V.$('.list-items', element).innerHTML = html;
-            V.mount(element);
+            await self.render({
+                loaded: true,
+                items: items
+            });
 
             window.hideLoading();
             window.setActiveElement( V.$('#content .list-item') );
 
-        })
-        .catch(function(){
-            window.hideLoading();
-        });
-    },
+        } catch (error) {
+            console.log(error);
+        }
 
-    /**
-     * Retrieve episodes sort
-     * @param {String} sort
-     * @return {String}
-     */
-    getSortOptions: async function(sort){
+        window.hideLoading();
 
-        var options = [];
-
-        // Retrieve options
-        options.push({id: 'asc', name: 'Ascending'});
-        options.push({id: 'desc', name: 'Descending'});
-
-        return options.map(function(option){
-            return '<option {SELECTED} value="{VALUE}">{LABEL}</option>'
-                .replace('{SELECTED}', (option.id == sort) ? 'selected="selected"' : '')
-                .replace('{VALUE}', option.id)
-                .replace('{LABEL}', option.name);
-        }).join('');
-    },
-
-    /**
-     * Transform data to episode item
-     * @param {Object} data
-     * @return {String}
-     */
-    toSerieEpisode: function(data){
-
-        var episode = data;
-        var playhead = episode.playhead;
-        var duration = episode.duration;
-        var url = './serie/' + episode.series_id + '/episode/' + episode.media_id + '/video';
-
-        var html = template('serie-episode-item')
-            .replace('{EPISODE_ID}', episode.media_id)
-            .replace('{EPISODE_NAME}', episode.name)
-            .replace('{EPISODE_NUMBER}', episode.episode_number)
-            .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
-            .replace('{EPISODE_DURATION}', duration)
-            .replace('{EPISODE_PLAYHEAD}', playhead)
-            .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
-            .replace('{EPISODE_URL}', url)
-            .replace('data-src', 'src')
-            .render();
-
-        return html;
     }
 
 });

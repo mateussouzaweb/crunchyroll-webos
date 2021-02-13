@@ -1,11 +1,10 @@
-V.component('[data-episode-item]', {
+V.component('[data-episode]', {
 
     /**
-     * After render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    afterRender: function(resolve){
+    onMount: function(){
 
         var self = this;
         var element = self.element;
@@ -26,7 +25,6 @@ V.component('[data-episode-item]', {
                 premiumElement.classList.remove('hidden');
         }
 
-        resolve(this);
     }
 
 });

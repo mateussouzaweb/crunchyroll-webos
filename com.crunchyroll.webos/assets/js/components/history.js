@@ -1,47 +1,43 @@
+V.route.add({
+    id: 'history',
+    path: '/history',
+    title: 'History',
+    component: '<div data-history></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'history',
+    path: '/history/:pageNumber',
+    title: 'History',
+    component: '<div data-history></div>',
+    authenticated: true
+});
+
 V.component('[data-history]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
+     * Return template data
+     * @return {string}
      */
-    constructor: function(resolve){
-
-        // Route
-        V.router.add({
-            id: 'history',
-            path: '/history',
-            title: 'History',
-            component: this
-        });
-
-        V.router.add({
-            id: 'history',
-            path: '/history/:pageNumber',
-            title: 'History',
-            component: this
-        });
-
-        resolve(this);
-
+    template: function(){
+        return V.$('#template-history').innerHTML;
     },
 
     /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-history></div>';
-    },
-
-    /**
-     * After render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    afterRender: async function(resolve){
-        await this.listHistory();
-        resolve(this);
+    onMount: async function(){
+
+        var self = this;
+        var pageNumber = V.route.active().param('pageNumber') || 1;
+
+        self.set({
+            pageNumber: pageNumber
+        });
+
+        self.listHistory();
+
     },
 
     /**
@@ -50,12 +46,8 @@ V.component('[data-history]', {
      */
     listHistory: async function(){
 
-        var data = window.getSessionData();
         var self = this;
-        var element = self.element;
-        var active = V.router.$active;
-
-        var pageNumber = Number( active.getParam('pageNumber') || 1 );
+        var pageNumber = Number( self.get('pageNumber') );
         var limit = 8;
 
         var fields = [
@@ -111,67 +103,37 @@ V.component('[data-history]', {
 
         window.showLoading();
 
-        return Api.request('POST', '/recently_watched', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            fields: fields.join(','),
-            limit: limit,
-            offset: (pageNumber - 1) * limit
-        }).then(function(response){
+        try {
+
+            var response = await Api.request('POST', '/recently_watched', {
+                fields: fields.join(','),
+                limit: limit,
+                offset: (pageNumber - 1) * limit
+            });
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.tryLogin().then(self.listHistory);
+                return Api.tryLogin().then(self.listHistory);
             }
 
             var items = response.data.map(function(item){
-                return self.toHistory(item);
-            }).join('');
+                return Api.toSerieEpisode(item, 'history');
+            });
 
-            var html = template('history')
-                .replace('{HISTORY_ITEMS}', items)
-                .render();
-
-            element.innerHTML = html;
-            V.mount(element);
+            await self.render({
+                loaded: true,
+                items: items
+            });
 
             window.hideLoading();
             window.setActiveElement( V.$('#content .list-item') );
 
-        })
-        .catch(function(){
-            window.hideLoading();
-        });
-    },
+        } catch (error) {
+            console.log(error);
+        }
 
-    /**
-     * Transform data to history item
-     * @param {Object} data
-     * @return {String}
-     */
-    toHistory: function(data){
+        window.hideLoading();
 
-        var serie = data.series;
-        var episode = data.media;
-        var playhead = episode.playhead;
-        var duration = episode.duration;
-        var url = './serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
-
-        var html = template('history-item')
-            .replace('{SERIE_ID}', serie.series_id)
-            .replace('{SERIE_NAME}', serie.name)
-            .replace('{EPISODE_ID}', episode.media_id)
-            .replace('{EPISODE_NAME}', episode.name)
-            .replace('{EPISODE_NUMBER}', episode.episode_number)
-            .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
-            .replace('{EPISODE_DURATION}', duration)
-            .replace('{EPISODE_PLAYHEAD}', playhead)
-            .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
-            .replace('{EPISODE_URL}', url)
-            .replace('data-src', 'src')
-            .render();
-
-        return html;
     }
 
 });

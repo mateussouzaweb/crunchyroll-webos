@@ -1,11 +1,10 @@
 V.component('[data-loading]', {
 
     /**
-     * On render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    onRender: function(resolve){
+    onMount: function(){
 
         var self = this;
 
@@ -27,8 +26,6 @@ V.component('[data-loading]', {
         window.hideLoading = function(){
             return self.hideLoading();
         };
-
-        resolve(this);
 
     },
 

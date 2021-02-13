@@ -1,40 +1,41 @@
+V.route.add({
+    id: 'queue',
+    path: '/queue',
+    title: 'Queue',
+    component: '<div data-queue></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'queue',
+    path: '/home',
+    title: 'Queue',
+    component: '<div data-queue></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'queue',
+    path: '/',
+    title: 'Queue',
+    component: '<div data-queue></div>',
+    authenticated: true
+});
+
 V.component('[data-queue]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
+     * Return template data
+     * @return {string}
      */
-    constructor: function(resolve){
-
-        // Route
-        V.router.add({
-            id: 'queue',
-            path: '/queue',
-            title: 'Queue',
-            component: this
-        });
-
-        resolve(this);
-
+    template: function(){
+        return V.$('#template-queue').innerHTML;
     },
 
     /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-queue></div>';
-    },
-
-    /**
-     * After render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    afterRender: async function(resolve){
-        await this.listQueue();
-        resolve(this);
+    onMount: function(){
+        this.listQueue();
     },
 
     /**
@@ -43,10 +44,7 @@ V.component('[data-queue]', {
      */
     listQueue: async function(){
 
-        var data = window.getSessionData();
         var self = this;
-        var element = self.element;
-
         var fields = [
             'image.full_url',
             'image.fwide_url',
@@ -115,71 +113,36 @@ V.component('[data-queue]', {
 
         window.showLoading();
 
-        return Api.request('POST', '/queue', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            media_types: 'anime',
-            fields: fields.join(',')
-        }).then(function(response){
+        try {
+
+            var response = await Api.request('POST', '/queue', {
+                media_types: 'anime',
+                fields: fields.join(',')
+            })
 
             if( response.error
                 && response.code == 'bad_session' ){
-                    return window.tryLogin().then(self.listQueue);
+                return Api.tryLogin().then(self.listQueue);
             }
 
             var items = response.data.map(function(item){
-                return self.toQueue(item);
-            }).join('');
+                return Api.toSerieEpisode(item, 'queue');
+            }).filter(Boolean);
 
-            var html = template('queue')
-                .replace('{QUEUE_ITEMS}', items)
-                .render();
-
-            element.innerHTML = html;
-            V.mount(element);
+            await self.render({
+                loaded: true,
+                items: items
+            });
 
             window.hideLoading();
             window.setActiveElement( V.$('#content .list-item') );
 
-        })
-        .catch(function(){
-            window.hideLoading();
-        });
-    },
-
-    /**
-     * Transform data to queue item
-     * @param {Object} data
-     * @return {String}
-     */
-    toQueue: function(data){
-
-        var serie = data.series;
-        var episode = data.most_likely_media;
-
-        if( !episode ){
-            return '';
+        } catch (error) {
+            console.log(error);
         }
 
-        var playhead = episode.playhead;
-        var duration = episode.duration;
-        var url = './serie/' + serie.series_id + '/episode/' + episode.media_id + '/video';
+        window.hideLoading();
 
-        var html = template('queue-item')
-            .replace('{SERIE_ID}', serie.series_id)
-            .replace('{SERIE_NAME}', serie.name)
-            .replace('{EPISODE_ID}', episode.media_id)
-            .replace('{EPISODE_NAME}', episode.name)
-            .replace('{EPISODE_NUMBER}', episode.episode_number)
-            .replace('{EPISODE_IMAGE}', episode.screenshot_image.full_url)
-            .replace('{EPISODE_DURATION}', duration)
-            .replace('{EPISODE_PLAYHEAD}', playhead)
-            .replace('{EPISODE_PREMIUM}', (!episode.free_available) ? 1 : 0)
-            .replace('{EPISODE_URL}', url)
-            .replace('data-src', 'src')
-            .render();
-
-        return html;
     }
 
 });

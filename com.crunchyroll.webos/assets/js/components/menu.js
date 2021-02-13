@@ -1,62 +1,56 @@
 V.component('[data-menu]', {
 
     /**
-     * After render
-     * @param {Function} resolve
+     * Return template
+     * @return {string}
+     */
+    template: function(){
+        return V.$('#template-menu').innerHTML;
+    },
+
+    /**
+     * On mount
      * @return {void}
      */
-    afterRender: function(resolve){
+    onMount: function(){
 
         var self = this;
-        var element = this.element;
 
-        V.router.afterChange(function(resolve){
-
-            if( V.$('.menu-link.active', element) ){
-                V.$('.menu-link.active', element).classList.remove('active');
-            }
-
-            if( this.next.id ){
-                var item = V.$('.menu-' + this.next.id, element);
-                if( item ){
-                    item.classList.add('active');
-                }
-            }
-
-            resolve(this);
+        V.route.afterChange(function(){
+            self.setActive();
         });
 
-        // Public
-        window.updateMenu = function(){
-            return self.updateMenu();
-        };
-
-        self.updateMenu();
-        resolve(this);
+        Store.on('authChanged', 'menu', async function(){
+            await self.render();
+            await self.setActive();
+        });
 
     },
 
     /**
-     * Update menu
+     * On destroy
      * @return {void}
      */
-    updateMenu: function(){
+    onDestroy: function(){
+        Store.off('authChanged', 'menu');
+    },
 
-        var element = this.element;
+    /**
+     * Set active menu item
+     * @return {void}
+     */
+    setActive: function(){
 
-        if( !element ){
-            return;
+        var self = this;
+        var path = V.route.active().id;
+        var next = V.$('a[href="/' + path + '"]', self.element);
+        var current = V.$('a.active', self.element);
+
+        if( current ){
+            current.classList.remove('active');
         }
-
-        var data = window.getSessionData();
-        var name = V.$('.account-name', element);
-
-        if( data.userName ){
-            name.innerHTML = data.userName
-            element.classList.add('logged');
-        }else{
-            name.innerHTML = '';
-            element.classList.remove('logged');
+        if ( next ){
+            next.classList.add('active');
         }
 
     }

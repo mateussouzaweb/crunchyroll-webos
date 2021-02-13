@@ -357,6 +357,9 @@ body.page-video #content{
     transition: all 0.4s ease-in-out;
     z-index: 2;
 }
+.video-error #video .video-title-bar{
+    opacity: 1 !important;
+}
 .video-playing #video .video-title-bar{
     opacity: 0;
 }
@@ -397,7 +400,7 @@ body.page-video #content{
 #video .video-extra-bar button span{
     background-repeat: no-repeat;
     background-position: center;
-    background-size: auto 1.875rem;
+    background-size: 100% auto;
     display: block;
     width: 100%;
     height: 100%;
@@ -412,6 +415,9 @@ body.page-video #content{
 }
 #video .video-extra-bar button.video-extra-play span{
     background-image: url(../icons/play.svg);
+}
+#video .video-extra-bar button.video-extra-reload span{
+    background-image: url(../icons/reload.svg);
 }
 #video .video-extra-bar button.video-extra-watched span{
     background-image: url(../icons/eye.svg);
@@ -497,7 +503,7 @@ body.page-login #content{
 #menu .links{
     flex: 1 1 auto;
 }
-#menu .menu-link{
+#menu .link{
     background: transparent;
     border-radius: 0 4px 4px 0;
     cursor: pointer;
@@ -509,12 +515,12 @@ body.page-login #content{
     text-decoration: none;
     transition: all 0.2s ease-in-out;
 }
-.mouse #menu .menu-link:hover,
-#menu .menu-link.hover{
+.mouse #menu .link:hover,
+#menu .link.hover{
     color: #F37521;
     background: #FFF;
 }
-#menu .menu-link.active{
+#menu .link.active{
     background: #F37521;
     color: #FFF;
 }
@@ -613,10 +619,19 @@ body.page-login #content{
     align-items: stretch;
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -0.83rem;
+    justify-content: space-between;
+    margin: 0 -0.80rem;
+}
+#content .fill{
+    flex: 0 1 12.5rem;
 }
 #content .list-item{
+    display: flex;
     flex: 0 1 12.5rem;
+    margin-bottom: 0.83rem;
+    padding: 0.83rem;
+    align-items: stretch;
+    justify-content: stretch;
 }
 #content .list-item-inside{
     background: #000;
@@ -628,9 +643,9 @@ body.page-login #content{
     border-radius: 5px 5px 2px 2px;
     cursor: pointer;
     display: block;
-    margin: 0.83rem;
     position: relative;
     transition: all 0.2s ease-in-out;
+    width: 100%;
 }
 .mouse #content .list-item:hover .list-item-inside,
 #content .list-item.hover .list-item-inside{
@@ -641,6 +656,7 @@ body.page-login #content{
     position: relative;
     padding-top: 56.25%;
     width: 100%;
+    min-width: 6rem;
 }
 #content .list-item-image img{
     border-radius: 5px 5px 2px 2px;
@@ -741,7 +757,7 @@ body.page-login #content{
         width: 100%;
         padding: 0 0.83rem;
     }
-    #menu .menu-link{
+    #menu .link{
         border-radius: 4px;
         margin-top: 1rem;
         padding: 10px 0.83rem;

@@ -1,76 +1,63 @@
+V.route.add({
+    id: 'series',
+    path: '/series',
+    title: 'Series',
+    component: '<div data-series></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'series',
+    path: '/series/:filter',
+    title: 'Series',
+    component: '<div data-series></div>',
+    authenticated: true
+});
+V.route.add({
+    id: 'series',
+    path: '/series/:filter/:pageNumber',
+    title: 'Series',
+    component: '<div data-series></div>',
+    authenticated: true
+});
+
 V.component('[data-series]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
-     * @return {void}
+     * Return template data
+     * @return {string}
      */
-    constructor: function(resolve){
-
-        // Route
-        V.router.add({
-            id: 'series',
-            path: '/series',
-            title: 'Series',
-            component: this
-        });
-
-        V.router.add({
-            id: 'series',
-            path: '/series/:filter',
-            title: 'Series',
-            component: this
-        });
-
-        V.router.add({
-            id: 'series',
-            path: '/series/:filter/:pageNumber',
-            title: 'Series',
-            component: this
-        });
-
-        resolve(this);
-
+    template: function(){
+        return V.$('#template-series').innerHTML;
     },
 
-    /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-series></div>';
-    },
-
-    /**
-     * On render
-     * @param {Function} resolve
+     /**
+     * On mount
      * @return {void}
      */
-    onRender: function(resolve){
+    onMount: async function(){
 
         var self = this;
+        var active = V.route.active();
+        var pageNumber = Number( active.param('pageNumber') || 1 );
+        var filter = String( active.param('filter') || 'popular' );
+        var search = String( active.query('search') || '' );
 
-        // Private
         self.on('change', 'select' , function(){
-            V.router.redirect('/series/' + this.value);
+            V.route.redirect('/series/' + this.value);
         });
 
         self.on('change', 'input' , function(){
-            V.router.redirect('/series?search=' + encodeURI(this.value));
+            V.route.redirect('/series?search=' + encodeURI(this.value));
         });
 
-        resolve(this);
+        self.set({
+            pageNumber: pageNumber,
+            filter: filter,
+            search: search
+        });
 
-    },
+        self.listSeries();
 
-    /**
-     * After render
-     * @param {Function} resolve
-     * @return {void}
-     */
-    afterRender: async function(resolve){
-        await this.listSeries();
-        resolve(this);
     },
 
     /**
@@ -79,15 +66,10 @@ V.component('[data-series]', {
      */
     listSeries: async function(){
 
-        var data = window.getSessionData();
         var self = this;
-        var element = self.element;
-        var active = V.router.$active;
-
-        // Filter option
-        var pageNumber = Number( active.getParam('pageNumber') || 1 );
-        var filter = String( active.getParam('filter') || 'popular' );
-        var search = String( active.getQuery('search') || '' );
+        var pageNumber = Number( self.get('pageNumber') );
+        var filter = String( self.get('filter') );
+        var search = String( self.get('search') );
         var limit = 20;
 
         if( search ){
@@ -119,51 +101,47 @@ V.component('[data-series]', {
 
         window.showLoading();
 
-        return Api.request('POST', '/list_series', {
-            session_id: data.sessionId,
-            locale: data.locale,
-            media_type: 'anime',
-            filter: filter,
-            fields: fields.join(','),
-            limit: limit,
-            offset: (pageNumber - 1) * limit
-        }).then(async function(response){
+        try {
+
+            var response = await Api.request('POST', '/list_series', {
+                media_type: 'anime',
+                filter: filter,
+                fields: fields.join(','),
+                limit: limit,
+                offset: (pageNumber - 1) * limit
+            });
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return window.tryLogin().then(self.listSeries);
+                return Api.tryLogin().then(self.listSeries);
             }
+
+            var items = response.data.map(function(item){
+                return Api.toSerie(item);
+            });
 
             var options = await self.getFiltersOptions(filter);
-            var items = response.data.map(function(item){
-                return self.toSerie(item);
-            }).join('');
+            var base = '/series/' + filter + '/';
+            var nextPage = base + (pageNumber + 1);
+            var previousPage = ( pageNumber > 1 ) ? base + (pageNumber - 1) : '';
 
-            var nextPage = '/series/' + filter + '/' + (pageNumber + 1);
-            var previousPage = '';
-
-            if( pageNumber > 1 ){
-                previousPage = '/series/' + filter + '/' + (pageNumber - 1)
-            }
-
-            var html = template('series')
-                .replace('{SERIES_FILTER_OPTIONS}', options)
-                .replace('{SERIES_SEARCH}', search)
-                .replace('{SERIES_ITEMS}', items)
-                .replace('{SERIES_PREVIOUS_PAGE}', previousPage)
-                .replace('{SERIES_NEXT_PAGE}', nextPage)
-                .render();
-
-            element.innerHTML = html;
-            V.mount(element);
+            await self.render({
+                loaded: true,
+                items: items,
+                options: options,
+                nextPage: nextPage,
+                previousPage: previousPage
+            });
 
             window.hideLoading();
             window.setActiveElement( V.$('#content .list-item') );
 
-        })
-        .catch(function(){
-            window.hideLoading();
-        });
+        } catch (error) {
+            console.log(error);
+        }
+
+        window.hideLoading();
+
     },
 
     /**
@@ -173,9 +151,8 @@ V.component('[data-series]', {
      */
     getFiltersOptions: async function(selected){
 
-        var data = window.getSessionData();
         var options = [];
-        var categories = [];
+        var categories = Store.get('categories', []);
 
         // Retrieve options
         options.push({id: '', name: '--- FILTERS'});
@@ -187,32 +164,23 @@ V.component('[data-series]', {
         options.push({id: 'simulcast', name: 'Simulcasts'});
 
         // Retrieve categories
-        window.categoriesData = window.categoriesData || {};
+        if( !categories.length ){
 
-        if( window.categoriesData[ data.locale ] ){
-            categories = window.categoriesData[ data.locale ];
-
-        }else{
-
-            await Api.request('POST', '/categories', {
-                session_id: data.sessionId,
-                locale: data.locale,
+            var response = await Api.request('POST', '/categories', {
                 media_type: 'anime'
-            }).then(function(response){
-
-                categories.push({id: '-', name: '--- GENRES'});
-                response.data.genre.map(function(item){
-                    categories.push({id: item.tag, name: item.label});
-                });
-
-                // categories.push({id: '-', name: '--- SEASONS'});
-                // response.data.season.map(function(item){
-                //     categories.push({id: item.tag, name: item.label});
-                // });
-
-                window.categoriesData[ data.locale ] = categories;
-
             });
+
+            categories.push({id: '-', name: '--- GENRES'});
+            response.data.genre.map(function(item){
+                categories.push({id: item.tag, name: item.label});
+            });
+
+            // categories.push({id: '-', name: '--- SEASONS'});
+            // response.data.season.map(function(item){
+            //     categories.push({id: item.tag, name: item.label});
+            // });
+
+            await Store.set('categories', categories);
 
         }
 
@@ -226,25 +194,6 @@ V.component('[data-series]', {
                 .replace('{VALUE}', option.id)
                 .replace('{LABEL}', option.name);
         }).join('');
-    },
-
-    /**
-     * Transform data to serie item
-     * @param {Object} data
-     * @return {String}
-     */
-    toSerie: function(data){
-
-        var html = template('series-item')
-            .replace('{SERIE_URL}', './serie/' + data.series_id)
-            .replace('{SERIE_ID}', data.series_id)
-            .replace('{SERIE_NAME}', data.name)
-            .replace('{SERIE_DESCRIPTION}', data.description)
-            .replace('{SERIE_IMAGE}', data.portrait_image.full_url)
-            .replace('data-src', 'src')
-            .render();
-
-        return html;
     }
 
 });

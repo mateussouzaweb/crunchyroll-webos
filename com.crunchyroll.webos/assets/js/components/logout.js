@@ -1,73 +1,54 @@
+V.route.add({
+    id: 'logout',
+    path: '/logout',
+    title: 'Logout',
+    component: '<div data-logout></div>',
+    authenticated: true
+});
+
 V.component('[data-logout]', {
 
     /**
-     * Constructor
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    constructor: function(resolve){
-
-        // Route
-        V.router.add({
-            id: 'logout',
-            path: '/logout',
-            title: 'Logout',
-            component: this
-        });
-
-        resolve(this);
-
-    },
-
-    /**
-     * Retrieve router HTML
-     * @return {String}
-     */
-    getHTML: function(){
-        return '<div data-logout></div>';
-    },
-
-    /**
-     * On render
-     * @param {Function} resolve
-     * @return {void}
-     */
-    onRender: async function(resolve){
-
-        resolve(this);
-
-        await this.makeLogout();
-        V.router.redirect('/login');
-
-    },
-
-    /**
-     * Make logout on system
-     * @return {Promise}
-     */
-    makeLogout: async function(){
-
-        var data = window.getSessionData();
-
-        window.setSessionData({});
-
-        if( !data.sessionId ){
-            return Promise.resolve();
-        }
+    onMount: async function(){
 
         window.showLoading();
 
-        return Api.request('POST', '/logout', {
-            session_id: data.sessionId,
-            locale: data.locale
-        }).then(function(response){
+        var sessionId = Store.get('sessionId');
+        var locale = Store.get('locale');
+
+        if( sessionId ){
+            try {
+                await Api.request('POST', '/logout', {
+                    session_id: sessionId,
+                    locale: locale
+                });
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+
+        await Store.remove('accessToken');
+        await Store.remove('deviceType');
+        await Store.remove('deviceId');
+        await Store.remove('sessionId');
+        await Store.remove('locale');
+        await Store.remove('email');
+        await Store.remove('password');
+        await Store.remove('userId');
+        await Store.remove('userName');
+        await Store.remove('auth');
+        await Store.remove('expires');
+
+        await Store.fire('authChanged');
+
+        setTimeout(function(){
             window.hideLoading();
-            return response;
-        })
-        .catch(function(error){
-            console.log(error.message);
-            window.hideLoading();
-        });
+            V.route.redirect('/login');
+        }, 1000);
+
     }
 
 });

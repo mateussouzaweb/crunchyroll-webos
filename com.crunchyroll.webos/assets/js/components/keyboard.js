@@ -1,4 +1,4 @@
-V.component('[data-navigation-keyboard]', {
+V.component('[data-keyboard-navigation]', {
 
     /**
      * Keys mapping
@@ -133,11 +133,10 @@ V.component('[data-navigation-keyboard]', {
     },
 
     /**
-     * On render
-     * @param {Function} resolve
+     * On mount
      * @return {void}
      */
-    onRender: function(resolve){
+    onMount: function(){
 
         var self = this;
             self.lastKey = null;
@@ -196,8 +195,6 @@ V.component('[data-navigation-keyboard]', {
         window.setActiveElement = function(element){
             return self.setActiveElement(element);
         };
-
-        resolve(this);
 
     },
 
