@@ -492,6 +492,7 @@ body.page-login #content{
 /* MENU */
 #menu{
     bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 1),
         0 1px 1px rgba(255, 255, 255, 0.3),
         0 1px 15px rgba(0, 0, 0, 0.25);
@@ -515,6 +516,7 @@ body.page-login #content{
     display: inline-block;
     font-size: 1.2rem;
     margin-top: 2.2rem;
+    min-width: 90%;
     padding: 10px 2.2rem 10px 0.83rem;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
@@ -765,6 +767,7 @@ body.page-login #content{
         border-radius: 4px;
         margin-top: 1rem;
         padding: 10px 0.83rem;
+        min-width: unset;
     }
     #menu .account-name{
         display: none;
