@@ -122,7 +122,9 @@ V.component('[data-queue]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.listQueue);
+                return Api.tryLogin().then(function(){
+                    self.listQueue();
+                });
             }
 
             var items = response.data.map(function(item){

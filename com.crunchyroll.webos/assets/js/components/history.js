@@ -113,7 +113,9 @@ V.component('[data-history]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.listHistory);
+                return Api.tryLogin().then(function(){
+                    self.listHistory();
+                });
             }
 
             var items = response.data.map(function(item){

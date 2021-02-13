@@ -142,7 +142,9 @@ V.component('[data-serie]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.listSerieInfo);
+                return Api.tryLogin().then(function(){
+                    self.listSerieInfo();
+                });
             }
 
             var serieName = response.data.name;
@@ -204,7 +206,9 @@ V.component('[data-serie]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.listEpisodes);
+                return Api.tryLogin().then(function(){
+                    self.listEpisodes();
+                });
             }
 
             var items = response.data.map(function(item){

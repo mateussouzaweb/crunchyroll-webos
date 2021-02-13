@@ -243,7 +243,9 @@ V.component('[data-video]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.loadVideo);
+                return Api.tryLogin().then(function(){
+                    self.loadVideo();
+                });
             }
 
             var episodeNumber = response.data.episode_number;

@@ -113,7 +113,9 @@ V.component('[data-series]', {
 
             if( response.error
                 && response.code == 'bad_session' ){
-                return Api.tryLogin().then(self.listSeries);
+                return Api.tryLogin().then(function(){
+                    self.listSeries();
+                });
             }
 
             var items = response.data.map(function(item){
