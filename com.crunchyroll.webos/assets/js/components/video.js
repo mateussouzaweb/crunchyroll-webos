@@ -280,13 +280,14 @@ V.component('[data-video]', {
 
             }else{
 
-                await new Promise(function (resolve, reject){
+                await new Promise(function (resolve){
 
                     if( !Hls.isSupported() ) {
                         throw Error('Video format not supported.');
                     }
 
                     var hls = new Hls({
+                        minAutoBitrate: 300000,
                         maxBufferLength: 15,
                         maxBufferSize: 30 * 1000 * 1000
                     });
