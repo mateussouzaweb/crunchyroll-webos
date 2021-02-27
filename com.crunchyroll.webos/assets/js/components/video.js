@@ -141,11 +141,8 @@ V.component('[data-video]', {
                 self.toggleVideo();
             });
 
-            V.on(video, 'loadedmetadata', function(){
-                self.initializeVideo();
-            });
-
             V.on(video, 'timeupdate', function(){
+                self.updateDuration();
                 self.updateTimeElapsed();
                 self.updateProgress();
             });
@@ -341,30 +338,6 @@ V.component('[data-video]', {
     },
 
     /**
-     * Initialize video
-     * @return {void}
-     */
-    initializeVideo: function(){
-
-        var self = this;
-        var element = self.element;
-        var video = self.video;
-        var duration = V.$('.duration', element);
-        var seek = V.$('input[type="range"]', element);
-        var progress = V.$('progress', element);
-
-        var time = Math.round(video.duration);
-        var format = self.formatTime(time);
-
-        duration.innerText = format.m + ':' + format.s;
-        duration.setAttribute('datetime', format.m + 'm ' + format.s + 's');
-
-        seek.setAttribute('max', time);
-        progress.setAttribute('max', time);
-
-    },
-
-    /**
      * Play video
      * @return {void}
      */
@@ -531,6 +504,30 @@ V.component('[data-video]', {
         seek.dataset.seek = skipTo;
         tooltip.textContent = format.m + ':' + format.s;
         tooltip.style.left = pageX + 'px';
+
+    },
+
+    /**
+     * Update video duration
+     * @return {void}
+     */
+    updateDuration: function(){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var duration = V.$('.duration', element);
+        var seek = V.$('input[type="range"]', element);
+        var progress = V.$('progress', element);
+
+        var time = Math.round(video.duration);
+        var format = self.formatTime(time);
+
+        duration.innerText = format.m + ':' + format.s;
+        duration.setAttribute('datetime', format.m + 'm ' + format.s + 's');
+
+        seek.setAttribute('max', time);
+        progress.setAttribute('max', time);
 
     },
 
