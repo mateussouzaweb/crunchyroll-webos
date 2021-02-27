@@ -1,4 +1,4 @@
-V.on(window, 'load', async function(){
+V.on(window, 'load', function(){
 
     // Template helpers
     V.helper('store', function(key, _default){

@@ -1,7 +1,7 @@
 V.component('[data-view]', {
 
     /**
-     * Attach router component changes
+     * Attach route component changes
      * @return {void}
      */
     onMount: function(){
@@ -38,7 +38,6 @@ V.component('[data-view]', {
                 body.classList.remove('page-' + previous.id)
             }
 
-            // Destroy previous route
             if( previous && previous.component ){
                 await V.destroy(element);
             }
@@ -57,6 +56,7 @@ V.component('[data-view]', {
                 }
             }
 
+            // Mount next component
             if( next && next.id ){
                 body.classList.add('page-' + next.id);
             }
