@@ -210,14 +210,16 @@ V.component('[data-keyboard-navigation]', {
             this.activeElement.blur();
         }
 
-        element.scrollIntoView();
-        element.classList.add('hover');
+        if( element ){
+            element.scrollIntoView();
+            element.classList.add('hover');
 
-        if( element.nodeName !== 'INPUT' ){
-            element.focus();
+            if( element.nodeName !== 'INPUT' ){
+                element.focus();
+            }
+
+            this.activeElement = element;
         }
-
-        this.activeElement = element;
 
     },
 
