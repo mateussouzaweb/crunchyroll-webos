@@ -336,7 +336,8 @@ body.page-video #content{
     position: absolute;
     top: -55px;
 }
-.mouse #video .video-progress:hover .tooltip {
+.mouse #video .video-progress:hover .tooltip,
+.mouse #video .video-progress:focus-within .tooltip {
     display: block;
 }
 #video .video-time{
