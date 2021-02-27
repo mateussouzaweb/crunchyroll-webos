@@ -20,7 +20,7 @@ V.component('[data-menu]', {
             self.setActive();
         });
 
-        self.on('authChanged', 'menu', async function(){
+        self.watch('authChanged', async function(){
             await self.render();
             await self.setActive();
         });
