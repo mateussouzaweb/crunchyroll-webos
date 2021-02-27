@@ -494,10 +494,15 @@ V.component('[data-video]', {
             pageX = event.targetTouches[0].pageX;
         }
 
+        var max = Number(seek.max);
         var skipTo = Math.round(
             (offsetX / event.target.clientWidth)
             * parseInt(event.target.getAttribute('max'), 10)
         );
+
+        if( skipTo > max ){
+            skipTo = max;
+        }
 
         var format = self.formatTime(skipTo);
 
