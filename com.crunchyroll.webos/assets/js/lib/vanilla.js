@@ -829,8 +829,8 @@ var V = (function (exports) {
     }
     function get$1(name, _default) {
         var value = _store[name];
-        value = (value === undefined) ? local.get(name) : value;
-        value = (value === undefined) ? _default : value;
+        value = (value === undefined || value === null) ? local.get(name) : value;
+        value = (value === undefined || value === null) ? _default : value;
         return value;
     }
     function remove(name) {
@@ -846,7 +846,7 @@ var V = (function (exports) {
         get: function (name, _default) {
             var value = localStorage.getItem(name);
             value = _decompress(value);
-            value = (value === undefined) ? _default : value;
+            value = (value === undefined || value === null) ? _default : value;
             return value;
         },
         remove: function (name) {
@@ -863,7 +863,7 @@ var V = (function (exports) {
         get: function (name, _default) {
             var value = sessionStorage.getItem(name);
             value = _decompress(value);
-            value = (value === undefined) ? _default : value;
+            value = (value === undefined || value === null) ? _default : value;
             return value;
         },
         remove: function (name) {
