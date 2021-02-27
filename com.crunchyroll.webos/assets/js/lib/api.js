@@ -21,8 +21,8 @@ const Api = {
         data.version = '0';
         data.connectivity_type = 'ethernet';
 
-        var sessionId = Store.get('sessionId');
-        var locale = Store.get('locale');
+        var sessionId = V.store.local.get('sessionId');
+        var locale = V.store.local.get('locale');
 
         if( sessionId && !data.session_id ){
             data.session_id = sessionId;
@@ -62,9 +62,9 @@ const Api = {
      */
     tryLogin: async function(){
 
-        var email = Store.get('email');
-        var password = Store.get('password');
-        var locale = Store.get('locale');
+        var email = V.store.local.get('email');
+        var password = V.store.local.get('password');
+        var locale = V.store.local.get('locale');
 
         var accessToken = 'LNDJgOit5yaRIWN';
         var deviceType = 'com.crunchyroll.windows.desktop';
@@ -94,19 +94,19 @@ const Api = {
             throw new Error('Invalid login.');
         }
 
-        await Store.set('accessToken', accessToken, true);
-        await Store.set('deviceType', deviceType, true);
-        await Store.set('deviceId', deviceId, true);
-        await Store.set('sessionId', sessionId, true);
-        await Store.set('locale', locale, true);
-        await Store.set('email', email, true);
-        await Store.set('password', password, true);
-        await Store.set('userId', response.data.user.user_id, true);
-        await Store.set('userName', response.data.user.username, true);
-        await Store.set('auth', response.data.auth, true);
-        await Store.set('expires', response.data.expires, true);
+        await V.store.local.set('accessToken', accessToken, true);
+        await V.store.local.set('deviceType', deviceType, true);
+        await V.store.local.set('deviceId', deviceId, true);
+        await V.store.local.set('sessionId', sessionId, true);
+        await V.store.local.set('locale', locale, true);
+        await V.store.local.set('email', email, true);
+        await V.store.local.set('password', password, true);
+        await V.store.local.set('userId', response.data.user.user_id, true);
+        await V.store.local.set('userName', response.data.user.username, true);
+        await V.store.local.set('auth', response.data.auth, true);
+        await V.store.local.set('expires', response.data.expires, true);
 
-        await Store.fire('authChanged');
+        await V.fire('authChanged');
 
         return true;
     },

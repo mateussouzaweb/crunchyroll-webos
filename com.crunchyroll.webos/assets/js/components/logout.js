@@ -16,8 +16,8 @@ V.component('[data-logout]', {
 
         window.showLoading();
 
-        var sessionId = Store.get('sessionId');
-        var locale = Store.get('locale');
+        var sessionId = V.store.local.get('sessionId');
+        var locale = V.store.local.get('locale');
 
         if( sessionId ){
             try {
@@ -30,19 +30,19 @@ V.component('[data-logout]', {
             }
         }
 
-        await Store.remove('accessToken');
-        await Store.remove('deviceType');
-        await Store.remove('deviceId');
-        await Store.remove('sessionId');
-        await Store.remove('locale');
-        await Store.remove('email');
-        await Store.remove('password');
-        await Store.remove('userId');
-        await Store.remove('userName');
-        await Store.remove('auth');
-        await Store.remove('expires');
+        await V.store.local.remove('accessToken');
+        await V.store.local.remove('deviceType');
+        await V.store.local.remove('deviceId');
+        await V.store.local.remove('sessionId');
+        await V.store.local.remove('locale');
+        await V.store.local.remove('email');
+        await V.store.local.remove('password');
+        await V.store.local.remove('userId');
+        await V.store.local.remove('userName');
+        await V.store.local.remove('auth');
+        await V.store.local.remove('expires');
 
-        await Store.fire('authChanged');
+        await V.fire('authChanged');
 
         setTimeout(function(){
             window.hideLoading();

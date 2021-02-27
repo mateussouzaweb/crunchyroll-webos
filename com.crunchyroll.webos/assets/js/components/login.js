@@ -44,9 +44,9 @@ V.component('[data-login]', {
         var password = V.$('input#password', element);
         var locale = V.$('select#locale', element);
 
-        await Store.set('email', email.value, true);
-        await Store.set('password', password.value, true);
-        await Store.set('locale', locale.value, true);
+        await V.store.local.set('email', email.value, true);
+        await V.store.local.set('password', password.value, true);
+        await V.store.local.set('locale', locale.value, true);
 
         window.showLoading();
 

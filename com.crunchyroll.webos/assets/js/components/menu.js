@@ -20,19 +20,11 @@ V.component('[data-menu]', {
             self.setActive();
         });
 
-        Store.on('authChanged', 'menu', async function(){
+        this.on('authChanged', 'menu', async function(){
             await self.render();
             await self.setActive();
         });
 
-    },
-
-    /**
-     * On destroy
-     * @return {void}
-     */
-    onDestroy: function(){
-        Store.off('authChanged', 'menu');
     },
 
     /**

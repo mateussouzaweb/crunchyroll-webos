@@ -154,7 +154,7 @@ V.component('[data-series]', {
     getFiltersOptions: async function(selected){
 
         var options = [];
-        var categories = Store.get('categories', []);
+        var categories = V.store.local.get('categories', []);
 
         // Retrieve options
         options.push({id: '', name: '--- FILTERS'});
@@ -182,7 +182,7 @@ V.component('[data-series]', {
             //     categories.push({id: item.tag, name: item.label});
             // });
 
-            await Store.set('categories', categories);
+            await V.store.local.set('categories', categories);
 
         }
 

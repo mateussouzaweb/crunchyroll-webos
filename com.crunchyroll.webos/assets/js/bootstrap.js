@@ -1,23 +1,8 @@
 V.on(window, 'load', async function(){
 
-    // Storage
-    await Store.load([
-        'accessToken',
-        'auth',
-        'deviceId',
-        'deviceType',
-        'email',
-        'expires',
-        'locale',
-        'password',
-        'sessionId',
-        'userId',
-        'userName',
-    ]);
-
     // Template helpers
     V.helper('store', function(key, _default){
-        return Store.get(key, _default);
+        return V.store.local.get(key, _default);
     });
 
     V.helper('selected', function(condition){

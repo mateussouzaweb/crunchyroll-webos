@@ -10,7 +10,7 @@ V.component('[data-view]', {
         var element = self.element;
 
         var isLoggedIn = function(){
-            var expires = Store.get('expires', false);
+            var expires = V.store.local.get('expires', false);
             return expires && new Date() < new Date(expires);
         }
 
