@@ -36,6 +36,10 @@ V.component('[data-history]', {
             pageNumber: pageNumber
         });
 
+        self.watch('currentViewReload', function(){
+            self.listHistory();
+        });
+
         self.listHistory();
 
     },

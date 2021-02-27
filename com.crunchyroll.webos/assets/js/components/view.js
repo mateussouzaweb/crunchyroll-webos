@@ -34,6 +34,15 @@ V.component('[data-view]', {
             var next = this.next;
             var body = document.body;
 
+            // Prevent in case of change to the same URL
+            if( previous && next ){
+                if( previous.path === next.path ){
+                    V.fire('currentViewReload');
+                    return;
+                }
+            }
+
+            // Destroy previous route
             if( previous && previous.id ){
                 body.classList.remove('page-' + previous.id)
             }

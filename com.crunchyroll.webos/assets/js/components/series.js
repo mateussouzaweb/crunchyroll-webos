@@ -56,6 +56,10 @@ V.component('[data-series]', {
             search: search
         });
 
+        self.watch('currentViewReload', function(){
+            self.listSeries();
+        });
+
         self.listSeries();
 
     },

@@ -62,6 +62,11 @@ V.component('[data-serie]', {
             pageNumber: pageNumber
         });
 
+        self.watch('currentViewReload', function(){
+            self.listSerieInfo();
+            self.listEpisodes();
+        });
+
         self.listSerieInfo();
         self.listEpisodes();
 

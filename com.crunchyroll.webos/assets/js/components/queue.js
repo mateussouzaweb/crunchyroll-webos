@@ -35,7 +35,15 @@ V.component('[data-queue]', {
      * @return {void}
      */
     onMount: function(){
-        this.listQueue();
+
+        var self = this;
+
+        self.watch('currentViewReload', function(){
+            self.listQueue();
+        });
+
+        self.listQueue();
+
     },
 
     /**
