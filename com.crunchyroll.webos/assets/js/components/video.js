@@ -368,13 +368,17 @@ V.component('[data-video]', {
      * Play video
      * @return {void}
      */
-    playVideo: function(){
+    playVideo: async function(){
 
         var self = this;
         var element = self.element;
         var video = self.video;
 
-        video.play();
+        try{
+            await video.play();
+        } catch(err) {
+        }
+
         element.classList.remove('video-paused');
         element.classList.add('video-playing');
 
