@@ -179,7 +179,8 @@ var V = (function (exports) {
     function conditions(line) {
         return line
             .replace(/^if\s?(.*)$/, 'if( $1 ){')
-            .replace(/^else$/, '} else {')
+            .replace(/^elseif\s?(.*)$/, '}else if( $1 ){')
+            .replace(/^else$/, '}else{')
             .replace(/^end$/, '}');
     }
     function loops(line) {
@@ -196,8 +197,11 @@ var V = (function (exports) {
                 vars.push(match[1]);
             }
         };
-        add(/^(?!}|for\(|if\()([A-Za-z0-9_]+)/);
+        if (line.match(/^(}|for\(|if\()/) === null) {
+            add(/^([A-Za-z0-9_]+)/);
+        }
         add(/^if\(\s?!?([A-Za-z0-9_]+)/);
+        add(/^}else\sif\(\s?!?([A-Za-z0-9_]+)/);
         add(/&&\s?!?([A-Za-z0-9_]+)/);
         add(/\|\|\s?!?([A-Za-z0-9_]+)/);
         add(/in\s([A-Za-z0-9_]+)\s\)/);
@@ -884,7 +888,7 @@ var V = (function (exports) {
         session: session
     });
 
-    const __version = '1.0.7';
+    const __version = '1.0.8';
 
     exports.$ = $;
     exports.$$ = $$;
