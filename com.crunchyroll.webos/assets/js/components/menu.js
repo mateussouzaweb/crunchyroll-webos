@@ -28,6 +28,14 @@ V.component('[data-menu]', {
     },
 
     /**
+     * After render
+     * @return {void}
+     */
+    afterRender: function(){
+        this.setActive();
+    },
+
+    /**
      * Set active menu item
      * @return {void}
      */
