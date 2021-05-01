@@ -9,6 +9,8 @@ Just open the browser on your WebOS TV, then navigate to <https://mateussouzaweb
 
 Add to favorites and enjoy!
 
+PRO-TIP: You can use this mode in almost any device of any brand that has a browser and that is not iOS and iPadOS because of limitations that Apple defined on such devices.
+
 ## Usage - For Developers
 
 This method will install Crunchyroll as TV App, but is recommended only for developers:
