@@ -9,6 +9,12 @@ V.route.add({
 V.component('[data-video]', {
 
     /**
+     * Streams data
+     * @var {Array}
+     */
+    streams: [],
+
+    /**
      * Return template data
      * @return {string}
      */
@@ -28,36 +34,36 @@ V.component('[data-video]', {
         var controlsTimeout = null;
 
         // UI Events
-        self.on('click', '.video-extra-play', function(e){
+        self.on('click', '.video-play', function(e){
             e.preventDefault();
             self.toggleVideo();
         });
 
-        self.on('click', '.video-extra-reload', function(e){
+        self.on('click', '.video-reload', function(e){
             e.preventDefault();
             self.render();
         });
 
-        self.on('click', '.video-extra-watched', function(e){
+        self.on('click', '.video-watched', function(e){
             e.preventDefault();
             self.setWatched();
         });
 
-        self.on('click', '.video-extra-episodes', function(e){
+        self.on('click', '.video-episodes', function(e){
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
             V.route.redirect('/serie/' + serieId);
         });
 
-        self.on('click', '.video-extra-close', function(e){
+        self.on('click', '.video-close', function(e){
             e.preventDefault();
             self.pauseVideo();
             self.hideVideo();
             V.route.redirect('/home');
         });
 
-        self.on('click', '.video-extra-fullscreen', function(e){
+        self.on('click', '.video-fullscreen', function(e){
             e.preventDefault();
             self.toggleFullScreen();
         });
@@ -147,10 +153,14 @@ V.component('[data-video]', {
                 self.updateProgress();
             });
 
-            await self.loadVideo();
-
-            self.showVideo();
-            self.playVideo();
+            try {
+                await self.loadVideo();
+                await self.streamVideo();
+                await self.showVideo();
+                await self.playVideo();
+            } catch (error) {
+                self.showError(error.message);
+            }
 
         });
 
@@ -174,6 +184,21 @@ V.component('[data-video]', {
     },
 
     /**
+     * Show error message
+     * @param {string} message
+     */
+    showError: function(message){
+
+        var self = this;
+        var element = self.element;
+        var error = V.$('.video-error-bar', element);
+
+        element.classList.add('video-error');
+        error.innerHTML = message;
+
+    },
+
+    /**
      * Show video
      * @return {void}
      */
@@ -181,7 +206,7 @@ V.component('[data-video]', {
 
         var self = this;
         var element = self.element;
-        var playButton = V.$('.video-extra-play', element);
+        var playButton = V.$('.video-play', element);
 
         element.classList.add('video-active');
         window.setActiveElement(playButton);
@@ -229,7 +254,6 @@ V.component('[data-video]', {
         ];
 
         window.showLoading();
-        element.classList.add('video-loading');
 
         try {
 
@@ -249,91 +273,125 @@ V.component('[data-video]', {
             var episodeName = response.data.name;
             var serieName = response.data.series_name;
 
-            title.innerHTML = serieName + ' / EP ' + episodeNumber + ' - ' + episodeName;
+            title.innerHTML = serieName + ' / E' + episodeNumber + ' - ' + episodeName;
 
             var streams = response.data.stream_data.streams;
-            var stream = streams[ streams.length - 1 ].url;
-
             var startTime = response.data.playhead || 0;
             var duration = response.data.duration || 0;
 
-            if( startTime / duration > 0.85 || startTime < 30 ){
+            if( startTime / duration > 0.90 || startTime < 30 ){
                 startTime = 0;
             }
 
-            var proxy = document.body.dataset.proxy;
-
-            if( proxy ){
-                stream = proxy + encodeURI(stream);
-            }
-
-            if( video.canPlayType('application/vnd.apple.mpegurl') ){
-
-                element.classList.remove('video-loading');
-                element.classList.add('video-loaded');
-
-                video.src = stream;
-                video.currentTime = startTime;
-
-            }else{
-
-                await new Promise(function (resolve){
-
-                    if( !Hls.isSupported() ) {
-                        throw Error('Video format not supported.');
-                    }
-
-                    var hls = new Hls({
-                        minAutoBitrate: 300000,
-                        maxBufferLength: 15,
-                        maxBufferSize: 30 * 1000 * 1000
-                    });
-
-                    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                        hls.loadSource(stream);
-                    });
-
-                    hls.on(Hls.Events.MANIFEST_PARSED, function(){
-                        element.classList.remove('video-loading');
-                        element.classList.add('video-loaded');
-                        video.currentTime = startTime;
-                        resolve(response);
-                    });
-
-                    hls.on(Hls.Events.ERROR, function(_event, data){
-
-                        if( !data.fatal ){
-                            return;
-                        }
-
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                hls.startLoad();
-                            break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                hls.recoverMediaError();
-                            break;
-                            default:
-                                // cannot recover
-                                hls.destroy();
-                                element.classList.add('video-error');
-                                title.innerHTML = 'VIDEO PLAY ERROR';
-                            break;
-                        }
-
-                    });
-
-                    hls.attachMedia(video);
-
-                });
-
-            }
+            self.streams = streams;
+            video.currentTime = startTime;
 
         } catch (error) {
-            console.log(error);
+            self.showError(error.message);
         }
 
         window.hideLoading();
+
+    },
+
+    /**
+     * Stream video
+     * @return {void}
+     */
+    streamVideo: async function(){
+
+        var self = this;
+        var element = self.element;
+        var video = self.video;
+        var streams = self.streams;
+
+        if( !streams.length ){
+            throw Error('No streams to load.');
+        }
+
+        var stream = streams[ streams.length - 1 ].url;
+        var currentTime = video.currentTime || 0;
+
+        var proxy = document.body.dataset.proxy;
+        if( proxy ){
+            stream = proxy + encodeURI(stream);
+        }
+
+        element.classList.add('video-loading');
+
+        if( video.canPlayType('application/vnd.apple.mpegurl') ){
+
+            element.classList.remove('video-loading');
+            element.classList.add('video-loaded');
+
+            video.src = stream;
+            video.currentTime = currentTime;
+
+        }else{
+
+            await new Promise(function (resolve){
+
+                if( !Hls.isSupported() ) {
+                    throw Error('Video format not supported.');
+                }
+
+                var hls = new Hls({
+                    startPosition: currentTime,
+                    minAutoBitrate: 300000,
+                    maxBufferLength: 15,
+                    maxBufferSize: 30 * 1000 * 1000
+                });
+
+                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    hls.loadSource(stream);
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function(){
+                    element.classList.remove('video-loading');
+                    element.classList.add('video-loaded');
+                    resolve(response);
+                });
+
+                hls.on(Hls.Events.ERROR, function(_event, data){
+
+                    if( !data.fatal ){
+                        return;
+                    }
+
+                    switch (data.type) {
+                        case Hls.ErrorTypes.OTHER_ERROR:
+                            //hls.startLoad();
+                        break;
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+
+                            if( data.details == 'manifestLoadError' && data.response.code == 0 ){
+                                self.showError('Episode cannot be played because of CORS error. You must use a proxy.');
+                            }else{
+                                hls.startLoad();
+                            }
+
+                        break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+
+                            self.showError('Media error: trying recovery...');
+                            hls.recoverMediaError();
+
+                        break;
+                        default:
+
+                            self.showError('Media cannot be recovered: ' + data.details);
+                            hls.destroy();
+
+                        break;
+                    }
+
+                });
+
+                hls.attachMedia(video);
+
+            });
+
+        }
 
     },
 

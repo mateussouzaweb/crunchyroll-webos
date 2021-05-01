@@ -292,7 +292,7 @@ body.page-video #content{
 }
 #video .video-control-bar{
     align-items: center;
-    background-color: #F37521;
+    background-color: rgba(0, 0, 0, 0.75);
     bottom: 0;
     display: flex;
     left: 0;
@@ -345,7 +345,8 @@ body.page-video #content{
     margin-left: 20px;
 }
 
-#video .video-title-bar {
+#video .video-title-bar,
+#video .video-error-bar {
     background: rgba(0, 0, 0, 0.65);
     color: #FFF;
     display: block;
@@ -362,14 +363,21 @@ body.page-video #content{
     transition: all 0.4s ease-in-out;
     z-index: 2;
 }
-.video-error #video .video-title-bar{
+#video .video-error-bar{
+    top: 3rem;
+    font-size: 1rem;
+    font-weight: normal;
+}
+.video-error #video .video-title-bar,
+.video-error #video .video-error-bar{
     opacity: 1 !important;
 }
-.video-playing #video .video-title-bar{
+.video-playing #video .video-title-bar,
+.video-playing #video .video-error-bar{
     opacity: 0;
 }
 
-#video .video-extra-bar{
+#video .video-bar{
     display: flex;
     height: 3.34rem;
     left: 50%;
@@ -382,11 +390,11 @@ body.page-video #content{
     width: 22rem;
     z-index: 2;
 }
-.video-playing #video .video-extra-bar{
+.video-playing #video .video-bar{
     display: none;
     opacity: 0;
 }
-#video .video-extra-bar button{
+#video .video-bar button{
     background: #F37521;
     border: 2px solid #FFF;
     border-bottom-width: 5px;
@@ -402,7 +410,7 @@ body.page-video #content{
     padding: 5px;
     text-align: center;
 }
-#video .video-extra-bar button span{
+#video .video-bar button span{
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
@@ -412,29 +420,43 @@ body.page-video #content{
     overflow: hidden;
     text-indent: -9999em;
 }
-.mouse #video .video-extra-bar button:hover,
-#video .video-extra-bar button.hover,
-#video .video-extra-bar button:focus,
-#video .video-extra-bar button:active{
+.mouse #video .video-bar button:hover,
+#video .video-bar button.hover,
+#video .video-bar button:focus,
+#video .video-bar button:active{
     border-color: #ffc095;
 }
-#video .video-extra-bar button.video-extra-play span{
+#video .video-bar button.video-play span{
     background-image: url(../icons/play.svg);
 }
-#video .video-extra-bar button.video-extra-reload span{
+#video .video-bar button.video-reload span{
     background-image: url(../icons/reload.svg);
 }
-#video .video-extra-bar button.video-extra-watched span{
+#video .video-bar button.video-watched span{
     background-image: url(../icons/eye.svg);
 }
-#video .video-extra-bar button.video-extra-episodes span{
+#video .video-bar button.video-episodes span{
     background-image: url(../icons/playlist.svg);
 }
-#video .video-extra-bar button.video-extra-close span{
+#video .video-bar button.video-close span{
     background-image: url(../icons/exit.svg);
 }
-#video .video-extra-bar button.video-extra-fullscreen span{
+
+#video .video-fullscreen{
+    cursor: pointer;
+    margin-left: 10px;
+    width: 2rem;
+}
+#video .video-fullscreen span{
     background-image: url(../icons/fullscreen.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-indent: -9999em;
 }
 
 /* LOGIN */
