@@ -28,13 +28,6 @@ Developer Mode is enabled only for 50 hours, so you will need to renew developer
 
 Support me for future versions for Samsung, Android TV, Chromecast and Others.
 
-## TODO
+## Know Bugs
 
-- Scrolling / pagination
-- Translations
-- Picture In Picture Mode
-- Touch support
-
-## Bugs
-
-- Select dropdown does not trigger with controller
+- Select dropdown does not trigger with LG TV Controller in arrow navigation mode.
