@@ -176,13 +176,13 @@
                 data-episode-premium="{{ item.premium }}">
                 <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
-                        <img src="{{ item.image }}" />
+                        <img src="{{ item.image }}" title="{{ item.serie_name }} - E{{ item.number }} - {{ item.name }}"/>
                         <div class="list-item-progress hidden">&nbsp;</div>
                         <div class="list-item-premium hidden">&nbsp;</div>
                     </div>
                     <div class="list-item-info">
                         <h2>{{ item.serie_name }}</h2>
-                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                        <h3>E{{ item.number }} - {{ item.name }}</h3>
                     </div>
                 </a>
             </div>
@@ -214,13 +214,13 @@
                 data-episode-premium="{{ item.premium }}">
                 <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
-                        <img src="{{ item.image }}" />
+                        <img src="{{ item.image }}" title="{{ item.serie_name }} - E{{ item.number }} - {{ item.name }}" />
                         <div class="list-item-progress hidden">&nbsp;</div>
                         <div class="list-item-premium hidden">&nbsp;</div>
                     </div>
                     <div class="list-item-info">
                         <h2>{{ item.serie_name }}</h2>
-                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                        <h3>E{{ item.number }} - {{ item.name }}</h3>
                     </div>
                 </a>
             </div>
@@ -258,7 +258,7 @@
                 tabindex="0">
                 <a href="/serie/{{ item.id }}" class="list-item-inside">
                     <div class="list-item-image">
-                        <img src="{{ item.image }}" width="640" height="960" />
+                        <img src="{{ item.image }}" title="{{ item.name }}" width="640" height="960" />
                     </div>
                     <div class="list-item-info">
                         <h2>{{ item.name }}</h2>
@@ -324,12 +324,12 @@
                 data-episode-premium="{{ item.premium }}">
                 <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
-                        <img src="{{ item.image }}" />
+                        <img src="{{ item.image }}" title="E{{ item.number }} - {{ item.name }}" />
                         <div class="list-item-progress hidden">&nbsp;</div>
                         <div class="list-item-premium hidden">&nbsp;</div>
                     </div>
                     <div class="list-item-info">
-                        <h3>{{ item.number }} - {{ item.name }}</h3>
+                        <h3>E{{ item.number }} - {{ item.name }}</h3>
                     </div>
                 </a>
             </div>
