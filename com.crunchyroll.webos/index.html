@@ -107,38 +107,43 @@
         <div id="login">
             <form action="#" method="POST">
 
-                <label for="email">E-mail:</label>
-                <input
-                    id="email"
-                    type="email"
-                    value="{{ store('email', '') }}"
-                    tabindex="0"
-                    required>
+                <div>
+                    <label for="email">E-mail:</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value="{{ store('email', '') }}"
+                        tabindex="0"
+                        required>
+                </div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input
+                        id="password"
+                        type="password"
+                        value="{{ store('password', '') }}"
+                        tabindex="0"
+                        required>
+                </div>
 
-                <label for="password">Password:</label>
-                <input
-                    id="password"
-                    type="password"
-                    value="{{ store('password', '') }}"
-                    tabindex="0"
-                    required>
-
-                <label for="locale">Locale:</label>
-                <div class="select" tabindex="0">
-                    <select id="locale">
-                        <option value="enUS" {{ selected( store('locale') == 'enUS' ) }}>English (US)</option>
-                        <option value="enGB" {{ selected( store('locale') == 'enGB' ) }}>English (UK)</option>
-                        <option value="esLA" {{ selected( store('locale') == 'esLA' ) }}>Español</option>
-                        <option value="esES" {{ selected( store('locale') == 'esES' ) }}>Español (España)</option>
-                        <option value="ptBR" {{ selected( store('locale') == 'ptBR' ) }}>Português (Brasil)</option>
-                        <option value="ptPT" {{ selected( store('locale') == 'ptPT' ) }}>Português (Portugal)</option>
-                        <option value="frFR" {{ selected( store('locale') == 'frFR' ) }}>Français (France)</option>
-                        <option value="deDE" {{ selected( store('locale') == 'deDE' ) }}>Deutsch</option>
-                        <option value="itIT" {{ selected( store('locale') == 'itIT' ) }}>Italiano</option>
-                        <option value="ruRU" {{ selected( store('locale') == 'ruRU' ) }}>Русский</option>
-                        <option value="arME" {{ selected( store('locale') == 'arME' ) }}>العربية</option>
-                        <option value="jaJP" {{ selected( store('locale') == 'jaJP' ) }}>Japonês</option>
-                    </select>
+                <div>
+                    <label for="locale">Locale:</label>
+                    <div class="select" tabindex="0">
+                        <select id="locale">
+                            <option value="enUS" {{ selected( store('locale') == 'enUS' ) }}>English (US)</option>
+                            <option value="enGB" {{ selected( store('locale') == 'enGB' ) }}>English (UK)</option>
+                            <option value="esLA" {{ selected( store('locale') == 'esLA' ) }}>Español</option>
+                            <option value="esES" {{ selected( store('locale') == 'esES' ) }}>Español (España)</option>
+                            <option value="ptBR" {{ selected( store('locale') == 'ptBR' ) }}>Português (Brasil)</option>
+                            <option value="ptPT" {{ selected( store('locale') == 'ptPT' ) }}>Português (Portugal)</option>
+                            <option value="frFR" {{ selected( store('locale') == 'frFR' ) }}>Français (France)</option>
+                            <option value="deDE" {{ selected( store('locale') == 'deDE' ) }}>Deutsch</option>
+                            <option value="itIT" {{ selected( store('locale') == 'itIT' ) }}>Italiano</option>
+                            <option value="ruRU" {{ selected( store('locale') == 'ruRU' ) }}>Русский</option>
+                            <option value="arME" {{ selected( store('locale') == 'arME' ) }}>العربية</option>
+                            <option value="jaJP" {{ selected( store('locale') == 'jaJP' ) }}>Japonês</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button type="submit" tabindex="0">Login</button>
