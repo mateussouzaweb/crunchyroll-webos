@@ -126,12 +126,12 @@ V.component('[data-video]', {
         var self = this;
         var element = self.element;
 
-        element.classList.remove('video-error');
-        element.classList.remove('video-active');
-        element.classList.remove('video-loading');
-        element.classList.remove('video-loaded');
-        element.classList.remove('video-playing');
-        element.classList.remove('video-paused');
+        element.classList.remove('video-has-error');
+        element.classList.remove('video-is-active');
+        element.classList.remove('video-is-loading');
+        element.classList.remove('video-is-loaded');
+        element.classList.remove('video-is-playing');
+        element.classList.remove('video-is-paused');
 
         window.setTimeout(async function(){
 
@@ -191,9 +191,9 @@ V.component('[data-video]', {
 
         var self = this;
         var element = self.element;
-        var error = V.$('.video-error-bar', element);
+        var error = V.$('.video-error', element);
 
-        element.classList.add('video-error');
+        element.classList.add('video-has-error');
         error.innerHTML = message;
 
     },
@@ -208,7 +208,7 @@ V.component('[data-video]', {
         var element = self.element;
         var playButton = V.$('.video-play', element);
 
-        element.classList.add('video-active');
+        element.classList.add('video-is-active');
         window.setActiveElement(playButton);
 
     },
@@ -222,7 +222,7 @@ V.component('[data-video]', {
         var self = this;
         var element = self.element;
 
-        element.classList.remove('video-active');
+        element.classList.remove('video-is-active');
 
         if( document.fullscreenElement ){
             document.exitFullscreen();
@@ -239,7 +239,7 @@ V.component('[data-video]', {
         var self = this;
         var element = self.element;
         var video = self.video;
-        var title = V.$('.video-title-bar', element);
+        var title = V.$('.video-title', element);
         var episodeId = V.route.active().param('episodeId');
 
         var fields = [
@@ -317,12 +317,12 @@ V.component('[data-video]', {
             stream = proxy + encodeURI(stream);
         }
 
-        element.classList.add('video-loading');
+        element.classList.add('video-is-loading');
 
         if( video.canPlayType('application/vnd.apple.mpegurl') ){
 
-            element.classList.remove('video-loading');
-            element.classList.add('video-loaded');
+            element.classList.remove('video-is-loading');
+            element.classList.add('video-is-loaded');
 
             video.src = stream;
             video.currentTime = currentTime;
@@ -347,8 +347,8 @@ V.component('[data-video]', {
                 });
 
                 hls.on(Hls.Events.MANIFEST_PARSED, function(){
-                    element.classList.remove('video-loading');
-                    element.classList.add('video-loaded');
+                    element.classList.remove('video-is-loading');
+                    element.classList.add('video-is-loaded');
                     resolve(response);
                 });
 
@@ -410,8 +410,8 @@ V.component('[data-video]', {
         } catch(err) {
         }
 
-        element.classList.remove('video-paused');
-        element.classList.add('video-playing');
+        element.classList.remove('video-is-paused');
+        element.classList.add('video-is-playing');
 
         self.playing = true;
         self.trackProgress();
@@ -429,8 +429,8 @@ V.component('[data-video]', {
         var video = self.video;
 
         video.pause();
-        element.classList.remove('video-playing');
-        element.classList.add('video-paused');
+        element.classList.remove('video-is-playing');
+        element.classList.add('video-is-paused');
 
         self.playing = false;
         self.stopTrackProgress();

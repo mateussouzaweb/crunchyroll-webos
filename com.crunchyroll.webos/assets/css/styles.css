@@ -290,9 +290,9 @@ body.page-video #content{
     height: 100% !important;
     overflow: hidden;
 }
-#video .video-control-bar{
+#video .video-controls{
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.50);
     bottom: 0;
     display: flex;
     left: 0;
@@ -304,10 +304,10 @@ body.page-video #content{
     width: 100%;
     z-index: 2;
 }
-.video-playing #video .video-control-bar{
+.video-is-playing #video .video-controls{
     opacity: 0;
 }
-.show-controls #video .video-control-bar{
+.show-controls #video .video-controls{
     opacity: 1 !important;
 }
 
@@ -345,9 +345,8 @@ body.page-video #content{
     margin-left: 20px;
 }
 
-#video .video-title-bar,
-#video .video-error-bar {
-    background: rgba(0, 0, 0, 0.65);
+#video .video-info {
+    background-color: rgba(0, 0, 0, 0.50);
     color: #FFF;
     display: block;
     font-size: 1.4rem;
@@ -363,21 +362,18 @@ body.page-video #content{
     transition: all 0.4s ease-in-out;
     z-index: 2;
 }
-#video .video-error-bar{
-    top: 3rem;
+#video .video-info .video-error{
     font-size: 1rem;
     font-weight: normal;
 }
-.video-error #video .video-title-bar,
-.video-error #video .video-error-bar{
+.video-has-error #video .video-info{
     opacity: 1 !important;
 }
-.video-playing #video .video-title-bar,
-.video-playing #video .video-error-bar{
+.video-is-playing #video .video-info{
     opacity: 0;
 }
 
-#video .video-bar{
+#video .video-buttons{
     display: flex;
     height: 3.34rem;
     left: 50%;
@@ -390,11 +386,11 @@ body.page-video #content{
     width: 22rem;
     z-index: 2;
 }
-.video-playing #video .video-bar{
+.video-is-playing #video .video-buttons{
     display: none;
     opacity: 0;
 }
-#video .video-bar button{
+#video button{
     background: #F37521;
     border: 2px solid #FFF;
     border-bottom-width: 5px;
@@ -410,7 +406,7 @@ body.page-video #content{
     padding: 5px;
     text-align: center;
 }
-#video .video-bar button span{
+#video button span{
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
@@ -420,25 +416,25 @@ body.page-video #content{
     overflow: hidden;
     text-indent: -9999em;
 }
-.mouse #video .video-bar button:hover,
-#video .video-bar button.hover,
-#video .video-bar button:focus,
-#video .video-bar button:active{
+.mouse #video button:hover,
+#video button.hover,
+#video button:focus,
+#video button:active{
     border-color: #ffc095;
 }
-#video .video-bar button.video-play span{
+#video button.video-play span{
     background-image: url(../icons/play.svg);
 }
-#video .video-bar button.video-reload span{
+#video button.video-reload span{
     background-image: url(../icons/reload.svg);
 }
-#video .video-bar button.video-watched span{
+#video button.video-watched span{
     background-image: url(../icons/eye.svg);
 }
-#video .video-bar button.video-episodes span{
+#video button.video-episodes span{
     background-image: url(../icons/playlist.svg);
 }
-#video .video-bar button.video-close span{
+#video button.video-close span{
     background-image: url(../icons/exit.svg);
 }
 

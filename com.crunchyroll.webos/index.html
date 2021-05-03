@@ -53,9 +53,12 @@
     <script type="text/vanilla-template" id="template-video">
         <div id="video">
 
-            <div class="video-title-bar"></div>
-            <div class="video-error-bar"></div>
-            <div class="video-bar">
+            <div class="video-info">
+                <div class="video-title"></div>
+                <div class="video-error"></div>
+            </div>
+
+            <div class="video-buttons">
                 <button tabindex="0"
                     class="video-play">
                     <span>Play</span>
@@ -77,7 +80,8 @@
                     <span>Close</span>
                 </button>
             </div>
-            <div class="video-control-bar">
+
+            <div class="video-controls">
 
                 <div class="video-progress">
                     <progress value="0" min="0" max="0"></progress>
