@@ -1,0 +1,99 @@
+/* LOGIN */
+body.page-login {
+    background-color: #F37521;
+
+    #menu {
+        display: none;
+    }
+    #content {
+        padding: 0 !important;
+    }
+}
+
+#login {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    transition: background 0.25s;
+
+    &::before {
+        background: url(../img/512px.png) no-repeat center center;
+        bottom: 0;
+        content: '';
+        display: block;
+        height: 100%;
+        left: 0;
+        opacity: 0.25;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    form {
+        flex: 1;
+        margin: auto;
+        max-width: 500px;
+        padding: 1rem 0.83rem;
+        position: relative;
+        text-align: center;
+    }
+    form > div {
+        position: relative;
+    }
+
+    label {
+        background: #000;
+        border-radius: 0.25rem 0.25rem 0 0.25rem;
+        bottom: 80%;
+        left: 0;
+        padding: 0.25rem 0.5rem;
+        position: absolute;
+        z-index: 2;
+    }
+
+    input,
+    .select {
+        border-color: #000;
+        margin-bottom: 2rem;
+    }
+
+    input.hover,
+    input:focus,
+    input:active,
+    .select.hover,
+    .select:focus,
+    .select:active {
+        border-color: #000000;
+    }
+
+    .select:focus-within {
+        border-color: #000000;
+    }
+
+    button {
+        border-color: #000;
+        margin-bottom: 2rem;
+    }
+    button:hover,
+    button.hover,
+    button:focus,
+    button:active {
+        background: #5d2500;
+    }
+
+    #message {
+        margin-top: 0.83rem;
+    }
+
+}
+
+.mouse #login input:hover,
+.mouse #login .select:hover {
+    border-color: #000000;
+}
+.mouse #login button:hover {
+    background: #5d2500;
+}

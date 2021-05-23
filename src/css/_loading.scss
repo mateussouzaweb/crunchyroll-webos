@@ -1,0 +1,36 @@
+/* LOADING */
+#loading {
+    background-color: transparent;
+    bottom: 0;
+    display: flex;
+    height: 100vh;
+    left: 0;
+    overflow: hidden;
+    position: fixed;
+    text-align: center;
+    transition: background 0.25s ease-in-out;
+    top: -100vh;
+    right: 0;
+    width: 100vw;
+    z-index: 999;
+
+    span {
+        background: transparent url(../icons/loading.svg) no-repeat;
+        background-size: 100% auto;
+        flex: 0 0 auto;
+        height: 4.15rem;
+        margin: auto;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        width: 4.15rem;
+    }
+
+    &.active {
+        background-color: rgba(0, 0, 0, 0.65);
+        top: 0;
+
+        span {
+            opacity: 1;
+        }
+    }
+}

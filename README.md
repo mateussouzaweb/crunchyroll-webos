@@ -20,8 +20,16 @@ This method will install Crunchyroll as TV App, but is recommended only for deve
 - Clone this repository, then run the following code to install the App:
 
 ```bash
-./scripts.sh deploy # OR
-./scripts.sh test
+# Build from SRC
+make build
+
+# Create App for TV
+make app_build
+make app_install
+
+# Launch or inspect
+make app_launch
+make app_inspect
 ```
 
 Developer Mode is enabled only for 50 hours, so you will need to renew developer session every 50 hours to keep using Crunchyroll as app... :(

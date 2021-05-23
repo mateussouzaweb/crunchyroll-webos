@@ -1,0 +1,99 @@
+/* MENU */
+#menu {
+    background: rgba(255, 255, 255, 0.1);
+    bottom: 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 1),
+        0 1px 1px rgba(255, 255, 255, 0.3),
+        0 1px 15px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 9.16rem;
+    z-index: 2;
+
+    .links {
+        flex: 1 1 auto;
+    }
+
+    .link {
+        background: transparent;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        color: #FFF;
+        display: inline-block;
+        font-size: 1.2rem;
+        margin-top: 2.2rem;
+        min-width: 90%;
+        padding: 10px 2.2rem 10px 0.83rem;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+
+        &.hover {
+            color: #F37521;
+            background: #FFF;
+        }
+        &.active {
+            background: #F37521;
+            color: #FFF;
+        }
+    }
+
+    .account {
+        flex: 0 1 auto;
+        margin-bottom: 0.83rem;
+        margin-top: 0.83rem;
+    }
+    .account-name {
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        overflow: hidden;
+        padding: 10px 0.83rem;
+        text-overflow: ellipsis;
+        word-wrap: normal;
+        word-break: keep-all;
+    }
+    .account-logout {
+        cursor: pointer;
+        display: block;
+        font-size: 1.2rem;
+        padding: 10px 0.83rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .account-logout.hover {
+        color: #e89f6d;
+    }
+
+}
+
+.mouse #menu .link:hover {
+    background: #FFF;
+    color: #F37521;
+}
+.mouse #menu .account-logout:hover {
+    color: #e89f6d;
+}
+
+@media screen and (max-width: 860px) {
+
+    #menu {
+        flex-flow: row;
+        padding: 0 0.83rem;
+        position: static;
+        width: 100%;
+
+        .link {
+            border-radius: 4px;
+            margin-top: 1rem;
+            min-width: unset;
+            padding: 10px 0.83rem;
+        }
+        .account-name {
+            display: none;
+        }
+    }
+
+}

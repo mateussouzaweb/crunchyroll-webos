@@ -1,0 +1,226 @@
+/* CONTENT */
+#content {
+    padding: 0.83rem 1.16rem;
+    padding-bottom: 2.5rem;
+    padding-left: 10.833rem;
+
+    .inside {
+        align-items: stretch;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    h1 {
+        flex: 1 1 100%;
+        margin: 1.16rem 0 0.83rem;
+    }
+}
+
+#content .list-filters {
+    display: flex;
+    flex: 1 1 100%;
+    flex-flow: row;
+    justify-content: space-between;
+    margin: 0 0 0.83rem;
+
+    input,
+    .select,
+    .select select {
+        background: transparent;
+        border-color: #FFF;
+        color: #FFF;
+    }
+
+    input {
+        flex: 0 1 20rem;
+    }
+
+    .select {
+        flex: 0 1 12.5rem;
+        margin-right: 1.6rem;
+    }
+    .select:focus-within {
+        border-color: #F37521;
+    }
+    .select:after {
+        filter: invert(100%);
+    }
+    .select option {
+        color: #000;
+    }
+
+    input.hover,
+    input:focus,
+    input:active,
+    .select.hover,
+    .select:focus,
+    .select:active {
+        border-color: #F37521;
+    }
+
+    button {
+        border: 2px solid #FFF;
+        flex: 0 0 auto;
+        height: 2.6rem;
+        width: auto;
+    }
+
+}
+.mouse #content .list-filters input:hover,
+.mouse #content .list-filters .select:hover {
+    border-color: #F37521;
+}
+
+#content .list-items {
+    align-items: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 0 -0.80rem;
+
+    .fill {
+        flex: 0 1 12.5rem;
+    }
+
+    .list-item {
+        align-items: stretch;
+        display: flex;
+        flex: 0 1 12.5rem;
+        justify-content: stretch;
+        margin-bottom: 0.83rem;
+        padding: 0.83rem;
+    }
+    .list-item-inside {
+        background: #000;
+        border: 1px solid #FFF;
+        border-bottom-width: 10px;
+        border-left-width: 2px;
+        border-radius: 5px 5px 2px 2px;
+        border-right-width: 2px;
+        border-top-width: 2px;
+        cursor: pointer;
+        display: block;
+        position: relative;
+        transition: all 0.2s ease-in-out;
+        width: 100%;
+    }
+
+    &.hover .list-item-inside {
+        border-color: #F37521;
+    }
+
+}
+.mouse #content .list-item:hover .list-item-inside {
+    border-color: #F37521;
+}
+
+#content .list-item-image {
+    min-width: 6rem;
+    overflow: hidden;
+    padding-top: 56.25%;
+    position: relative;
+    width: 100%;
+
+    img {
+        border-radius: 5px 5px 2px 2px;
+        bottom: 0;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+    }
+}
+
+#content .list-item-progress {
+    background-color: #F37521;
+    bottom: 0px;
+    height: 10px;
+    left: 0;
+    position: absolute;
+    width: 0%;
+}
+
+#content .list-item-premium {
+    background: #FFF url(../icons/premium.svg) no-repeat center;
+    background-size: 1.6rem auto;
+    border-radius: 0.83rem;
+    height: 2.5rem;
+    padding: 0.42rem;
+    position: absolute;
+    right: 0.625rem;
+    top: 0.625rem;
+    width: 2.5rem;
+}
+
+#content .list-item-info {
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 0 0 2px 2px;
+    overflow: hidden;
+    padding: 0.83rem;
+    text-overflow: ellipsis;
+    transition: all 0.2s ease-in-out;
+    word-break: break;
+
+    h2,
+    h3 {
+        margin: 0;
+    }
+    h2 + h3 {
+        font-weight: normal;
+        margin-top: 0.83rem;
+    }
+
+}
+.mouse #content .list-item:hover .list-item-info,
+#content .list-item.hover .list-item-info {
+    background: #000;
+}
+
+#content .list-pagination {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    padding: 1rem 0;
+
+    a {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        padding: 10px;
+    }
+    a[href=""] {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+#content .series-item {
+
+    .list-item-info {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+    }
+    .list-item-image {
+        padding: 0;
+
+        img {
+            border-radius: 2px 2px 0 0;
+            position: static;
+        }
+    }
+
+}
+
+@media screen and (max-width: 860px) {
+    #content {
+        padding-left: 1.16rem;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    #content .list-item {
+        flex-basis: 50%;
+    }
+}
