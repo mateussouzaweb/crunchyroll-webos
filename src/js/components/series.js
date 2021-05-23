@@ -139,7 +139,7 @@ V.component('[data-series]', {
             });
 
             var options = await self.getFiltersOptions(filter);
-            var base = '/series/' + filter + '/';
+            var base = 'series/' + filter + '/';
             var nextPage = base + (pageNumber + 1);
             var previousPage = ( pageNumber > 1 ) ? base + (pageNumber - 1) : '';
 
