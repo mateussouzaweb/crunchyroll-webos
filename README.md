@@ -15,8 +15,8 @@ PRO-TIP: You can use this mode in almost any device of any brand that has a brow
 
 This method will install Crunchyroll as TV App, but is recommended only for developers:
 
-- Install WebOS SDK (<http://webostv.developer.lge.com/sdk/installation/>)
-- Enable TV for Testing (<http://webostv.developer.lge.com/develop/app-test/>)
+- Install WebOS SDK (<https://webostv.developer.lge.com/sdk/installation/>)
+- Enable TV for Testing (<https://webostv.developer.lge.com/develop/app-test/>)
 - Clone this repository, then run the following code to install the App:
 
 ```bash
