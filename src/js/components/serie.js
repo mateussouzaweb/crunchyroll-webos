@@ -38,37 +38,51 @@ V.component('[data-serie]', {
 
         var self = this;
 
-        var active = V.route.active();
-        var serieId = active.param('serieId');
-        var sort = active.param('sort') || 'desc';
-        var pageNumber = active.param('pageNumber') || 1;
-
         self.on('change', 'select', function(){
-            V.route.redirect('/serie/' + serieId + '/' + this.value);
+            V.route.redirect('/serie/' + self.get('serieId') + '/' + this.value);
         });
 
         self.on('click', '.add-to-queue', function(e){
             e.preventDefault();
             self.addToQueue();
         });
+
         self.on('click', '.remove-from-queue', function(e){
             e.preventDefault();
             self.removeFromQueue();
         });
+
+        self.watch('currentViewReload', function(){
+
+            self.parseParams();
+            self.listSerieInfo();
+            self.listEpisodes();
+
+        });
+
+        self.parseParams();
+        self.listSerieInfo();
+        self.listEpisodes();
+
+    },
+
+    /**
+     * Parse route params to the component
+     * @return {void}
+     */
+    parseParams: function(){
+
+        var self = this;
+        var active = V.route.active();
+        var serieId = active.param('serieId');
+        var sort = active.param('sort') || 'desc';
+        var pageNumber = active.param('pageNumber') || 1;
 
         self.set({
             serieId: serieId,
             sort: sort,
             pageNumber: pageNumber
         });
-
-        self.watch('currentViewReload', function(){
-            self.listSerieInfo();
-            self.listEpisodes();
-        });
-
-        self.listSerieInfo();
-        self.listEpisodes();
 
     },
 
@@ -220,9 +234,15 @@ V.component('[data-serie]', {
                 return Api.toSerieEpisode(item, 'serie');
             });
 
+            var base = '/serie/' + serieId + '/' + sort + "/";
+            var nextPage = base + (pageNumber + 1);
+            var previousPage = ( pageNumber > 1 ) ? base + (pageNumber - 1) : '';
+
             await self.render({
                 loaded: true,
-                items: items
+                items: items,
+                nextPage: nextPage,
+                previousPage: previousPage
             });
 
             window.hideLoading();

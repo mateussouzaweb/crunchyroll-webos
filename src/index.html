@@ -287,7 +287,6 @@
                 {{ end }}
             </div>
         {{ end }}
-
     </script>
 
     <script type="text/vanilla-template" id="template-serie">
@@ -343,6 +342,17 @@
             <div class="fill"></div>
             <div class="fill"></div>
         </div>
+
+        {{ if previousPage || nextPage }}
+            <div class="list-pagination">
+                {{ if previousPage }}
+                    <a href="{{ previousPage }}" title="Previous page"><span>Previous Page</span></a>
+                {{ end }}
+                {{ if nextPage }}
+                    <a href="{{ nextPage }}" title="Next page"><span>Next Page</span></a>
+                {{ end }}
+            </div>
+        {{ end }}
     </script>
 
     <script defer src="/js/hls.js"></script>
