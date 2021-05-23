@@ -327,72 +327,70 @@ V.component('[data-video]', {
             video.src = stream;
             video.currentTime = currentTime;
 
-        }else{
+            return;
+        }
 
-            await new Promise(function (resolve){
+        return await new Promise(function (resolve){
 
-                if( !Hls.isSupported() ) {
-                    throw Error('Video format not supported.');
+            if( !Hls.isSupported() ) {
+                throw Error('Video format not supported.');
+            }
+
+            var hls = new Hls({
+                startPosition: currentTime,
+                minAutoBitrate: 300000,
+                maxBufferLength: 15,
+                maxBufferSize: 30 * 1000 * 1000
+            });
+
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                hls.loadSource(stream);
+            });
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function(){
+                element.classList.remove('video-is-loading');
+                element.classList.add('video-is-loaded');
+                resolve();
+            });
+
+            hls.on(Hls.Events.ERROR, function(_event, data){
+
+                if( !data.fatal ){
+                    return;
                 }
 
-                var hls = new Hls({
-                    startPosition: currentTime,
-                    minAutoBitrate: 300000,
-                    maxBufferLength: 15,
-                    maxBufferSize: 30 * 1000 * 1000
-                });
+                switch (data.type) {
+                    case Hls.ErrorTypes.OTHER_ERROR:
+                        //hls.startLoad();
+                    break;
+                    case Hls.ErrorTypes.NETWORK_ERROR:
 
-                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                    hls.loadSource(stream);
-                });
+                        if( data.details == 'manifestLoadError' && data.response.code == 0 ){
+                            self.showError('Episode cannot be played because of CORS error. You must use a proxy.');
+                        }else{
+                            hls.startLoad();
+                        }
 
-                hls.on(Hls.Events.MANIFEST_PARSED, function(){
-                    element.classList.remove('video-is-loading');
-                    element.classList.add('video-is-loaded');
-                    resolve(response);
-                });
+                    break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
 
-                hls.on(Hls.Events.ERROR, function(_event, data){
+                        self.showError('Media error: trying recovery...');
+                        hls.recoverMediaError();
 
-                    if( !data.fatal ){
-                        return;
-                    }
+                    break;
+                    default:
 
-                    switch (data.type) {
-                        case Hls.ErrorTypes.OTHER_ERROR:
-                            //hls.startLoad();
-                        break;
-                        case Hls.ErrorTypes.NETWORK_ERROR:
+                        self.showError('Media cannot be recovered: ' + data.details);
+                        hls.destroy();
 
-                            if( data.details == 'manifestLoadError' && data.response.code == 0 ){
-                                self.showError('Episode cannot be played because of CORS error. You must use a proxy.');
-                            }else{
-                                hls.startLoad();
-                            }
-
-                        break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-
-                            self.showError('Media error: trying recovery...');
-                            hls.recoverMediaError();
-
-                        break;
-                        default:
-
-                            self.showError('Media cannot be recovered: ' + data.details);
-                            hls.destroy();
-
-                        break;
-                    }
-
-                });
-
-                hls.attachMedia(video);
+                    break;
+                }
 
             });
 
-        }
+            hls.attachMedia(video);
 
+        });
     },
 
     /**
