@@ -37,10 +37,6 @@ V.component('[data-series]', {
     onMount: async function(){
 
         var self = this;
-        var active = V.route.active();
-        var pageNumber = Number( active.param('pageNumber') || 1 );
-        var filter = String( active.param('filter') || 'popular' );
-        var search = String( active.query('search') || '' );
 
         self.on('change', 'select' , function(){
             V.route.redirect('/series/' + this.value);
@@ -50,17 +46,33 @@ V.component('[data-series]', {
             V.route.redirect('/series?search=' + encodeURI(this.value));
         });
 
+        self.watch('currentViewReload', function(){
+            self.parseParams();
+            self.listSeries();
+        });
+
+        self.parseParams();
+        self.listSeries();
+
+    },
+
+    /**
+     * Parse route params to the component
+     * @return {void}
+     */
+    parseParams: function(){
+
+        var self = this;
+        var active = V.route.active();
+        var pageNumber = Number( active.param('pageNumber') || 1 );
+        var filter = String( active.param('filter') || 'popular' );
+        var search = String( active.query('search') || '' );
+
         self.set({
             pageNumber: pageNumber,
             filter: filter,
             search: search
         });
-
-        self.watch('currentViewReload', function(){
-            self.listSeries();
-        });
-
-        self.listSeries();
 
     },
 
