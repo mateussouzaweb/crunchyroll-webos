@@ -141,6 +141,7 @@ body.page-video {
 }
 
 #video button {
+    align-items: center;
     background: #F37521;
     border: 2px solid #FFF;
     border-bottom-width: 5px;
@@ -149,9 +150,11 @@ body.page-video {
                 0px 2px 3px rgba(0, 0, 0, 0.4);
     color: #FFF;
     cursor: pointer;
+    display: flex;
     flex: 1;
-    font-size: 2rem;
+    font-size: 1.4rem;
     height: 3.34rem;
+    justify-content: center;
     margin: 0 5px;
     padding: 5px;
     text-align: center;
@@ -167,7 +170,6 @@ body.page-video {
         background-size: 100% auto;
         background-repeat: no-repeat;
         display: block;
-        height: 100%;
         overflow: hidden;
         text-indent: -9999em;
         width: 100%;
