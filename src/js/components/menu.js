@@ -43,7 +43,7 @@ V.component('[data-menu]', {
 
         var self = this;
         var path = V.route.active().id;
-        var next = V.$('a[href="/' + path + '"]', self.element);
+        var next = V.$('a[href="' + path + '"]', self.element);
         var current = V.$('a.active', self.element);
 
         if( current ){

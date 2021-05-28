@@ -12,6 +12,10 @@ V.on(window, 'load', function(){
     // Route definitions
     var base = window.location.pathname.replace('index.html', '');
 
+    if( window.location.protocol == 'file:' ){
+        base = 'file://' + base;
+    }
+
     V.route.options.mode = 'hash';
     V.route.options.base = base;
     V.route.attachEvents();

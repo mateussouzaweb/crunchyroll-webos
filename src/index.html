@@ -7,8 +7,8 @@
 
     <title>Crunchyroll TV</title>
 
-    <link href="/css/styles.css" rel="stylesheet">
-    <link rel="shortcut icon" href="/img/130px.png" type="image/png">
+    <link href="css/styles.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/130px.png" type="image/png">
 
 </head>
 <body data-proxy="">
@@ -27,14 +27,14 @@
     <script type="text/vanilla-template" id="template-menu">
 
         <div class="links">
-            <a href="/series"
+            <a href="series"
                 class="link"
                 tabindex="0">Series</a>
-            <a href="/queue"
+            <a href="queue"
                 class="link"
                 data-content="queue"
                 tabindex="0">Queue</a>
-            <a href="/history"
+            <a href="history"
                 class="link"
                 tabindex="0">History</a>
         </div>
@@ -42,7 +42,7 @@
         {{ if store('sessionId') }}
         <div class="account">
             <div class="account-name">{{ store('userName') }}</div>
-            <a href="/logout"
+            <a href="logout"
                 class="account-logout"
                 tabindex="0">Logout</a>
         </div>
@@ -183,7 +183,7 @@
                 data-episode-duration="{{ item.duration }}"
                 data-episode-playhead="{{ item.playhead }}"
                 data-episode-premium="{{ item.premium }}">
-                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                <a href="serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
                         <img src="{{ item.image }}" title="{{ item.serie_name }} - E{{ item.number }} - {{ item.name }}"/>
                         <div class="list-item-progress hidden">&nbsp;</div>
@@ -221,7 +221,7 @@
                 data-episode-duration="{{ item.duration }}"
                 data-episode-playhead="{{ item.playhead }}"
                 data-episode-premium="{{ item.premium }}">
-                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                <a href="serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
                         <img src="{{ item.image }}" title="{{ item.serie_name }} - E{{ item.number }} - {{ item.name }}" />
                         <div class="list-item-progress hidden">&nbsp;</div>
@@ -265,7 +265,7 @@
             {{ each item in items }}
             <div class="list-item series-item"
                 tabindex="0">
-                <a href="/serie/{{ item.id }}" class="list-item-inside">
+                <a href="serie/{{ item.id }}" class="list-item-inside">
                     <div class="list-item-image">
                         <img src="{{ item.image }}" title="{{ item.name }}" width="640" height="960" />
                     </div>
@@ -330,7 +330,7 @@
                 data-episode-duration="{{ item.duration }}"
                 data-episode-playhead="{{ item.playhead }}"
                 data-episode-premium="{{ item.premium }}">
-                <a href="/serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
+                <a href="serie/{{ item.serie_id }}/episode/{{ item.id }}/video" class="list-item-inside">
                     <div class="list-item-image">
                         <img src="{{ item.image }}" title="E{{ item.number }} - {{ item.name }}" />
                         <div class="list-item-progress hidden">&nbsp;</div>
@@ -360,10 +360,10 @@
         {{ end }}
     </script>
 
-    <script defer src="/js/hls.js"></script>
-    <script defer src="/js/vanilla.js"></script>
-    <script defer src="/js/api.js"></script>
-    <script defer src="/js/components.js"></script>
-    <script defer src="/js/bootstrap.js"></script>
+    <script defer src="js/hls.js"></script>
+    <script defer src="js/vanilla.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/components.js"></script>
+    <script defer src="js/bootstrap.js"></script>
 
 </body>
