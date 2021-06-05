@@ -2,10 +2,10 @@
 # http://webostv.developer.lge.com/sdk/tools/using-webos-tv-cli
 
 # VARIABLES
-export TV_SDK="/usr/local/share/webOS_TV_SDK/CLI/bin"
-export ID="com.crunchyroll.webos"
-export DEVICE="emulator"
-export VERSION="1.4.0"
+export TV_SDK=/usr/local/share/webOS_TV_SDK/CLI/bin
+export ID=com.crunchyroll.webos
+export DEVICE=emulator
+export VERSION=1.4.0
 export PROJECT_PATH=$(shell pwd)
 
 # TV METHODS
@@ -40,15 +40,15 @@ build:
 	compactor \
 		--progressive false \
 		--source src/ --destination $(ID)/ \
-		--ignore "css/_*.scss" \
-		--bundle "css/styles.scss:css/styles.scss" \
+		--exclude "css/_*.scss" \
+		--bundle "css/styles.css:css/styles.scss" \
 		--bundle "js/components.js:js/components/*.js"
 
 watch:
 	compactor --watch \
 		--progressive false \
 		--source src/ --destination $(ID)/ \
-		--ignore "css/_*.scss" \
+		--exclude "css/_*.scss" \
 		--bundle "css/styles.css:css/styles.scss" \
 		--bundle "js/components.js:js/components/*.js"
 
