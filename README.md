@@ -5,7 +5,7 @@ The last Crunchyroll app you will ever need!
 
 ## Usage - For Everyone
 
-Just open the browser on your WebOS TV, then navigate to <https://mateussouzaweb.com/tv>.
+Just open the browser on your WebOS TV, then navigate to <https://tv.mateussouzaweb.com>.
 
 Add to favorites and enjoy!
 
