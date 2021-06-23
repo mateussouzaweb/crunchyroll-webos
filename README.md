@@ -34,6 +34,16 @@ make app_inspect
 
 Developer Mode is enabled only for 50 hours, so you will need to renew developer session every 50 hours to keep using Crunchyroll as app... :(
 
+If you want to develop changes on the project, you need to install ``compactor`` and use the following commands:
+
+```bash
+# Build from SRC
+make build
+
+# Live watch and build from SRC
+make watch
+```
+
 ## Support
 
 Support me for future versions for Samsung, Android TV, Chromecast and Others.
