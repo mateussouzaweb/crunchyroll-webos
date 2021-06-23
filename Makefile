@@ -39,18 +39,20 @@ app_inspect:
 build:
 	compactor \
 		--progressive false \
-		--source src/ --destination $(ID)/ \
+		--source src/ \
+		--destination $(ID)/ \
 		--exclude "css/_*.scss" \
-		--bundle "css/styles.css:css/styles.scss" \
-		--bundle "js/components.js:js/components/*.js"
+		--bundle "css/styles.scss:css/styles.css" \
+		--bundle "js/components/*.js:js/components.js"
 
 watch:
 	compactor --watch \
 		--progressive false \
-		--source src/ --destination $(ID)/ \
+		--source src/ \
+		--destination $(ID)/ \
 		--exclude "css/_*.scss" \
-		--bundle "css/styles.css:css/styles.scss" \
-		--bundle "js/components.js:js/components/*.js"
+		--bundle "css/styles.scss:css/styles.css" \
+		--bundle "js/components/*.js:js/components.js"
 
 server:
 	statiq --port 5000 --root $(PROJECT_PATH)/$(ID)/
