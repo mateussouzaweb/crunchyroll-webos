@@ -38,18 +38,19 @@ app_inspect:
 # DEV METHODS
 build:
 	compactor \
-		--progressive false \
 		--source src/ \
 		--destination $(ID)/ \
+		--progressive false \
 		--bundle "css/styles.scss:css/_*.scss:css/styles.css" \
 		--bundle "js/components/*.js:js/components.js"
 
 watch:
-	compactor --watch \
-		--hashed false \
-		--progressive false \
+	compactor \
+		--watch \
 		--source src/ \
 		--destination $(ID)/ \
+		--progressive false \
+		--hashed false \
 		--bundle "css/styles.scss:css/_*.scss:css/styles.css" \
 		--bundle "js/components/*.js:js/components.js"
 
