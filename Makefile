@@ -41,17 +41,16 @@ build:
 		--progressive false \
 		--source src/ \
 		--destination $(ID)/ \
-		--exclude "css/_*.scss" \
-		--bundle "css/styles.scss:css/styles.css" \
+		--bundle "css/styles.scss:css/_*.scss:css/styles.css" \
 		--bundle "js/components/*.js:js/components.js"
 
 watch:
 	compactor --watch \
+		--hashed false \
 		--progressive false \
 		--source src/ \
 		--destination $(ID)/ \
-		--exclude "css/_*.scss" \
-		--bundle "css/styles.scss:css/styles.css" \
+		--bundle "css/styles.scss:css/_*.scss:css/styles.css" \
 		--bundle "js/components/*.js:js/components.js"
 
 server:
